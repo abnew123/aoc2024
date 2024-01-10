@@ -51,22 +51,24 @@ public class MasterSolver {
     public static void timer(boolean total, boolean exclusion) throws Exception {
         Double totalTime = 0.0;
         for (int day = 1; day <= 25; day++) {
-            String zeroFilledDay = (day < 10 ? "0" : "") + day;
-            for (int part = 1; part <= 2; part++) {
-                boolean exclude = (boolean) Class.forName("src.solutions.Day" + zeroFilledDay).getMethod("exclude")
-                        .invoke(Class.forName("src.solutions.Day" + zeroFilledDay).getDeclaredConstructor().newInstance());
-                if (exclusion && exclude) {
-                    continue;
+                String zeroFilledDay = (day < 10 ? "0" : "") + day;
+                for (int part = 1; part <= 2; part++) {
+                    boolean exclude = (boolean) Class.forName("src.solutions.Day" + zeroFilledDay).getMethod("exclude")
+                            .invoke(Class.forName("src.solutions.Day" + zeroFilledDay).getDeclaredConstructor().newInstance());
+                    if (exclusion && exclude) {
+                        continue;
+                    }
+                    Double time = (Double) Class.forName("src.solutions.Day" + zeroFilledDay)
+                            .getMethod("timer", boolean.class, Scanner.class)
+                            .invoke(Class.forName("src.solutions.Day" + zeroFilledDay).getDeclaredConstructor().newInstance(),
+                                    part == 1, new Scanner(new File("./data/day" + zeroFilledDay + ".txt")));
+                    if (!total) {
+                        System.out.println("Day " + zeroFilledDay + " part " + part + " execution time: " + time);
+                    }
+                    totalTime += time;
                 }
-                Double time = (Double) Class.forName("src.solutions.Day" + zeroFilledDay)
-                        .getMethod("timer", boolean.class, Scanner.class)
-                        .invoke(Class.forName("src.solutions.Day" + zeroFilledDay).getDeclaredConstructor().newInstance(),
-                                part == 1, new Scanner(new File("./data/day" + zeroFilledDay + ".txt")));
-                if (!total) {
-                    System.out.println("Day " + zeroFilledDay + " part " + part + " execution time: " + time);
-                }
-                totalTime += time;
-            }
+
+
         }
         System.out.println("Total execution time (ms): " + totalTime);
     }
