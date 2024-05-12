@@ -1,12 +1,11 @@
-# Compiled class file
-*.class
-
-# Log file
-*.log
-
 .idea/
 data/
-out/
+/out/*
+!out/production
+/out/production/*
+!out/production/aoc2024
+/out/production/aoc2024/*
+!out/production/aoc2024/src
 
 # for https://github.com/LiquidFun/aoc_tiles
 .aoc_tiles/*
