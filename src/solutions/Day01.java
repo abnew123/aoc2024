@@ -18,6 +18,6 @@ public class Day01 extends DayTemplate {
         }
         int[][] grid = new int[tmp.get(0).length][tmp.size()];
 
-        return answer + "";
+        return "";
     }
 }
