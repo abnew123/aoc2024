@@ -6,6 +6,8 @@ import java.util.Scanner;
 
 public class MasterSolver {
 
+    private static final String PATH_NAME_PREFIX = "src.solutions.Day";
+
     public static void main(String[] args) throws Exception {
 
         // inputs.
@@ -21,13 +23,13 @@ public class MasterSolver {
             String zeroFilledDay = (day < 10 ? "0" : "") + day;
             for (boolean part1 : parts) {
                 File file = new File("./data/day" + zeroFilledDay + ".txt");
-                Scanner in = new Scanner(file);
-                Class<?> cls = Class.forName("src.solutions.Day" + zeroFilledDay);
-                Method m = cls.getDeclaredMethod("solve", boolean.class, Scanner.class);
-                String answer = (String) m.invoke(cls.getDeclaredConstructor().newInstance(), part1, in);
-                System.out.println(
-                        "Day " + zeroFilledDay+ " part " + (part1 ? 1 : 2) + " solution: " + answer);
-                in.close();
+                try (Scanner in = new Scanner(file)) {
+                    Class<?> cls = Class.forName(PATH_NAME_PREFIX + zeroFilledDay);
+                    Method m = cls.getDeclaredMethod("solve", boolean.class, Scanner.class);
+                    String answer = (String) m.invoke(cls.getDeclaredConstructor().newInstance(), part1, in);
+                    System.out.println(
+                            "Day " + zeroFilledDay + " part " + (part1 ? 1 : 2) + " solution: " + answer);
+                }
             }
         }
         if (runTimer) {
@@ -53,14 +55,14 @@ public class MasterSolver {
         for (int day = 1; day <= 25; day++) {
                 String zeroFilledDay = (day < 10 ? "0" : "") + day;
                 for (int part = 1; part <= 2; part++) {
-                    boolean exclude = (boolean) Class.forName("src.solutions.Day" + zeroFilledDay).getMethod("exclude")
-                            .invoke(Class.forName("src.solutions.Day" + zeroFilledDay).getDeclaredConstructor().newInstance());
+                    boolean exclude = (boolean) Class.forName(PATH_NAME_PREFIX + zeroFilledDay).getMethod("exclude")
+                            .invoke(Class.forName(PATH_NAME_PREFIX + zeroFilledDay).getDeclaredConstructor().newInstance());
                     if (exclusion && exclude) {
                         continue;
                     }
-                    Double time = (Double) Class.forName("src.solutions.Day" + zeroFilledDay)
+                    Double time = (Double) Class.forName(PATH_NAME_PREFIX + zeroFilledDay)
                             .getMethod("timer", boolean.class, Scanner.class)
-                            .invoke(Class.forName("src.solutions.Day" + zeroFilledDay).getDeclaredConstructor().newInstance(),
+                            .invoke(Class.forName(PATH_NAME_PREFIX + zeroFilledDay).getDeclaredConstructor().newInstance(),
                                     part == 1, new Scanner(new File("./data/day" + zeroFilledDay + ".txt")));
                     if (!total) {
                         System.out.println("Day " + zeroFilledDay + " part " + part + " execution time: " + time);
