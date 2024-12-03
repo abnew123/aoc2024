@@ -4,4 +4,5 @@
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=abnew123_aoc2024&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=abnew123_aoc2024)
 
 <!-- AOC TILES BEGIN -->
+
 <!-- AOC TILES END -->
