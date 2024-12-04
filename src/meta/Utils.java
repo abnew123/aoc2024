@@ -47,6 +47,10 @@ public class Utils {
         return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
     }
 
+    public static boolean safe(int x, int y, char[][] grid){
+        return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
+    }
+
     public static List<Coordinate> getNeighbors(int x, int y, int[][] grid){
         List<Coordinate> neighbors = new ArrayList<>();
         int[] xs = new int[]{1,-1,0,0};
