@@ -5,3 +5,4 @@ repos:
       - id: aoc-tiles
         args:
           - --overwrite-year=2024
+          - -exclude-patterns=aoc2024/src/meta/*,aoc2024/src/objects/*
