@@ -1,12 +1,13 @@
 package src.solutions;
 
+import src.meta.DayTemplate;
 import src.objects.Coordinate;
 
 import java.util.*;
 
 import static src.meta.Utils.*;
 
-public class Day08 {
+public class Day08 extends DayTemplate {
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
         Map<Character, List<Coordinate>> freqs = new HashMap<>();

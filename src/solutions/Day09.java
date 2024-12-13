@@ -1,8 +1,10 @@
 package src.solutions;
 
+import src.meta.DayTemplate;
+
 import java.util.*;
 
-public class Day09 {
+public class Day09 extends DayTemplate {
     public String solve(boolean part1, Scanner in) {
         long answer;
         String line = in.nextLine();
