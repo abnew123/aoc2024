@@ -8,6 +8,15 @@ import java.util.Scanner;
 import java.util.function.Function;
 
 public class Utils {
+    public static long gcd(long a, long b) {
+        if (b == 0) return a;
+        return gcd(b, a % b);
+    }
+
+    public static long lcm(long a, long b) {
+        return a * b / gcd(a, b);
+    }
+
     public static int gcd(int a, int b) {
         if (b == 0) return a;
         return gcd(b, a % b);
@@ -43,6 +52,22 @@ public class Utils {
         return result;
     }
 
+    public static long gcd(long[] nums) {
+        long result = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            result = gcd(result, nums[i]);
+        }
+        return result;
+    }
+
+    public static long lcm(long[] nums){
+        long result = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            result = lcm(result, nums[i]);
+        }
+        return result;
+    }
+
     public static boolean safe(int x, int y, int[][] grid){
         return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
     }
@@ -58,7 +83,7 @@ public class Utils {
         for (int i = 0; i < 4; i++) {
             int nx = x + xs[i];
             int ny = y + ys[i];
-            if (safe(nx, ny, grid) && grid[nx][ny] == 0) {
+            if (safe(nx, ny, grid)) {
                 neighbors.add(new Coordinate(nx, ny));
             }
         }
@@ -89,18 +114,20 @@ public class Utils {
         return result;
     }
 
-//    public int[][] buildGrid(List<String> lines){
-//        int[][] grid = new int[lines.get(0).length()][lines.size()];
-//        for (int i = 0; i < lines.size(); i++) {
-//            String line = lines.get(i);
-//            for (int j = 0; j < line.length(); j++) {
-//                grid[j][i] = line.charAt(j) == '.' ? 0 : 1;
-//            }
-//        }
-//        return grid;
-//    }
 
-    public char[][] buildGrid(List<String> lines){
+
+    public static int[][] buildGrid(List<String> lines, Function<Character, Integer> converter){
+        int[][] grid = new int[lines.get(0).length()][lines.size()];
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            for (int j = 0; j < line.length(); j++) {
+                grid[j][i] = converter.apply(line.charAt(j));
+            }
+        }
+        return grid;
+    }
+
+    public static char[][] buildGrid(List<String> lines){
         char[][] grid = new char[lines.get(0).length()][lines.size()];
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
@@ -111,12 +138,16 @@ public class Utils {
         return grid;
     }
 
-    public char[][] getGrid(Scanner in){
+    public static char[][] getGrid(Scanner in){
         List<String> lines = new ArrayList<>();
         while (in.hasNext()) {
             lines.add(in.nextLine());
         }
         return buildGrid(lines);
+    }
+
+    public static long det(long x1, long x2, long y1, long y2){
+        return x1 * y2 - x2 * y1;
     }
 
     //TODO: kruskal's algorithm, prim's algorithm, dijkstras, bfs, dfs
