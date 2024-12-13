@@ -1,11 +1,12 @@
 package src.solutions;
 
+import src.meta.DayTemplate;
 import src.objects.Coordinate;
 
 import java.util.*;
 import static src.meta.Utils.*;
 
-public class Day06 {
+public class Day06 extends DayTemplate {
 
     int[] xs = new int[]{0,1,0,-1};
     int[] ys = new int[]{-1,0,1,0};
