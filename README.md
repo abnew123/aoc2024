@@ -5,7 +5,7 @@
 
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
-  2024 - 28 ⭐ - Java
+  2024 - 30 ⭐ - Java
 </h1>
 <a href="src/solutions/Day01.java">
   <img src=".aoc_tiles/tiles/2024/01.png" width="161px">
@@ -48,5 +48,8 @@
 </a>
 <a href="src/solutions/Day14.java">
   <img src=".aoc_tiles/tiles/2024/14.png" width="161px">
+</a>
+<a href="src/solutions/Day15.java">
+  <img src=".aoc_tiles/tiles/2024/15.png" width="161px">
 </a>
 <!-- AOC TILES END -->
