@@ -41,13 +41,6 @@ public class Day20 extends DayTemplate {
 
         int[][] bfsFromEnd = bfs(end);
         int[][] bfsFromStart = bfs(start);
-        for(int i = 0; i < bfsFromEnd.length; i++){
-            for(int j = 0; j < bfsFromEnd.length; j++){
-                if(grid[i][j] == 2){
-                    bfsFromEnd[i][j] = grid.length * grid[0].length * 2;
-                }
-            }
-        }
         int currentDistance = bfsFromEnd[start.x][start.y];
         for(int i = 0; i < bfsFromEnd.length; i++){
             for(int j = 0; j < bfsFromEnd[0].length; j++){
