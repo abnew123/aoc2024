@@ -12,8 +12,6 @@ public class Day16 extends DayTemplate {
     int[] xs = new int[]{0, 1, 0, -1};
     int[] ys = new int[]{1, 0, -1, 0};
 
-    Set<String> cache = new HashSet<>();
-
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
         List<String> lines = new ArrayList<>();
@@ -58,10 +56,8 @@ public class Day16 extends DayTemplate {
             }
             for(int i = 0; i < bestSeats.length; i++){
                 for(int j = 0; j < bestSeats.length; j++){
-                    System.out.print(grid[i][j] == 2?"#":bestSeats[i][j]);
                     answer+= bestSeats[i][j];
                 }
-                System.out.println();
             }
         }
 

@@ -1,7 +1,6 @@
 package src.solutions;
 
 import src.meta.DayTemplate;
-import static src.meta.Utils.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
