@@ -16,7 +16,8 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: 21 # Use the version you need
+          java-version: 21
+          distribution: 'corretto'
 
       - name: Build and run solutions
         run: |
