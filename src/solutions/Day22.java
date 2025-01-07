@@ -23,20 +23,20 @@ public class Day22 extends DayTemplate {
         }
         else{
             Map<Integer, Long> sequenceValues = new HashMap<>();
-            for(int i = 0; i < lines.size(); i++){
+            for (Long line : lines) {
                 int diffHash = 0;
-                long past = lines.get(i);
+                long past = line;
                 Set<Integer> viewedHashes = new HashSet<>();
-                for(int j = 0; j < 2000; j++){
+                for (int j = 0; j < 2000; j++) {
                     long future = oneIteration(past);
                     diffHash <<= 5;
-                    diffHash += ( future%10 - past%10+ 9);
-                    if(j >= 3){
-                        if(!viewedHashes.contains(diffHash)){
-                            sequenceValues.merge(diffHash, future%10, Long::sum);
+                    diffHash += (int) (future % 10 - past % 10 + 9);
+                    if (j >= 3) {
+                        if (!viewedHashes.contains(diffHash)) {
+                            sequenceValues.merge(diffHash, future % 10, Long::sum);
                             viewedHashes.add(diffHash);
                         }
-                        diffHash %= 1<<15;
+                        diffHash %= 1 << 15;
                     }
                     past = future;
                 }
