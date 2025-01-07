@@ -22,26 +22,28 @@ public class Day22 extends DayTemplate {
             }
         }
         else{
-            List<int[]> changes = new ArrayList<>();
+            Map<Integer, Long> sequenceValues = new HashMap<>();
             for(int i = 0; i < lines.size(); i++){
-                changes.add(new int[2000]);
+                int diffHash = 0;
                 long past = lines.get(i);
+                Set<Integer> viewedHashes = new HashSet<>();
                 for(int j = 0; j < 2000; j++){
                     long future = oneIteration(past);
-                    changes.get(i)[j] = (int)(future % 10 - past%10);
+                    diffHash <<= 5;
+                    diffHash += ( future%10 - past%10+ 9);
+                    if(j >= 3){
+                        if(!viewedHashes.contains(diffHash)){
+                            sequenceValues.merge(diffHash, future%10, Long::sum);
+                            viewedHashes.add(diffHash);
+                        }
+                        diffHash %= 1<<15;
+                    }
                     past = future;
                 }
             }
-            for(int i = -9; i < 10; i++){
-                for(int j = -9; j <10; j++){
-                    for(int k = -9; k < 10; k++){
-                        for(int a = -9; a < 10; a++){
-                            long possible = checkSequence(i,j,k,a,changes, lines);
-                            if( possible > answer){
-                                answer = possible;
-                            }
-                        }
-                    }
+            for(Integer key: sequenceValues.keySet()){
+                if(sequenceValues.get(key) > answer){
+                    answer = sequenceValues.get(key);
                 }
             }
         }
@@ -49,47 +51,13 @@ public class Day22 extends DayTemplate {
         return answer + "";
     }
 
-    private long checkSequence(int i, int j, int k, int a, List<int[]> changes, List<Long> lines){
-        long result = 0;
-        for(int c = 0; c < changes.size(); c++){
-            int[] changeList = changes.get(c);
-            long initial = lines.get(c) % 10;
-            for(int b = 3; b < changeList.length; b++){
-                if(changeList[b - 3] == i && changeList[b - 2] == j &&changeList[b - 1] == k &&changeList[b] == a){
-                    result+= initial;
-                    for(int d = 0; d <= b; d++){
-                        result+= changeList[d];
-                    }
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-    private long prune(long l){
-        return l % 16777216L;
-    }
-
-    private long mix(long l, long factor, boolean mult){
-        if(mult){
-            long other = l * factor;
-            return l ^ other;
-        }
-        else{
-            long other = l / factor;
-            return l ^ other;
-        }
-
-    }
-
     private long oneIteration(long l){
-        l = mix(l, 64, true);
-        l = prune(l);
-        l = mix(l, 32, false);
-        l = prune(l);
-        l = mix(l, 2048, true);
-        l = prune(l);
+        l ^= l<<6;
+        l %= 16777216L;
+        l ^= l>>5;
+        l %= 16777216L;
+        l ^= l<<11;
+        l %= 16777216L;
         return l;
     }
 }
