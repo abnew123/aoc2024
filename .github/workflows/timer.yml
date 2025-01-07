@@ -21,7 +21,7 @@ jobs:
 
       - name: Build and run solutions
         run: |
-          java -cp out/production/aoc2024 meta.TimerRunner
+          java -cp out/production/aoc2024 src.meta.TimerRunner
 
       - name: Compare timing
         id: compare-timing
