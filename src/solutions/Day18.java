@@ -22,11 +22,19 @@ public class Day18 extends DayTemplate {
 
         }
         else{
-            int time = 0;
-            while(bfs(time, lines, grid) != -1){
-                time++;
+            int high = lines.size() - 1;
+            int low = 0;
+            while(low < high){
+                grid = new int[gridSize][gridSize];
+                int med = (low + high)/2;
+                if(bfs(med, lines, grid) == -1){
+                    high = med;
+                }
+                else{
+                    low = med + 1;
+                }
             }
-            return lines.get(time - 1).x + "," + lines.get(time - 1).y;
+            return lines.get(low - 1).x + "," + lines.get(low - 1).y;
         }
     }
 
