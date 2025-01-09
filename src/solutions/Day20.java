@@ -45,19 +45,11 @@ public class Day20 extends DayTemplate {
         for(int i = 0; i < bfsFromEnd.length; i++){
             for(int j = 0; j < bfsFromEnd[0].length; j++){
                 if(grid[i][j] != 2){
-                    Set<Coordinate> allNeighbors = new HashSet<>();
-                    Coordinate s = new Coordinate(i,j);
-                    allNeighbors.add(s);
-                    for(int k = 0; k < (part1?2:20); k++){
-                        Set<Coordinate> newAllNeighbors = new HashSet<>(allNeighbors);
-                        for(Coordinate c: allNeighbors){
-                            newAllNeighbors.addAll(getNeighbors(c.x, c.y, grid));
-                        }
-                        allNeighbors = newAllNeighbors;
-                    }
-                    for(Coordinate c: allNeighbors){
-                        if(grid[c.x][c.y] != 2 && (bfsFromStart[i][j] + bfsFromEnd[c.x][c.y] + Math.abs(c.x - i) + Math.abs(c.y - j)) <= currentDistance - 100){
-                            answer++;
+                    for(int k = 0; k < bfsFromStart.length; k++){
+                        for(int l = 0; l < bfsFromStart[0].length; l++){
+                            if(grid[k][l] != 2 && (Math.abs(k - i) + Math.abs(l - j)) <= (part1?2:20) && (bfsFromStart[i][j] + bfsFromEnd[k][l] + Math.abs(k - i) + Math.abs(l - j)) <= currentDistance - 100){
+                                answer++;
+                            }
                         }
                     }
                 }
