@@ -33,24 +33,18 @@ public class Day23 extends DayTemplate {
         List<String> forIndices = new ArrayList<>(computers);
 
         if(part1){
-            for(int i = 0; i < forIndices.size(); i++){
-                for(int j = i + 1; j < forIndices.size(); j++){
-                    for(int k = j + 1; k < forIndices.size(); k++){
-                        String first = forIndices.get(i);
-                        String second = forIndices.get(j);
-                        String third = forIndices.get(k);
-                        if(connections.get(first).contains(second) && connections.get(first).contains(third)){
-                            if(connections.get(second).contains(first) && connections.get(second).contains(third)){
-                                if(connections.get(third).contains(second) && connections.get(third).contains(first)){
-                                    if(first.startsWith("t") || second.startsWith("t") || third.startsWith("t")){
-                                        answer += 1;
-                                    }
-                                }
+            for(String first: forIndices){
+                for(String second: connections.get(first)){
+                    for(String third: connections.get(second)){
+                        if(connections.get(third).contains(first)){
+                            if(first.startsWith("t") || second.startsWith("t") || third.startsWith("t")){
+                                answer++;
                             }
                         }
                     }
                 }
             }
+            answer/=6;
         }
         else{
             List<List<String>> connectedGroups = new ArrayList<>();
