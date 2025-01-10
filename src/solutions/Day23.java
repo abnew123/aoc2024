@@ -8,6 +8,7 @@ public class Day23 extends DayTemplate {
 
     Set<String> computers = new HashSet<>();
     Map<String, Set<String>> connections = new HashMap<>();
+    Set<Set<String>> maximalCliques = new HashSet<>();
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
@@ -47,35 +48,64 @@ public class Day23 extends DayTemplate {
             answer/=6;
         }
         else{
-            List<List<String>> connectedGroups = new ArrayList<>();
-            for(String computer: computers){
-                List<String> tmp = new ArrayList<>();
-                tmp.add(computer);
-                connectedGroups.add(tmp);
-            }
-
-            while(true){
-                List<List<String>> newConnectedGroups = new ArrayList<>();
-                Set<String> newStringForms = new HashSet<>();
-                for(List<String> connectedGroup: connectedGroups){
-                    for(String s: computers){
-                        if(connections.get(s).containsAll(connectedGroup)){
-                            List<String> newConnectedGroup = new ArrayList<>(connectedGroup);
-                            newConnectedGroup.add(s);
-                            if(!newStringForms.contains(listToString(newConnectedGroup))){
-                                newConnectedGroups.add(newConnectedGroup);
-                                newStringForms.add(listToString(newConnectedGroup));
-                            }
-                        }
-                    }
+            BronKerbosch(new HashSet<>(), computers, new HashSet<>());
+//            List<List<String>> connectedGroups = new ArrayList<>();
+//            for(String computer: computers){
+//                List<String> tmp = new ArrayList<>();
+//                tmp.add(computer);
+//                connectedGroups.add(tmp);
+//            }
+//
+//            while(true){
+//                List<List<String>> newConnectedGroups = new ArrayList<>();
+//                Set<String> newStringForms = new HashSet<>();
+//                for(List<String> connectedGroup: connectedGroups){
+//                    for(String s: computers){
+//                        if(connections.get(s).containsAll(connectedGroup)){
+//                            List<String> newConnectedGroup = new ArrayList<>(connectedGroup);
+//                            newConnectedGroup.add(s);
+//                            if(!newStringForms.contains(listToString(newConnectedGroup))){
+//                                newConnectedGroups.add(newConnectedGroup);
+//                                newStringForms.add(listToString(newConnectedGroup));
+//                            }
+//                        }
+//                    }
+//                }
+//                if(newConnectedGroups.isEmpty()){
+//                    return listToString(connectedGroups.get(0));
+//                }
+//                connectedGroups = newConnectedGroups;
+//            }
+            Set<String> biggest = new HashSet<>();
+            for(Set<String> candidate: maximalCliques){
+                if(candidate.size() > biggest.size()){
+                    biggest = candidate;
                 }
-                if(newConnectedGroups.isEmpty()){
-                    return listToString(connectedGroups.get(0));
-                }
-                connectedGroups = newConnectedGroups;
             }
+            return listToString(new ArrayList<>(biggest));
         }
         return answer+"";
+    }
+
+    private void BronKerbosch(Set<String> R, Set<String> P, Set<String> X){
+        if(P.isEmpty() && X.isEmpty()){
+            maximalCliques.add(R);
+        }
+        else{
+            for(String v: List.copyOf(P)){
+
+                Set<String> RPrime = new HashSet<>(R);
+                RPrime.add(v);
+                Set<String> PPrime = new HashSet<>(connections.get(v));
+                PPrime.retainAll(P);
+                Set<String> XPrime = new HashSet<>(connections.get(v));
+                XPrime.retainAll(X);
+
+                BronKerbosch(RPrime, PPrime, XPrime);
+                P.remove(v);
+                X.add(v);
+            }
+        }
     }
 
     private String listToString(List<String> computers){
