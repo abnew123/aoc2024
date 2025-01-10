@@ -8,6 +8,7 @@ public class Day23 extends DayTemplate {
 
     Set<String> computers = new HashSet<>();
     Map<String, Set<String>> connections = new HashMap<>();
+    Set<Set<String>> maximalCliques = new HashSet<>();
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
@@ -33,55 +34,63 @@ public class Day23 extends DayTemplate {
         List<String> forIndices = new ArrayList<>(computers);
 
         if(part1){
-            for(int i = 0; i < forIndices.size(); i++){
-                for(int j = i + 1; j < forIndices.size(); j++){
-                    for(int k = j + 1; k < forIndices.size(); k++){
-                        String first = forIndices.get(i);
-                        String second = forIndices.get(j);
-                        String third = forIndices.get(k);
-                        if(connections.get(first).contains(second) && connections.get(first).contains(third)){
-                            if(connections.get(second).contains(first) && connections.get(second).contains(third)){
-                                if(connections.get(third).contains(second) && connections.get(third).contains(first)){
-                                    if(first.startsWith("t") || second.startsWith("t") || third.startsWith("t")){
-                                        answer += 1;
-                                    }
-                                }
+            for(String first: forIndices){
+                for(String second: connections.get(first)){
+                    for(String third: connections.get(second)){
+                        if(connections.get(third).contains(first)){
+                            if(first.startsWith("t") || second.startsWith("t") || third.startsWith("t")){
+                                answer++;
                             }
                         }
                     }
                 }
             }
+            answer/=6;
         }
         else{
-            List<List<String>> connectedGroups = new ArrayList<>();
-            for(String computer: computers){
-                List<String> tmp = new ArrayList<>();
-                tmp.add(computer);
-                connectedGroups.add(tmp);
-            }
-
-            while(true){
-                List<List<String>> newConnectedGroups = new ArrayList<>();
-                Set<String> newStringForms = new HashSet<>();
-                for(List<String> connectedGroup: connectedGroups){
-                    for(String s: computers){
-                        if(connections.get(s).containsAll(connectedGroup)){
-                            List<String> newConnectedGroup = new ArrayList<>(connectedGroup);
-                            newConnectedGroup.add(s);
-                            if(!newStringForms.contains(listToString(newConnectedGroup))){
-                                newConnectedGroups.add(newConnectedGroup);
-                                newStringForms.add(listToString(newConnectedGroup));
-                            }
-                        }
-                    }
+            BronKerbosch(new HashSet<>(), computers, new HashSet<>());
+            Set<String> biggest = new HashSet<>();
+            for(Set<String> candidate: maximalCliques){
+                if(candidate.size() > biggest.size()){
+                    biggest = candidate;
                 }
-                if(newConnectedGroups.isEmpty()){
-                    return listToString(connectedGroups.get(0));
-                }
-                connectedGroups = newConnectedGroups;
             }
+            return listToString(new ArrayList<>(biggest));
         }
         return answer+"";
+    }
+
+    private void BronKerbosch(Set<String> R, Set<String> P, Set<String> X){
+        if(P.isEmpty() && X.isEmpty()){
+            maximalCliques.add(R);
+        }
+        else{
+            Set<String> P_UNION_X = new HashSet<>(P);
+            P_UNION_X.addAll(X);
+            String pivot = P_UNION_X.iterator().next();
+            P.removeAll(connections.get(pivot));
+            for(String v: List.copyOf(P)){
+                Set<String> RPrime = new HashSet<>(R);
+                RPrime.add(v);
+                Set<String> PPrime = new HashSet<>(connections.get(v));
+                PPrime.retainAll(P);
+                Set<String> XPrime = new HashSet<>(connections.get(v));
+                XPrime.retainAll(X);
+
+                BronKerbosch(RPrime, PPrime, XPrime);
+                P.remove(v);
+                X.add(v);
+            }
+            Set<String> RPrime = new HashSet<>(R);
+            RPrime.add(pivot);
+            Set<String> PPrime = new HashSet<>(connections.get(pivot));
+            PPrime.retainAll(P);
+            Set<String> XPrime = new HashSet<>(connections.get(pivot));
+            XPrime.retainAll(X);
+            BronKerbosch(RPrime, PPrime, XPrime);
+            P.remove(pivot);
+            X.add(pivot);
+        }
     }
 
     private String listToString(List<String> computers){
