@@ -16,12 +16,10 @@ public class Day14 extends DayTemplate {
         if(part1){
             int xlimit = 101;
             int ylimit = 103;
-            int counter = 100;
-            while(counter-->0){
-                for(Robot robot: robots){
-                    robot.update(xlimit, ylimit);
-                }
+            for(Robot robot: robots){
+                robot.updateBatch(xlimit, ylimit, 100);
             }
+
             int[] quadrants = new int[]{0,0,0,0};
             for(Robot robot: robots){
                 if(robot.x%xlimit > (xlimit - 1)/2){
@@ -46,42 +44,75 @@ public class Day14 extends DayTemplate {
         else{
             int xlimit = 101;
             int ylimit = 103;
-            int counter = 0;
-            int[][] grid;
-            while(counter++ < 10000){
-                grid = new int[103][101];
+            int counter = 1;
+            int increment = 1;
+            while(counter < 103 * 101){
                 for(Robot robot: robots){
-                    robot.update(xlimit, ylimit);
-                    grid[robot.y][robot.x] = 1;
+                    robot.updateBatch(xlimit, ylimit, increment);
                 }
-                if(diagonal(robots) > 14000){
+                boolean boxX = boxX(robots);
+                boolean boxY = boxY(robots);
+                if(boxX && boxY){
                     return counter + "";
                 }
+                if(boxX(robots)){
+                    increment = 101;
+                }
+                counter += increment;
 
             }
         }
         return answer + "";
     }
 
-    private int diagonal(List<Robot> robots){
-        int answer = 0;
+//    private boolean box(List<Robot> robots){
+//        HashMap<Integer, Integer> mapX = new HashMap<>();
+//        HashMap<Integer, Integer> mapY = new HashMap<>();
+//        for(Robot robot: robots){
+//            mapX.merge(robot.x, 1, Integer::sum);
+//            mapY.merge(robot.y, 1, Integer::sum);
+//        }
+//
+//        boolean xbox = false;
+//        boolean ybox = false;
+//
+//        for(int key: mapX.keySet()){
+//            if(mapX.get(key) > 30){
+//                xbox = true;
+//            }
+//        }
+//        for(int key: mapY.keySet()){
+//            if(mapY.get(key) > 30){
+//                ybox = true;
+//            }
+//        }
+//        return xbox && ybox;
+//    }
+
+    private boolean boxX(List<Robot> robots){
+        HashMap<Integer, Integer> mapX = new HashMap<>();
         for(Robot robot: robots){
-            for(Robot robot2: robots){
-                if(Math.abs(robot.x - robot2.x) == Math.abs(robot.y - robot2.y)){
-                    answer++;
-                    if(Math.abs(robot.x - robot2.x) == 1){
-                        answer+=2;
-                    }
-                }
-                if(robot.x == robot2.x && robot.y == robot2.y){
-                    answer--;
-                }
-                if(robot.x == robot2.x && robot.y != robot2.y){
-                    answer++;
-                }
+            mapX.merge(robot.x, 1, Integer::sum);
+        }
+        for(int key: mapX.keySet()){
+            if(mapX.get(key) > 30){
+                return true;
             }
         }
-        return answer;
+        return false;
+    }
+
+    private boolean boxY(List<Robot> robots){
+        HashMap<Integer, Integer> mapY = new HashMap<>();
+        for(Robot robot: robots){
+            mapY.merge(robot.y, 1, Integer::sum);
+        }
+        for(int key: mapY.keySet()){
+            if(mapY.get(key) > 30){
+                return true;
+            }
+        }
+        return false;
     }
 }
 
@@ -101,6 +132,13 @@ class Robot{
     public void update(int xlimit, int ylimit){
         x += vx;
         y += vy;
+        x = (x%xlimit + xlimit)%xlimit;
+        y = (y%ylimit + ylimit)%ylimit;
+    }
+
+    public void updateBatch(int xlimit, int ylimit, int numUpdate){
+        x += vx * numUpdate;
+        y += vy * numUpdate;
         x = (x%xlimit + xlimit)%xlimit;
         y = (y%ylimit + ylimit)%ylimit;
     }
