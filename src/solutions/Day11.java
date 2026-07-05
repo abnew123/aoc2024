@@ -2,47 +2,70 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
-public class Day11 extends DayTemplate{
+public class Day11 extends DayTemplate {
+
+    private final Map<State, Long> memo = new HashMap<>();
 
     public String solve(boolean part1, Scanner in) {
-        Map<Long, Long> map = new HashMap<>();
+        int blinks = part1 ? 25 : 75;
         long answer = 0;
-        String[] line = in.nextLine().split(" ");
-        for(String s: line){
-            Long num = map.getOrDefault(Long.parseLong(s), 0L);
-            map.put(Long.parseLong(s), num + 1);
-        }
-        int counter = part1?25:75;
-        while(counter-- > 0){
-            map = oneCycle(map);
-        }
-        for(Long val: map.values()){
-            answer += val;
+        String[] stones = in.nextLine().split(" ");
+        memo.clear();
+        for (String stone : stones) {
+            answer += countStones(Long.parseLong(stone), blinks);
         }
         return answer + "";
     }
 
-    public Map<Long, Long> oneCycle(Map<Long, Long> map){
-        Map<Long, Long> newStones = new HashMap<>();
-        for(Map.Entry<Long,Long> entry: map.entrySet()){
-            String str = entry.getKey() + "";
-            if(entry.getKey() == 0L){
-                newStones.merge(1L, entry.getValue(), Long::sum);
-            }
-            else{
-                if(str.length() % 2 == 0){
-                    Long num = newStones.getOrDefault(Long.parseLong(str.substring(0, (str.length() / 2))), 0L);
-                    newStones.put(Long.parseLong(str.substring(0, (str.length() / 2))), num + entry.getValue());
-                    Long num2 = newStones.getOrDefault(Long.parseLong(str.substring((str.length() / 2))), 0L);
-                    newStones.put(Long.parseLong(str.substring((str.length() / 2))), num2 + entry.getValue());
-                }
-                else{
-                    newStones.merge(entry.getKey() * 2024, entry.getValue(), Long::sum);
-                }
+    private long countStones(long stone, int blinksLeft) {
+        if (blinksLeft == 0) {
+            return 1;
+        }
+
+        State state = new State(stone, blinksLeft);
+        Long cached = memo.get(state);
+        if (cached != null) {
+            return cached;
+        }
+
+        long result;
+        if (stone == 0) {
+            result = countStones(1, blinksLeft - 1);
+        } else {
+            int digits = digits(stone);
+            if (digits % 2 == 0) {
+                long divisor = pow10(digits / 2);
+                result = countStones(stone / divisor, blinksLeft - 1)
+                        + countStones(stone % divisor, blinksLeft - 1);
+            } else {
+                result = countStones(stone * 2024, blinksLeft - 1);
             }
         }
-        return newStones;
+
+        memo.put(state, result);
+        return result;
     }
+
+    private int digits(long stone) {
+        int digits = 1;
+        while (stone >= 10) {
+            stone /= 10;
+            digits++;
+        }
+        return digits;
+    }
+
+    private long pow10(int power) {
+        long result = 1;
+        for (int i = 0; i < power; i++) {
+            result *= 10;
+        }
+        return result;
+    }
+
+    private record State(long stone, int blinksLeft) {}
 }
