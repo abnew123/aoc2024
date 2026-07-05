@@ -1,69 +1,85 @@
 package src.solutions;
 
 import src.meta.DayTemplate;
-import src.objects.Coordinate;
 
-import java.util.*;
-
-import static src.meta.Utils.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class Day18 extends DayTemplate {
 
-    public String solve(boolean part1, Scanner in) {
-        int gridSize = 71;
-        int[][] grid = new int[gridSize][gridSize];
-        List<Coordinate> lines = new ArrayList<>();
-        while(in.hasNext()){
-            String[] parts = in.nextLine().split(",");
-            lines.add(new Coordinate(Integer.parseInt(parts[0]), Integer.parseInt(parts[1])));
-        }
-        if(part1){
-            return bfs(1024, lines, grid) + "";
+    private static final int GRID_SIZE = 71;
+    private static final int[] DR = {-1, 1, 0, 0};
+    private static final int[] DC = {0, 0, -1, 1};
 
+    public String solve(boolean part1, Scanner in) {
+        List<Integer> bytes = new ArrayList<>();
+        while (in.hasNextLine()) {
+            String line = in.nextLine();
+            int comma = line.indexOf(',');
+            int x = Integer.parseInt(line.substring(0, comma));
+            int y = Integer.parseInt(line.substring(comma + 1));
+            bytes.add(y * GRID_SIZE + x);
         }
-        else{
-            int high = lines.size() - 1;
-            int low = 0;
-            while(low < high){
-                grid = new int[gridSize][gridSize];
-                int med = (low + high)/2;
-                if(bfs(med, lines, grid) == -1){
-                    high = med;
-                }
-                else{
-                    low = med + 1;
-                }
+
+        if (part1) {
+            return bfs(1024, bytes) + "";
+        }
+
+        int high = bytes.size() - 1;
+        int low = 0;
+        while (low < high) {
+            int mid = (low + high) / 2;
+            if (bfs(mid, bytes) == -1) {
+                high = mid;
+            } else {
+                low = mid + 1;
             }
-            return lines.get(low - 1).x + "," + lines.get(low - 1).y;
         }
+        int answer = bytes.get(low - 1);
+        return (answer % GRID_SIZE) + "," + (answer / GRID_SIZE);
     }
 
-    private int bfs(int limit, List<Coordinate> memoryBlock, int[][] grid){
-        for(int i = 0; i < limit; i++){
-            grid[memoryBlock.get(i).x][memoryBlock.get(i).y] = 1;
+    private int bfs(int limit, List<Integer> bytes) {
+        boolean[] blocked = new boolean[GRID_SIZE * GRID_SIZE];
+        for (int i = 0; i < limit; i++) {
+            blocked[bytes.get(i)] = true;
         }
-        Set<Coordinate> lst = new HashSet<>();
-        lst.add(new Coordinate(0,0));
-        int counter = 0;
-        Coordinate end = new Coordinate(grid.length -1, grid.length - 1);
-        Set<Coordinate> allSeen = new HashSet<>();
-        while(!lst.contains(end) && counter < grid.length * grid[0].length * 2){
-            counter++;
-            allSeen.addAll(lst);
-            Set<Coordinate> newList = new HashSet<>();
-            for(Coordinate c: lst){
-                for(Coordinate neighbor: getNeighbors(c.x, c.y, grid)){
-                    if(grid[neighbor.x][neighbor.y] != 1 && !allSeen.contains(neighbor)){
-                        newList.add(neighbor);
+
+        boolean[] seen = new boolean[blocked.length];
+        int[] queue = new int[blocked.length];
+        int head = 0;
+        int tail = 0;
+        queue[tail++] = 0;
+        seen[0] = true;
+        int target = blocked.length - 1;
+        int steps = 0;
+
+        while (head < tail) {
+            int layerEnd = tail;
+            while (head < layerEnd) {
+                int current = queue[head++];
+                if (current == target) {
+                    return steps;
+                }
+
+                int row = current / GRID_SIZE;
+                int col = current % GRID_SIZE;
+                for (int dir = 0; dir < 4; dir++) {
+                    int nextRow = row + DR[dir];
+                    int nextCol = col + DC[dir];
+                    if (nextRow < 0 || nextCol < 0 || nextRow >= GRID_SIZE || nextCol >= GRID_SIZE) {
+                        continue;
+                    }
+                    int next = nextRow * GRID_SIZE + nextCol;
+                    if (!blocked[next] && !seen[next]) {
+                        seen[next] = true;
+                        queue[tail++] = next;
                     }
                 }
             }
-            lst = newList;
+            steps++;
         }
-        if(counter >= grid.length * grid[0].length){
-            return -1;
-        }
-        return counter;
-
+        return -1;
     }
 }
