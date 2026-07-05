@@ -12,12 +12,28 @@ public class Day21 extends DayTemplate {
     Map<Character, Integer> dirMap;
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
+        String[] inputs = readCodes(in);
+        initializeKeypads();
+
+        for(String input: inputs){
+            long a = shortest(input, part1);
+            long b = Integer.parseInt(input.substring(0, input.length() - 1));
+            answer +=  a * b;
+        }
+        return answer + "";
+    }
+
+    private String[] readCodes(Scanner in) {
         String[] inputs = new String[5];
-        inputs[0] = in.nextLine();
-        inputs[1] = in.nextLine();
-        inputs[2] = in.nextLine();
-        inputs[3] = in.nextLine();
-        inputs[4] = in.nextLine();
+        for(int i = 0; i < inputs.length; i++){
+            inputs[i] = in.nextLine();
+        }
+        return inputs;
+    }
+
+    private void initializeKeypads() {
+        numPad.clear();
+        dirPad.clear();
         numPad.add(new Coordinate(3,1));
         numPad.add(new Coordinate(2,0));
         numPad.add(new Coordinate(2,1));
@@ -35,13 +51,6 @@ public class Day21 extends DayTemplate {
         dirPad.add(new Coordinate(1,2));
         dirPad.add(new Coordinate(0,1));
         dirPad.add(new Coordinate(0,2));
-
-        for(String input: inputs){
-            long a = shortest(input, part1);
-            long b = Integer.parseInt(input.substring(0, input.length() - 1));
-            answer +=  a * b;
-        }
-        return answer + "";
     }
 
     private long shortest(String input, boolean part1){
