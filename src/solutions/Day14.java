@@ -46,16 +46,18 @@ public class Day14 extends DayTemplate {
             int ylimit = 103;
             int counter = 1;
             int increment = 1;
+            int[] xCounts = new int[xlimit];
+            int[] yCounts = new int[ylimit];
             while(counter < 103 * 101){
                 for(Robot robot: robots){
                     robot.updateBatch(xlimit, ylimit, increment);
                 }
-                boolean boxX = boxX(robots);
-                boolean boxY = boxY(robots);
+                boolean boxX = boxX(robots, xCounts);
+                boolean boxY = boxY(robots, yCounts);
                 if(boxX && boxY){
                     return counter + "";
                 }
-                if(boxX(robots)){
+                if(boxX){
                     increment = 101;
                 }
                 counter += increment;
@@ -89,26 +91,20 @@ public class Day14 extends DayTemplate {
 //        return xbox && ybox;
 //    }
 
-    private boolean boxX(List<Robot> robots){
-        HashMap<Integer, Integer> mapX = new HashMap<>();
+    private boolean boxX(List<Robot> robots, int[] counts){
+        Arrays.fill(counts, 0);
         for(Robot robot: robots){
-            mapX.merge(robot.x, 1, Integer::sum);
-        }
-        for(int key: mapX.keySet()){
-            if(mapX.get(key) > 30){
+            if(++counts[robot.x] > 30){
                 return true;
             }
         }
         return false;
     }
 
-    private boolean boxY(List<Robot> robots){
-        HashMap<Integer, Integer> mapY = new HashMap<>();
+    private boolean boxY(List<Robot> robots, int[] counts){
+        Arrays.fill(counts, 0);
         for(Robot robot: robots){
-            mapY.merge(robot.y, 1, Integer::sum);
-        }
-        for(int key: mapY.keySet()){
-            if(mapY.get(key) > 30){
+            if(++counts[robot.y] > 30){
                 return true;
             }
         }
