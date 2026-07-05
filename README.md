@@ -83,3 +83,33 @@
   <img src=".aoc_tiles/tiles/2024/25.png" width="161px">
 </a>
 <!-- AOC TILES END -->
+
+Total run time of all 50 parts is roughly 180ms on a 2024 MacBook Pro after optimization. Benchmark times below are 10-run averages per part using the existing `DayTemplate.timer` convention.
+
+| Day | Problem | Solution | Part 1 (ms) | Part 2 (ms) |
+| --- | --- | --- |------------:|------------:|
+| 1 | [Historian Hysteria](https://adventofcode.com/2024/day/1) | [Source](src/solutions/Day01.java) | 1.996 | 1.674 |
+| 2 | [Red-Nosed Reports](https://adventofcode.com/2024/day/2) | [Source](src/solutions/Day02.java) | 1.888 | 2.953 |
+| 3 | [Mull It Over](https://adventofcode.com/2024/day/3) | [Source](src/solutions/Day03.java) | 1.914 | 2.226 |
+| 4 | [Ceres Search](https://adventofcode.com/2024/day/4) | [Source](src/solutions/Day04.java) | 1.793 | 1.304 |
+| 5 | [Print Queue](https://adventofcode.com/2024/day/5) | [Source](src/solutions/Day05.java) | 2.794 | 3.055 |
+| 6 | [Guard Gallivant](https://adventofcode.com/2024/day/6) | [Source](src/solutions/Day06.java) | 1.408 | 10.201 |
+| 7 | [Bridge Repair](https://adventofcode.com/2024/day/7) | [Source](src/solutions/Day07.java) | 2.142 | 2.216 |
+| 8 | [Resonant Collinearity](https://adventofcode.com/2024/day/8) | [Source](src/solutions/Day08.java) | 0.913 | 3.578 |
+| 9 | [Disk Fragmenter](https://adventofcode.com/2024/day/9) | [Source](src/solutions/Day09.java) | 2.860 | 3.263 |
+| 10 | [Hoof It](https://adventofcode.com/2024/day/10) | [Source](src/solutions/Day10.java) | 1.514 | 1.344 |
+| 11 | [Plutonian Pebbles](https://adventofcode.com/2024/day/11) | [Source](src/solutions/Day11.java) | 1.722 | 9.535 |
+| 12 | [Garden Groups](https://adventofcode.com/2024/day/12) | [Source](src/solutions/Day12.java) | 1.703 | 2.575 |
+| 13 | [Claw Contraption](https://adventofcode.com/2024/day/13) | [Source](src/solutions/Day13.java) | 2.524 | 2.572 |
+| 14 | [Restroom Redoubt](https://adventofcode.com/2024/day/14) | [Source](src/solutions/Day14.java) | 2.396 | 4.969 |
+| 15 | [Warehouse Woes](https://adventofcode.com/2024/day/15) | [Source](src/solutions/Day15.java) | 1.724 | 2.872 |
+| 16 | [Reindeer Maze](https://adventofcode.com/2024/day/16) | [Source](src/solutions/Day16.java) | 3.931 | 6.352 |
+| 17 | [Chronospatial Computer](https://adventofcode.com/2024/day/17) | [Source](src/solutions/Day17.java) | 0.363 | 1.992 |
+| 18 | [RAM Run](https://adventofcode.com/2024/day/18) | [Source](src/solutions/Day18.java) | 2.545 | 3.138 |
+| 19 | [Linen Layout](https://adventofcode.com/2024/day/19) | [Source](src/solutions/Day19.java) | 2.035 | 2.705 |
+| 20 | [Race Condition](https://adventofcode.com/2024/day/20) | [Source](src/solutions/Day20.java) | 2.444 | 17.196 |
+| 21 | [Keypad Conundrum](https://adventofcode.com/2024/day/21) | [Source](src/solutions/Day21.java) | 1.991 | 2.814 |
+| 22 | [Monkey Market](https://adventofcode.com/2024/day/22) | [Source](src/solutions/Day22.java) | 15.680 | 15.744 |
+| 23 | [LAN Party](https://adventofcode.com/2024/day/23) | [Source](src/solutions/Day23.java) | 3.077 | 2.886 |
+| 24 | [Crossed Wires](https://adventofcode.com/2024/day/24) | [Source](src/solutions/Day24.java) | 2.145 | 1.906 |
+| 25 | [Code Chronicle](https://adventofcode.com/2024/day/25) | [Source](src/solutions/Day25.java) | 7.522 | 0.002 |
