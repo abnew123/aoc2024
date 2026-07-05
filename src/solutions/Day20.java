@@ -1,13 +1,13 @@
 package src.solutions;
 
 import src.meta.DayTemplate;
-import src.objects.Coordinate;
 import java.util.*;
-import static src.meta.Utils.*;
 
 public class Day20 extends DayTemplate {
 
-    int[][] grid;
+    private boolean[] walls;
+    private int rows;
+    private int cols;
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
@@ -16,40 +16,57 @@ public class Day20 extends DayTemplate {
             String line = in.nextLine();
             lines.add(line);
         }
-        grid = new int[lines.size()][lines.get(0).length()];
-        Coordinate start = new Coordinate(-1,-1);
-        Coordinate end = new Coordinate(-1,-1);
-        for(int i = 0 ; i < grid.length; i++){
-            for(int j = 0; j < grid[0].length; j++){
+        rows = lines.size();
+        cols = lines.get(0).length();
+        walls = new boolean[rows * cols];
+        int startX = -1;
+        int startY = -1;
+        int endX = -1;
+        int endY = -1;
+        for(int i = 0 ; i < rows; i++){
+            for(int j = 0; j < cols; j++){
                 char c = lines.get(i).charAt(j);
                 if(c == 'S'){
-                    start = new Coordinate(i,j);
-                    grid[i][j] = 1;
+                    startX = i;
+                    startY = j;
                 }
                 if(c == 'E'){
-                    end = new Coordinate(i,j);
-                    grid[i][j] = 1;
+                    endX = i;
+                    endY = j;
                 }
                 if(c == '#'){
-                    grid[i][j] = 2;
-                }
-                if(c == '.'){
-                    grid[i][j] = 1;
+                    walls[toIndex(i, j)] = true;
                 }
             }
         }
 
-        int[][] bfsFromEnd = bfs(end);
-        int[][] bfsFromStart = bfs(start);
-        int currentDistance = bfsFromEnd[start.x][start.y];
-        for(int i = 0; i < bfsFromEnd.length; i++){
-            for(int j = 0; j < bfsFromEnd[0].length; j++){
-                if(grid[i][j] != 2){
-                    for(int k = 0; k < bfsFromStart.length; k++){
-                        for(int l = 0; l < bfsFromStart[0].length; l++){
-                            if(grid[k][l] != 2 && (Math.abs(k - i) + Math.abs(l - j)) <= (part1?2:20) && (bfsFromStart[i][j] + bfsFromEnd[k][l] + Math.abs(k - i) + Math.abs(l - j)) <= currentDistance - 100){
-                                answer++;
-                            }
+        int start = toIndex(startX, startY);
+        int end = toIndex(endX, endY);
+        int[] bfsFromEnd = bfs(end);
+        int[] bfsFromStart = bfs(start);
+        int currentDistance = bfsFromEnd[start];
+        int maxCheat = part1 ? 2 : 20;
+        int targetDistance = currentDistance - 100;
+        for(int x = 0; x < rows; x++){
+            int rowStart = x * cols;
+            for(int y = 0; y < cols; y++){
+                int startDistance = bfsFromStart[rowStart + y];
+                if(startDistance < 0){
+                    continue;
+                }
+                int minDx = Math.max(-maxCheat, -x);
+                int maxDx = Math.min(maxCheat, rows - 1 - x);
+                for(int dx = minDx; dx <= maxDx; dx++){
+                    int nx = x + dx;
+                    int absDx = Math.abs(dx);
+                    int yRange = maxCheat - absDx;
+                    int targetRowStart = nx * cols;
+                    int minY = Math.max(0, y - yRange);
+                    int maxY = Math.min(cols - 1, y + yRange);
+                    for(int ny = minY; ny <= maxY; ny++){
+                        int endDistance = bfsFromEnd[targetRowStart + ny];
+                        if(endDistance >= 0 && startDistance + endDistance + absDx + Math.abs(ny - y) <= targetDistance){
+                            answer++;
                         }
                     }
                 }
@@ -58,27 +75,50 @@ public class Day20 extends DayTemplate {
         return answer + "";
     }
 
-    private int[][] bfs(Coordinate end){
-        int[][] bfs = new int[grid.length][grid[0].length];
-        List<Coordinate> queue = new ArrayList<>();
-        queue.add(end);
-        Set<Coordinate> seen = new HashSet<>();
-        seen.add(end);
-        int counter = 0;
-        while(!queue.isEmpty()){
-            List<Coordinate> newQueue = new ArrayList<>();
-            for(Coordinate c: queue){
-                bfs[c.x][c.y] = counter;
-                for(Coordinate neighbor: getNeighbors(c.x, c.y, grid)){
-                    if(!seen.contains(neighbor) && grid[neighbor.x][neighbor.y] != 2){
-                        newQueue.add(neighbor);
-                    }
-                }
+    private int[] bfs(int start){
+        int[] distances = new int[rows * cols];
+        Arrays.fill(distances, -1);
+
+        int[] queue = new int[rows * cols];
+        int head = 0;
+        int tail = 0;
+        distances[start] = 0;
+        queue[tail++] = start;
+
+        while(head < tail){
+            int current = queue[head++];
+            int x = current / cols;
+            int y = current - x * cols;
+            int nextDistance = distances[current] + 1;
+
+            int next = current - cols;
+            if(x > 0 && !walls[next] && distances[next] < 0){
+                distances[next] = nextDistance;
+                queue[tail++] = next;
             }
-            counter++;
-            queue = newQueue;
-            seen.addAll(newQueue);
+
+            next = current + cols;
+            if(x + 1 < rows && !walls[next] && distances[next] < 0){
+                distances[next] = nextDistance;
+                queue[tail++] = next;
+            }
+
+            next = current - 1;
+            if(y > 0 && !walls[next] && distances[next] < 0){
+                distances[next] = nextDistance;
+                queue[tail++] = next;
+            }
+
+            next = current + 1;
+            if(y + 1 < cols && !walls[next] && distances[next] < 0){
+                distances[next] = nextDistance;
+                queue[tail++] = next;
+            }
         }
-        return bfs;
+        return distances;
+    }
+
+    private int toIndex(int x, int y){
+        return x * cols + y;
     }
 }
