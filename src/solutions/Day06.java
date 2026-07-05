@@ -1,110 +1,144 @@
 package src.solutions;
 
 import src.meta.DayTemplate;
-import src.objects.Coordinate;
 
-import java.util.*;
-
-import static src.meta.Utils.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class Day06 extends DayTemplate {
 
-    int[] xs = new int[]{0,1,0,-1};
-    int[] ys = new int[]{-1,0,1,0};
+    private static final int[] DR = {-1, 0, 1, 0};
+    private static final int[] DC = {0, 1, 0, -1};
+
+    private int rows;
+    private int cols;
+    private int[] loopSeen;
+    private int loopStamp = 1;
 
     public String solve(boolean part1, Scanner in) {
-        long answer = 0;
         List<String> lines = new ArrayList<>();
-        while (in.hasNext()) {
+        while (in.hasNextLine()) {
             lines.add(in.nextLine());
         }
-        GuardLocation start = new GuardLocation(0,0, 0);
-        int direction = 0; //0 up, 1 right, 2 down, 3 left
-        int[][] grid = buildGrid(lines, c -> c == '.' ? 1 : (c == '#' ? 2 : 3));
 
-        for(int i = 0; i < grid.length; i++){
-            for(int j = 0; j < grid[0].length; j++){
-               if(grid[i][j] == 3){
-                   grid[i][j] = 1;
-                   start = new GuardLocation(i,j, 0);
-               }
-            }
-        }
-
-        if(part1){
-            Set<Coordinate> locations = new HashSet<>();
-            locations.add(new Coordinate(start.x(), start.y()));
-            GuardLocation guard = start;
-            while(safe(guard.x(), guard.y(), grid)){
-                int x = guard.x() + xs[direction%4];
-                int y = guard.y() + ys[direction%4];
-                if(!safe(x,y,grid)){
-                    return locations.size() + "";
-                }
-                if(grid[x][y] == 2){
-                    direction++;
-                }
-                else{
-                    locations.add(new Coordinate(x,y));
-                    guard = new GuardLocation(x,y, direction);
+        rows = lines.size();
+        cols = lines.get(0).length();
+        boolean[] walls = new boolean[rows * cols];
+        int start = -1;
+        for (int row = 0; row < rows; row++) {
+            String line = lines.get(row);
+            for (int col = 0; col < cols; col++) {
+                char c = line.charAt(col);
+                int index = row * cols + col;
+                if (c == '#') {
+                    walls[index] = true;
+                } else if (c == '^') {
+                    start = index;
                 }
             }
         }
-        else{
-            return part2(start, direction, grid);
 
+        if (part1) {
+            return countVisited(start, walls) + "";
         }
-        return answer + "";
+        return countLoopObstructions(start, walls) + "";
     }
 
-    private boolean loop(GuardLocation start, int[][]gridCopy, int direction){
-        Set<GuardLocation> visited = new HashSet<>();
-        GuardLocation guard = start;
-        while(!visited.contains(guard)){
-            int x = guard.x() + xs[direction%4];
-            int y = guard.y() + ys[direction%4];
-            if(!safe(x,y,gridCopy)){
+    private int countVisited(int start, boolean[] walls) {
+        boolean[] visited = new boolean[walls.length];
+        int count = 0;
+        int row = start / cols;
+        int col = start % cols;
+        int dir = 0;
+        visited[start] = true;
+        count++;
+        while (true) {
+            int nextRow = row + DR[dir];
+            int nextCol = col + DC[dir];
+            if (!inBounds(nextRow, nextCol)) {
+                return count;
+            }
+            int next = nextRow * cols + nextCol;
+            if (walls[next]) {
+                dir = (dir + 1) & 3;
+            } else {
+                row = nextRow;
+                col = nextCol;
+                if (!visited[next]) {
+                    visited[next] = true;
+                    count++;
+                }
+            }
+        }
+    }
+
+    private int countLoopObstructions(int start, boolean[] walls) {
+        boolean[] tested = new boolean[walls.length];
+        loopSeen = new int[walls.length * 4];
+        int loops = 0;
+        int row = start / cols;
+        int col = start % cols;
+        int dir = 0;
+
+        while (true) {
+            int nextRow = row + DR[dir];
+            int nextCol = col + DC[dir];
+            if (!inBounds(nextRow, nextCol)) {
+                return loops;
+            }
+
+            int next = nextRow * cols + nextCol;
+            if (walls[next]) {
+                dir = (dir + 1) & 3;
+                continue;
+            }
+
+            if (next != start && !tested[next]) {
+                tested[next] = true;
+                if (loopsWithObstacle(row, col, (dir + 1) & 3, next, walls)) {
+                    loops++;
+                }
+            }
+            row = nextRow;
+            col = nextCol;
+        }
+    }
+
+    private boolean loopsWithObstacle(int row, int col, int dir, int blocked, boolean[] walls) {
+        int stamp = nextLoopStamp();
+        while (true) {
+            int state = ((row * cols + col) << 2) | dir;
+            if (loopSeen[state] == stamp) {
+                return true;
+            }
+            loopSeen[state] = stamp;
+
+            int nextRow = row + DR[dir];
+            int nextCol = col + DC[dir];
+            if (!inBounds(nextRow, nextCol)) {
                 return false;
             }
-            if(gridCopy[x][y] == 2){
-                direction++;
-            }
-            else{
-                visited.add(guard);
-                guard = new GuardLocation(x,y, direction%4);
+
+            int next = nextRow * cols + nextCol;
+            if (next == blocked || walls[next]) {
+                dir = (dir + 1) & 3;
+            } else {
+                row = nextRow;
+                col = nextCol;
             }
         }
-        return true;
     }
 
-    private String part2(GuardLocation start, int direction, int[][] grid){
-        Set<Coordinate> places = new HashSet<>();
-        Set<Coordinate> seen = new HashSet<>();
-        GuardLocation guard = start;
-        while(true){
-            int x = guard.x() + xs[direction%4];
-            int y = guard.y() + ys[direction%4];
-            if(!safe(x,y,grid)){
-                break;
-            }
-            if(!seen.contains(new Coordinate(x,y)) && grid[x][y] == 1){
-                grid[x][y] = 2;
-                if(loop(guard, grid, direction + 1)){
-                    places.add(new Coordinate(x, y));
-                }
-                grid[x][y] = 1;
-            }
-
-            if(grid[x][y] == 2){
-                direction++;
-            }
-            else{
-                seen.add(new Coordinate(x,y));
-                guard = new GuardLocation(x,y, direction);
-            }
+    private int nextLoopStamp() {
+        if (loopStamp == Integer.MAX_VALUE) {
+            loopSeen = new int[loopSeen.length];
+            loopStamp = 1;
         }
-        return places.size() + "";
+        return loopStamp++;
+    }
+
+    private boolean inBounds(int row, int col) {
+        return row >= 0 && col >= 0 && row < rows && col < cols;
     }
 }
-
-record GuardLocation (int x, int y, int direction){}
