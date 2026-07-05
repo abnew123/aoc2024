@@ -6,33 +6,36 @@ import java.util.*;
 public class Day22 extends DayTemplate {
     private static final int MASK = (1 << 24) - 1;
     private static final int SEQUENCE_COUNT = 1 << 20;
+    private static final int SEQUENCE_MASK = SEQUENCE_COUNT - 1;
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
 
         if(part1){
             while (in.hasNext()) {
-                long l = Long.parseLong(in.nextLine());
+                int secret = (int) (Long.parseLong(in.nextLine()) & MASK);
                 for(int i = 0; i < 2000; i++){
-                    l = oneIteration(l);
+                    secret = oneIteration(secret);
                 }
-                answer += l;
+                answer += secret;
             }
         }
         else{
-            long[] lines = readLines(in);
             int[] sequenceValues = new int[SEQUENCE_COUNT];
             int[] viewedHashes = new int[SEQUENCE_COUNT];
-            for(int i = 0; i < lines.length; i++){
+            int buyerId = 1;
+            while (in.hasNext()) {
                 int diffHash = 0;
-                long past = lines[i];
-                int buyerId = i + 1;
+                long initial = Long.parseLong(in.nextLine());
+                int past = (int) (initial & MASK);
+                int pastPrice = (int) (initial % 10);
                 for(int j = 0; j < 2000; j++){
                     int future = oneIteration(past);
-                    diffHash = ((diffHash << 5) | (int) (future % 10 - past % 10 + 9)) & (SEQUENCE_COUNT - 1);
+                    int futurePrice = future % 10;
+                    diffHash = ((diffHash << 5) | (futurePrice - pastPrice + 9)) & SEQUENCE_MASK;
                     if(j >= 3){
                         if(viewedHashes[diffHash] != buyerId){
-                            int value = sequenceValues[diffHash] + future % 10;
+                            int value = sequenceValues[diffHash] + futurePrice;
                             sequenceValues[diffHash] = value;
                             viewedHashes[diffHash] = buyerId;
                             if(value > answer){
@@ -41,31 +44,18 @@ public class Day22 extends DayTemplate {
                         }
                     }
                     past = future;
+                    pastPrice = futurePrice;
                 }
+                buyerId++;
             }
         }
 
         return answer + "";
     }
 
-    private long[] readLines(Scanner in) {
-        long[] lines = new long[256];
-        int size = 0;
-        while (in.hasNext()) {
-            if(size == lines.length){
-                lines = Arrays.copyOf(lines, lines.length * 2);
-            }
-            lines[size++] = Long.parseLong(in.nextLine());
-        }
-        return Arrays.copyOf(lines, size);
-    }
-
-    private int oneIteration(long l){
-        l ^= l<<6;
-        l &= MASK;
-        l ^= l>>5;
-        l &= MASK;
-        l ^= l<<11;
-        return (int) (l & MASK);
+    private int oneIteration(int secret){
+        secret = (secret ^ (secret << 6)) & MASK;
+        secret = (secret ^ (secret >> 5)) & MASK;
+        return (secret ^ (secret << 11)) & MASK;
     }
 }
