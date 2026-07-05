@@ -9,6 +9,8 @@ public class Day24 extends DayTemplate {
     private final List<I> ins = new ArrayList<>();
 
     public String solve(boolean part1, Scanner in) {
+        v.clear();
+        ins.clear();
         for (boolean gates = false; in.hasNextLine();) {
             String line = in.nextLine();
             if (line.isEmpty()) {
@@ -21,8 +23,7 @@ public class Day24 extends DayTemplate {
             }
         }
         if (!part1) {
-            swaps();
-            return "";
+            return swaps();
         }
         for (int n = 0; !ins.isEmpty() && n++ < 100;) {
             for (ListIterator<I> it = ins.listIterator(ins.size()); it.hasPrevious();) {
@@ -47,52 +48,43 @@ public class Day24 extends DayTemplate {
         return "" + Long.parseLong(bits.toString(), 2);
     }
 
-    private void swaps() {
-        Map<String, Integer> gen = new HashMap<>(), prop = new HashMap<>(), or = new HashMap<>();
-        Set<I> bad = new HashSet<>();
-        for (ListIterator<I> it = ins.listIterator(ins.size()); it.hasPrevious();) {
-            I i = it.previous();
-            if ((i.a.equals("x00") || i.a.equals("y00"))) {
-                (i.op.equals("AND") ? gen : prop).put(i.o, 0);
-                if (i.op.equals("AND")) {
-                    or.put(i.o, 0);
-                }
-                it.remove();
-            }
-        }
-        for (ListIterator<I> it = ins.listIterator(ins.size()); it.hasPrevious();) {
-            I i = it.previous();
-            if (i.a.startsWith("x") || i.a.startsWith("y")) {
-                if (i.o.startsWith("z")) {
-                    bad.add(i);
-                } else {
-                    (i.op.equals("AND") ? gen : prop).put(i.o, Integer.parseInt(i.a.substring(1)));
-                }
-                it.remove();
-            }
-        }
+    private String swaps() {
+        int finalZ = ins.stream()
+                .filter(i -> i.o.startsWith("z"))
+                .mapToInt(i -> Integer.parseInt(i.o.substring(1)))
+                .max()
+                .orElseThrow();
+        Set<String> bad = new TreeSet<>();
         for (I i : ins) {
-            if (i.op.equals("OR")) {
-                Integer n = gen.getOrDefault(i.a, gen.get(i.b));
-                if (n == null) {
-                    bad.add(i);
-                } else {
-                    or.put(i.o, n);
-                }
+            boolean firstInputBit = i.a.equals("x00") || i.a.equals("y00");
+            boolean xyInput = isXY(i.a) && isXY(i.b);
+            if (i.o.startsWith("z") && Integer.parseInt(i.o.substring(1)) != finalZ && !i.op.equals("XOR")) {
+                bad.add(i.o);
+            }
+            if (i.op.equals("XOR") && !xyInput && !i.o.startsWith("z")) {
+                bad.add(i.o);
+            }
+            if (i.op.equals("AND") && !firstInputBit && !feeds(i.o, "OR")) {
+                bad.add(i.o);
+            }
+            if (i.op.equals("XOR") && xyInput && !firstInputBit && (!feeds(i.o, "XOR") || !feeds(i.o, "AND"))) {
+                bad.add(i.o);
             }
         }
-        for (I i : ins) {
-            int n = link(prop, or, i);
-            if ((i.op.equals("AND") || i.op.equals("XOR")) && n < 0) {
-                bad.add(i);
-            }
-        }
-        bad.stream().map(i -> i.o).sorted().forEach(System.out::println);
+        return String.join(",", bad);
     }
 
-    private int link(Map<String, Integer> a, Map<String, Integer> b, I i) {
-        return a.containsKey(i.a) && b.containsKey(i.b) ? a.get(i.a)
-                : a.containsKey(i.b) && b.containsKey(i.a) ? a.get(i.b) : -1;
+    private boolean isXY(String wire) {
+        return wire.startsWith("x") || wire.startsWith("y");
+    }
+
+    private boolean feeds(String wire, String op) {
+        for (I i : ins) {
+            if (i.op.equals(op) && (i.a.equals(wire) || i.b.equals(wire))) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 

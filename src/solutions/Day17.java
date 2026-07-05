@@ -6,14 +6,13 @@ import java.util.*;
 
 public class Day17 extends DayTemplate {
     public String solve(boolean part1, Scanner in) {
-        long a = 15401536;
-        in.nextLine();
+        long a = Long.parseLong(in.nextLine().split(" ")[2]);
         long b = Long.parseLong(in.nextLine().split(" ")[2]);
         long c = Long.parseLong(in.nextLine().split(" ")[2]);
         in.nextLine();
         int[] p = Arrays.stream(in.nextLine().split(" ")[1].split(",")).mapToInt(Integer::parseInt).toArray();
         if (part1) {
-            return run(p, a, b, c).toString().replace(" ", "");
+            return run(p, a, b, c).toString().replaceAll("[\\[\\] ]", "");
         }
         List<Long> candidates = List.of(0L);
         for (int from = p.length - 1; from >= 0; from--) {
@@ -21,7 +20,7 @@ public class Day17 extends DayTemplate {
             for (long prefix : candidates) {
                 for (int digit = 0; digit < 8; digit++) {
                     long value = prefix << 3 | digit;
-                    if (suffix(run(p, value, 0, 0), p, from)) {
+                    if (suffix(run(p, value, b, c), p, from)) {
                         next.add(value);
                     }
                 }
