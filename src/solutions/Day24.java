@@ -15,7 +15,19 @@ public class Day24 extends DayTemplate {
     boolean hitEmpty = false;
 
     public String solve(boolean part1, Scanner in) {
-        StringBuilder answer = new StringBuilder();
+        parseInput(in);
+        if(part1){
+            return solveDecimalOutput();
+        }
+        printPotentialSwaps();
+        return "";
+    }
+
+    private void parseInput(Scanner in) {
+        registers.clear();
+        map.clear();
+        instructions.clear();
+        hitEmpty = false;
         while (in.hasNext()) {
             String line = in.nextLine();
             if(line.equals("")){
@@ -31,34 +43,37 @@ public class Day24 extends DayTemplate {
                 instructions.add(new Instruction(line));
             }
         }
+    }
 
-        if(part1){
-            int counter = 0;
-            while(!instructions.isEmpty() && counter++<100){
-                for(int i = instructions.size() - 1; i >= 0; i--){
-                    Instruction instruction = instructions.get(i);
-                    if (map.containsKey(instruction.firstReg) && map.containsKey(instruction.secondReg)) {
-                        map.put(instruction.output, instruction.run(map));
-                        instructions.remove(instruction);
-                    }
+    private String solveDecimalOutput() {
+        StringBuilder answer = new StringBuilder();
+        int counter = 0;
+        while(!instructions.isEmpty() && counter++<100){
+            for(int i = instructions.size() - 1; i >= 0; i--){
+                Instruction instruction = instructions.get(i);
+                if (map.containsKey(instruction.firstReg) && map.containsKey(instruction.secondReg)) {
+                    map.put(instruction.output, instruction.run(map));
+                    instructions.remove(instruction);
                 }
             }
-            List<String> outputs = new ArrayList<>();
-
-            for(String key: map.keySet()){
-                if(key.startsWith("z")){
-                    outputs.add(key);
-                }
-            }
-            Collections.sort(outputs);
-            Collections.reverse(outputs);
-
-            for(String output: outputs){
-                answer.append(map.get(output));
-            }
-            answer = new StringBuilder(String.valueOf(Long.parseLong(answer.toString(), 2)));
         }
-        else{
+        List<String> outputs = new ArrayList<>();
+
+        for(String key: map.keySet()){
+            if(key.startsWith("z")){
+                outputs.add(key);
+            }
+        }
+        Collections.sort(outputs);
+        Collections.reverse(outputs);
+
+        for(String output: outputs){
+            answer.append(map.get(output));
+        }
+        return String.valueOf(Long.parseLong(answer.toString(), 2));
+    }
+
+    private void printPotentialSwaps() {
             Map<String, Integer> generateBits = new HashMap<>(); //determines whether the current x and y bits will generate a carry
             Map<String, Integer> propagateBits = new HashMap<>(); //determines whether the current carry will propagate up
             Map<String, Integer> intermediateOrs = new HashMap<>(); //don't really know conceptually what it does, but only type of operation with OR
@@ -179,11 +194,6 @@ public class Day24 extends DayTemplate {
             for(Instruction i: potentialSwaps){
                 System.out.println(i.output);
             }
-
-
-        }
-
-        return answer + "";
     }
 
 
