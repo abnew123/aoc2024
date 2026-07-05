@@ -47,6 +47,14 @@ public class Day24 extends DayTemplate {
 
     private String solveDecimalOutput() {
         StringBuilder answer = new StringBuilder();
+        runReadyInstructions();
+        for(String output: zOutputRegisters()){
+            answer.append(map.get(output));
+        }
+        return String.valueOf(Long.parseLong(answer.toString(), 2));
+    }
+
+    private void runReadyInstructions() {
         int counter = 0;
         while(!instructions.isEmpty() && counter++<100){
             for(int i = instructions.size() - 1; i >= 0; i--){
@@ -57,6 +65,9 @@ public class Day24 extends DayTemplate {
                 }
             }
         }
+    }
+
+    private List<String> zOutputRegisters() {
         List<String> outputs = new ArrayList<>();
 
         for(String key: map.keySet()){
@@ -66,11 +77,7 @@ public class Day24 extends DayTemplate {
         }
         Collections.sort(outputs);
         Collections.reverse(outputs);
-
-        for(String output: outputs){
-            answer.append(map.get(output));
-        }
-        return String.valueOf(Long.parseLong(answer.toString(), 2));
+        return outputs;
     }
 
     private void printPotentialSwaps() {
