@@ -1,3 +1,5 @@
+// Inspired by https://github.com/maneatingape/advent-of-code-rust/blob/main/src/year2024/day22.rs
+// for encoding four price changes as base-19 digits instead of sparse bit-packed indices.
 package src.solutions;
 
 import src.meta.DayTemplate;
@@ -5,8 +7,7 @@ import java.util.*;
 
 public class Day22 extends DayTemplate {
     private static final int MASK = (1 << 24) - 1;
-    private static final int SEQUENCE_COUNT = 1 << 20;
-    private static final int SEQUENCE_MASK = SEQUENCE_COUNT - 1;
+    private static final int SEQUENCE_COUNT = 19 * 19 * 19 * 19;
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
@@ -25,15 +26,22 @@ public class Day22 extends DayTemplate {
             int[] viewedHashes = new int[SEQUENCE_COUNT];
             int buyerId = 1;
             while (in.hasNext()) {
-                int diffHash = 0;
+                int a = 0;
+                int b = 0;
+                int c = 0;
+                int d = 0;
                 long initial = Long.parseLong(in.nextLine());
                 int past = (int) (initial & MASK);
                 int pastPrice = (int) (initial % 10);
                 for(int j = 0; j < 2000; j++){
                     int future = oneIteration(past);
                     int futurePrice = future % 10;
-                    diffHash = ((diffHash << 5) | (futurePrice - pastPrice + 9)) & SEQUENCE_MASK;
+                    a = b;
+                    b = c;
+                    c = d;
+                    d = futurePrice - pastPrice + 9;
                     if(j >= 3){
+                        int diffHash = ((a * 19 + b) * 19 + c) * 19 + d;
                         if(viewedHashes[diffHash] != buyerId){
                             int value = sequenceValues[diffHash] + futurePrice;
                             sequenceValues[diffHash] = value;

@@ -109,7 +109,7 @@ Total run time of all 50 parts is roughly 180ms on a 2024 MacBook Pro after opti
 | 19 | [Linen Layout](https://adventofcode.com/2024/day/19) | [Source](src/solutions/Day19.java) | 2.035 | 2.705 |
 | 20 | [Race Condition](https://adventofcode.com/2024/day/20) | [Source](src/solutions/Day20.java) | 2.444 | 17.196 |
 | 21 | [Keypad Conundrum](https://adventofcode.com/2024/day/21) | [Source](src/solutions/Day21.java) | 1.991 | 2.814 |
-| 22 | [Monkey Market](https://adventofcode.com/2024/day/22) | [Source](src/solutions/Day22.java) | 15.680 | 15.744 |
+| 22 | [Monkey Market](https://adventofcode.com/2024/day/22) | [Source](src/solutions/Day22.java) | 15.592 | 15.070 |
 | 23 | [LAN Party](https://adventofcode.com/2024/day/23) | [Source](src/solutions/Day23.java) | 3.077 | 2.886 |
 | 24 | [Crossed Wires](https://adventofcode.com/2024/day/24) | [Source](src/solutions/Day24.java) | 2.145 | 1.906 |
 | 25 | [Code Chronicle](https://adventofcode.com/2024/day/25) | [Source](src/solutions/Day25.java) | 7.522 | 0.002 |
