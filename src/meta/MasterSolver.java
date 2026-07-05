@@ -2,11 +2,14 @@ package src.meta;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.Scanner;
 
 public class MasterSolver {
 
     private static final String PATH_NAME_PREFIX = "src.solutions.Day";
+    private static final String[] GOLFED_DAYS = "A B C D E F G H I J K L M N O P Q R S T U V W X Y".split(" ");
+    private static boolean useGolfed;
 
     public static void main(String[] args) throws Exception {
 
@@ -14,6 +17,7 @@ public class MasterSolver {
         boolean runTimer = true;
         boolean totalTimer = false;
         boolean exclusionTimer = true;
+        useGolfed = false;
         int[] days = new int[]{};
         boolean[] parts = new boolean[] { true, false };
 
@@ -23,13 +27,10 @@ public class MasterSolver {
             String zeroFilledDay = (day < 10 ? "0" : "") + day;
             for (boolean part1 : parts) {
                 File file = new File("./data/day" + zeroFilledDay + ".txt");
-                try (Scanner in = new Scanner(file)) {
-                    Class<?> cls = Class.forName(PATH_NAME_PREFIX + zeroFilledDay);
-                    Method m = cls.getDeclaredMethod("solve", boolean.class, Scanner.class);
-                    String answer = (String) m.invoke(cls.getDeclaredConstructor().newInstance(), part1, in);
-                    System.out.println(
-                            "Day " + zeroFilledDay + " part " + (part1 ? 1 : 2) + " solution: " + answer);
-                }
+                Class<?> cls = Class.forName(className(day, zeroFilledDay));
+                String answer = solve(cls, part1, file);
+                System.out.println(
+                        "Day " + zeroFilledDay + " part " + (part1 ? 1 : 2) + " solution: " + answer);
             }
         }
         if (runTimer) {
@@ -55,15 +56,21 @@ public class MasterSolver {
         for (int day = 1; day <= 25; day++) {
             String zeroFilledDay = (day < 10 ? "0" : "") + day;
             for (int part = 1; part <= 2; part++) {
-                boolean exclude = (boolean) Class.forName(PATH_NAME_PREFIX + zeroFilledDay).getMethod("exclude")
-                        .invoke(Class.forName(PATH_NAME_PREFIX + zeroFilledDay).getDeclaredConstructor().newInstance());
-                if (exclusion && exclude) {
+                Class<?> cls = Class.forName(className(day, zeroFilledDay));
+                File file = new File("./data/day" + zeroFilledDay + ".txt");
+                if (!useGolfed && exclusion && (boolean) cls.getMethod("exclude")
+                        .invoke(cls.getDeclaredConstructor().newInstance())) {
                     continue;
                 }
-                Double time = (Double) Class.forName(PATH_NAME_PREFIX + zeroFilledDay)
-                        .getMethod("timer", boolean.class, Scanner.class)
-                        .invoke(Class.forName(PATH_NAME_PREFIX + zeroFilledDay).getDeclaredConstructor().newInstance(),
-                                part == 1, new Scanner(new File("./data/day" + zeroFilledDay + ".txt")));
+                Double time;
+                if (useGolfed) {
+                    long start = System.nanoTime();
+                    solve(cls, part == 1, file);
+                    time = (System.nanoTime() - start) / 1000000.0;
+                } else {
+                    time = (Double) cls.getMethod("timer", boolean.class, Scanner.class)
+                            .invoke(cls.getDeclaredConstructor().newInstance(), part == 1, new Scanner(file));
+                }
                 if (!total) {
                     System.out.println("Day " + zeroFilledDay + " part " + part + " execution time: " + time);
                 }
@@ -71,5 +78,28 @@ public class MasterSolver {
             }
         }
         System.out.println("Total execution time (ms): " + totalTime);
+    }
+
+    private static String className(int day, String zeroFilledDay) {
+        return useGolfed ? GOLFED_DAYS[day - 1] : PATH_NAME_PREFIX + zeroFilledDay;
+    }
+
+    private static String solve(Class<?> cls, boolean part1, File file) throws Exception {
+        Object solver = cls.getDeclaredConstructor().newInstance();
+        if (useGolfed) {
+            try {
+                Method m = cls.getDeclaredMethod("s", boolean.class, String.class);
+                m.setAccessible(true);
+                return (String) m.invoke(solver, part1, Files.readString(file.toPath()));
+            } catch (NoSuchMethodException e) {
+                Method m = cls.getDeclaredMethod("s", boolean.class, Scanner.class);
+                m.setAccessible(true);
+                return (String) m.invoke(solver, part1, new Scanner(file));
+            }
+        }
+        try (Scanner in = new Scanner(file)) {
+            Method m = cls.getDeclaredMethod("solve", boolean.class, Scanner.class);
+            return (String) m.invoke(solver, part1, in);
+        }
     }
 }
