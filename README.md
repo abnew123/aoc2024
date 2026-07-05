@@ -84,7 +84,9 @@
 </a>
 <!-- AOC TILES END -->
 
-Total run time of all 50 parts is roughly 180ms on a 2024 MacBook Pro after optimization. Benchmark times below are 10-run averages per part using the existing `DayTemplate.timer` convention.
+Current one-pass timing for `MasterSolver` is roughly 224ms on a 2024 MacBook Pro. The table below shows warm 10-run averages per part using the existing `DayTemplate.timer` convention; those numbers are useful for comparing individual solver changes, but they understate the first-run cost someone sees when running all 50 parts once.
+
+See [performance notes](PERFORMANCE.md) for visual before/after examples and benchmark caveats.
 
 | Day | Problem | Solution | Part 1 (ms) | Part 2 (ms) |
 | --- | --- | --- |------------:|------------:|
