@@ -2,83 +2,55 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Day18 extends DayTemplate {
-
-    private static final int GRID_SIZE = 71;
-    private static final int[] DR = {-1, 1, 0, 0};
-    private static final int[] DC = {0, 0, -1, 1};
+    private static final int N = 71;
 
     public String solve(boolean part1, Scanner in) {
         List<Integer> bytes = new ArrayList<>();
         while (in.hasNextLine()) {
-            String line = in.nextLine();
-            int comma = line.indexOf(',');
-            int x = Integer.parseInt(line.substring(0, comma));
-            int y = Integer.parseInt(line.substring(comma + 1));
-            bytes.add(y * GRID_SIZE + x);
+            String[] p = in.nextLine().split(",");
+            bytes.add(Integer.parseInt(p[1]) * N + Integer.parseInt(p[0]));
         }
-
         if (part1) {
-            return bfs(1024, bytes) + "";
+            return "" + bfs(bytes, 1024);
         }
-
-        int high = bytes.size() - 1;
-        int low = 0;
-        while (low < high) {
-            int mid = (low + high) / 2;
-            if (bfs(mid, bytes) == -1) {
-                high = mid;
+        int lo = 0, hi = bytes.size() - 1;
+        while (lo < hi) {
+            int mid = (lo + hi) / 2;
+            if (bfs(bytes, mid) < 0) {
+                hi = mid;
             } else {
-                low = mid + 1;
+                lo = mid + 1;
             }
         }
-        int answer = bytes.get(low - 1);
-        return (answer % GRID_SIZE) + "," + (answer / GRID_SIZE);
+        int p = bytes.get(lo - 1);
+        return p % N + "," + p / N;
     }
 
-    private int bfs(int limit, List<Integer> bytes) {
-        boolean[] blocked = new boolean[GRID_SIZE * GRID_SIZE];
+    private int bfs(List<Integer> bytes, int limit) {
+        boolean[] bad = new boolean[N * N], seen = new boolean[N * N];
         for (int i = 0; i < limit; i++) {
-            blocked[bytes.get(i)] = true;
+            bad[bytes.get(i)] = true;
         }
-
-        boolean[] seen = new boolean[blocked.length];
-        int[] queue = new int[blocked.length];
-        int head = 0;
-        int tail = 0;
-        queue[tail++] = 0;
+        int[] q = new int[N * N], dr = {-1, 1, 0, 0}, dc = {0, 0, -1, 1};
+        int head = 0, tail = 1;
         seen[0] = true;
-        int target = blocked.length - 1;
-        int steps = 0;
-
-        while (head < tail) {
-            int layerEnd = tail;
-            while (head < layerEnd) {
-                int current = queue[head++];
-                if (current == target) {
+        for (int steps = 0; head < tail; steps++) {
+            for (int end = tail; head < end;) {
+                int p = q[head++], r = p / N, c = p % N;
+                if (p == N * N - 1) {
                     return steps;
                 }
-
-                int row = current / GRID_SIZE;
-                int col = current % GRID_SIZE;
-                for (int dir = 0; dir < 4; dir++) {
-                    int nextRow = row + DR[dir];
-                    int nextCol = col + DC[dir];
-                    if (nextRow < 0 || nextCol < 0 || nextRow >= GRID_SIZE || nextCol >= GRID_SIZE) {
-                        continue;
-                    }
-                    int next = nextRow * GRID_SIZE + nextCol;
-                    if (!blocked[next] && !seen[next]) {
-                        seen[next] = true;
-                        queue[tail++] = next;
+                for (int d = 0; d < 4; d++) {
+                    int nr = r + dr[d], nc = c + dc[d], n = nr * N + nc;
+                    if (nr >= 0 && nc >= 0 && nr < N && nc < N && !bad[n] && !seen[n]) {
+                        seen[n] = true;
+                        q[tail++] = n;
                     }
                 }
             }
-            steps++;
         }
         return -1;
     }

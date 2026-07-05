@@ -5,67 +5,54 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day23 extends DayTemplate {
-
-    private final Map<String, Integer> nameToIndex = new HashMap<>();
+    private final Map<String, Integer> ids = new HashMap<>();
     private final List<String> names = new ArrayList<>();
-    private final List<BitSet> connections = new ArrayList<>();
-    private boolean[] startsWithT;
-    private BitSet bestClique;
-    private int bestCliqueSize;
+    private final List<BitSet> graph = new ArrayList<>();
+    private boolean[] startsT;
+    private BitSet best = new BitSet();
+    private int bs;
 
     public String solve(boolean part1, Scanner in) {
-        readConnections(in);
-        if (part1) {
-            return countTrianglesWithT() + "";
-        }
-        findLargestClique();
-        return cliqueToString(bestClique);
-    }
-
-    private void readConnections(Scanner in) {
-        nameToIndex.clear();
-        names.clear();
-        connections.clear();
-
         while (in.hasNextLine()) {
-            String line = in.nextLine();
-            if (line.isEmpty()) {
-                continue;
-            }
-            int split = line.indexOf('-');
-            int first = indexFor(line.substring(0, split));
-            int second = indexFor(line.substring(split + 1));
-            connections.get(first).set(second);
-            connections.get(second).set(first);
+            String[] p = in.nextLine().split("-");
+            int a = id(p[0]), b = id(p[1]);
+            graph.get(a).set(b);
+            graph.get(b).set(a);
         }
-
-        startsWithT = new boolean[names.size()];
+        startsT = new boolean[names.size()];
         for (int i = 0; i < names.size(); i++) {
-            startsWithT[i] = names.get(i).startsWith("t");
+            startsT[i] = names.get(i).startsWith("t");
         }
+        if (part1) {
+            return "" + triangles();
+        }
+        BitSet all = new BitSet(names.size());
+        all.set(0, names.size());
+        clique(new BitSet(), all, new BitSet());
+        List<String> out = new ArrayList<>();
+        for (int i = best.nextSetBit(0); i >= 0; i = best.nextSetBit(i + 1)) {
+            out.add(names.get(i));
+        }
+        Collections.sort(out);
+        return String.join(",", out);
     }
 
-    private int indexFor(String name) {
-        Integer existing = nameToIndex.get(name);
-        if (existing != null) {
-            return existing;
-        }
-        int index = names.size();
-        nameToIndex.put(name, index);
-        names.add(name);
-        connections.add(new BitSet());
-        return index;
+    private int id(String name) {
+        return ids.computeIfAbsent(name, k -> {
+            names.add(k);
+            graph.add(new BitSet());
+            return names.size() - 1;
+        });
     }
 
-    private long countTrianglesWithT() {
+    private long triangles() {
         long total = 0;
-        for (int first = 0; first < names.size(); first++) {
-            BitSet firstConnections = connections.get(first);
-            for (int second = firstConnections.nextSetBit(first + 1); second >= 0; second = firstConnections.nextSetBit(second + 1)) {
-                BitSet common = (BitSet) firstConnections.clone();
-                common.and(connections.get(second));
-                for (int third = common.nextSetBit(second + 1); third >= 0; third = common.nextSetBit(third + 1)) {
-                    if (startsWithT[first] || startsWithT[second] || startsWithT[third]) {
+        for (int a = 0; a < names.size(); a++) {
+            for (int b = graph.get(a).nextSetBit(a + 1); b >= 0; b = graph.get(a).nextSetBit(b + 1)) {
+                BitSet c = (BitSet) graph.get(a).clone();
+                c.and(graph.get(b));
+                for (int x = c.nextSetBit(b + 1); x >= 0; x = c.nextSetBit(x + 1)) {
+                    if (startsT[a] || startsT[b] || startsT[x]) {
                         total++;
                     }
                 }
@@ -74,78 +61,44 @@ public class Day23 extends DayTemplate {
         return total;
     }
 
-    private void findLargestClique() {
-        bestClique = new BitSet();
-        bestCliqueSize = 0;
-
-        BitSet candidates = new BitSet(names.size());
-        candidates.set(0, names.size());
-        bronKerbosch(new BitSet(names.size()), candidates, new BitSet(names.size()));
-    }
-
-    private void bronKerbosch(BitSet required, BitSet candidates, BitSet excluded) {
-        int requiredSize = required.cardinality();
-        if (requiredSize + candidates.cardinality() <= bestCliqueSize) {
+    private void clique(BitSet keep, BitSet can, BitSet skip) {
+        int size = keep.cardinality();
+        if (size + can.cardinality() <= bs) {
             return;
         }
-        if (candidates.isEmpty() && excluded.isEmpty()) {
-            if (requiredSize > bestCliqueSize) {
-                bestCliqueSize = requiredSize;
-                bestClique = (BitSet) required.clone();
-            }
+        if (can.isEmpty() && skip.isEmpty()) {
+            bs = size;
+            best = (BitSet) keep.clone();
             return;
         }
-
-        BitSet toVisit = (BitSet) candidates.clone();
-        int pivot = choosePivot(candidates, excluded);
-        if (pivot >= 0) {
-            toVisit.andNot(connections.get(pivot));
+        BitSet visit = (BitSet) can.clone();
+        int p = pivot(can, skip);
+        if (p >= 0) {
+            visit.andNot(graph.get(p));
         }
-
-        for (int vertex = toVisit.nextSetBit(0); vertex >= 0; vertex = toVisit.nextSetBit(vertex + 1)) {
-            BitSet nextRequired = (BitSet) required.clone();
-            nextRequired.set(vertex);
-
-            BitSet nextCandidates = (BitSet) candidates.clone();
-            nextCandidates.and(connections.get(vertex));
-
-            BitSet nextExcluded = (BitSet) excluded.clone();
-            nextExcluded.and(connections.get(vertex));
-
-            bronKerbosch(nextRequired, nextCandidates, nextExcluded);
-
-            candidates.clear(vertex);
-            excluded.set(vertex);
-            if (requiredSize + candidates.cardinality() <= bestCliqueSize) {
-                return;
-            }
+        for (int v = visit.nextSetBit(0); v >= 0; v = visit.nextSetBit(v + 1)) {
+            BitSet k = (BitSet) keep.clone(), c = (BitSet) can.clone(), s = (BitSet) skip.clone();
+            k.set(v);
+            c.and(graph.get(v));
+            s.and(graph.get(v));
+            clique(k, c, s);
+            can.clear(v);
+            skip.set(v);
         }
     }
 
-    private int choosePivot(BitSet candidates, BitSet excluded) {
-        BitSet choices = (BitSet) candidates.clone();
-        choices.or(excluded);
-
-        int bestPivot = -1;
-        int bestReach = -1;
-        for (int vertex = choices.nextSetBit(0); vertex >= 0; vertex = choices.nextSetBit(vertex + 1)) {
-            BitSet reachableCandidates = (BitSet) connections.get(vertex).clone();
-            reachableCandidates.and(candidates);
-            int reach = reachableCandidates.cardinality();
-            if (reach > bestReach) {
-                bestReach = reach;
-                bestPivot = vertex;
+    private int pivot(BitSet can, BitSet skip) {
+        BitSet all = (BitSet) can.clone();
+        all.or(skip);
+        int pick = -1, most = -1;
+        for (int v = all.nextSetBit(0); v >= 0; v = all.nextSetBit(v + 1)) {
+            BitSet reach = (BitSet) graph.get(v).clone();
+            reach.and(can);
+            if (reach.cardinality() > most) {
+                most = reach.cardinality();
+                pick = v;
             }
         }
-        return bestPivot;
-    }
-
-    private String cliqueToString(BitSet clique) {
-        List<String> cliqueNames = new ArrayList<>(clique.cardinality());
-        for (int index = clique.nextSetBit(0); index >= 0; index = clique.nextSetBit(index + 1)) {
-            cliqueNames.add(names.get(index));
-        }
-        Collections.sort(cliqueNames);
-        return String.join(",", cliqueNames);
+        return pick;
     }
 }

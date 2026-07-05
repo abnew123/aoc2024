@@ -1,100 +1,72 @@
 package src.solutions;
 
 import src.meta.DayTemplate;
+
 import java.util.*;
 
 public class Day17 extends DayTemplate {
-
     public String solve(boolean part1, Scanner in) {
-        long registerA = 15401536L;
+        long a = 15401536;
         in.nextLine();
-        long registerB = Long.parseLong(in.nextLine().split(" ")[2]);
-        long registerC = Long.parseLong(in.nextLine().split(" ")[2]);
+        long b = Long.parseLong(in.nextLine().split(" ")[2]);
+        long c = Long.parseLong(in.nextLine().split(" ")[2]);
         in.nextLine();
-        String stringProgram = in.nextLine().split(" ")[1];
-        List<Integer> program = new ArrayList<>();
-        for(String s: stringProgram.split(",")){
-            program.add(Integer.parseInt(s));
+        int[] p = Arrays.stream(in.nextLine().split(" ")[1].split(",")).mapToInt(Integer::parseInt).toArray();
+        if (part1) {
+            return run(p, a, b, c).toString().replace(" ", "");
         }
-        if(part1){
-            List<Integer> result = run(program, registerA, registerB, registerC);
-            return (result + "").replace(" ", "");
-        }
-        List<Long> possibilities = new ArrayList<>(List.of(0L));
-        for(int outputStart = program.size() - 1; outputStart >= 0; outputStart--){
-            List<Integer> targetSuffix = program.subList(outputStart, program.size());
-            List<Long> newPossibilities = new ArrayList<>();
-            for(long possibility: possibilities){
-                // This program emits once per base-8 digit of A.  Build A from
-                // the most significant digit down, keeping only candidates that
-                // reproduce the target suffix seen so far.
-                for(int digit = 0; digit < 8; digit++){
-                    long potentialValue = (possibility << 3) + digit;
-                    if(run(program, potentialValue, 0, 0).equals(targetSuffix)){
-                        newPossibilities.add(potentialValue);
+        List<Long> candidates = List.of(0L);
+        for (int from = p.length - 1; from >= 0; from--) {
+            List<Long> next = new ArrayList<>();
+            for (long prefix : candidates) {
+                for (int digit = 0; digit < 8; digit++) {
+                    long value = prefix << 3 | digit;
+                    if (suffix(run(p, value, 0, 0), p, from)) {
+                        next.add(value);
                     }
                 }
             }
-            possibilities = newPossibilities;
+            candidates = next;
         }
-        return possibilities.stream().min(Long::compareTo).orElseThrow() + "";
+        return "" + Collections.min(candidates);
     }
 
-    private List<Integer> run(List<Integer> program, long registerA, long registerB, long registerC){
-        int instructionPointer = 0;
-        List<Integer> result = new ArrayList<>();
-        while(instructionPointer < program.size()){
-            int operator = program.get(instructionPointer);
-            int operand = program.get(instructionPointer + 1); //literal
-            long combo = 0;
-            if(operand < 4){
-                combo = operand;
-            }
-            if(operand == 4){
-                combo = registerA;
-            }
-            if(operand == 5){
-                combo = registerB;
-            }
-            if(operand == 6){
-                combo = registerC;
-            }
-            if(operator == 0){
-                registerA = divideByPowerOfTwo(registerA, combo);
-            }
-            if(operator == 1){
-                registerB ^= operand;
-            }
-            if(operator == 2){
-                registerB = combo % 8;
-            }
-            if(operator == 3){
-                if(registerA != 0){
-                    instructionPointer = operand;
-                    continue;
+    private List<Integer> run(int[] p, long a, long b, long c) {
+        List<Integer> out = new ArrayList<>();
+        for (int i = 0; i < p.length;) {
+            int op = p[i++], x = p[i++];
+            long combo = x < 4 ? x : x == 4 ? a : x == 5 ? b : c;
+            switch (op) {
+                case 0 -> a = shr(a, combo);
+                case 1 -> b ^= x;
+                case 2 -> b = combo & 7;
+                case 3 -> {
+                    if (a != 0) {
+                        i = x;
+                    }
                 }
+                case 4 -> b ^= c;
+                case 5 -> out.add((int) (combo & 7));
+                case 6 -> b = shr(a, combo);
+                case 7 -> c = shr(a, combo);
             }
-            if(operator == 4){
-                registerB ^= registerC;
-            }
-            if(operator == 5){
-                result.add((int) (combo % 8));
-            }
-            if(operator == 6){
-                registerB = divideByPowerOfTwo(registerA, combo);
-            }
-            if(operator == 7){
-                registerC = divideByPowerOfTwo(registerA, combo);
-            }
-            instructionPointer += 2;
         }
-        return result;
+        return out;
     }
 
-    private long divideByPowerOfTwo(long value, long power){
-        if(power >= Long.SIZE){
-            return 0;
+    private long shr(long a, long b) {
+        return b >= 64 ? 0 : a >> b;
+    }
+
+    private boolean suffix(List<Integer> out, int[] p, int from) {
+        if (out.size() != p.length - from) {
+            return false;
         }
-        return value >> power;
+        for (int i = from; i < p.length; i++) {
+            if (out.get(i - from) != p[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 }

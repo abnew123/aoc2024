@@ -1,141 +1,54 @@
 package src.solutions;
+
 import src.meta.DayTemplate;
 
 import java.util.*;
 
 public class Day14 extends DayTemplate {
     public String solve(boolean part1, Scanner in) {
-        long answer = 0;
-        List<Robot> robots = new ArrayList<>();
-        while(in.hasNext()){
-            String line = in.nextLine();
-            String[] parts = line.split(" |,|=");
-            robots.add(new Robot(Integer.parseInt(parts[1]),Integer.parseInt(parts[2]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5])));
+        List<int[]> robots = new ArrayList<>();
+        while (in.hasNextLine()) {
+            String[] p = in.nextLine().split(" |,|=");
+            robots.add(new int[]{Integer.parseInt(p[1]), Integer.parseInt(p[2]), Integer.parseInt(p[4]), Integer.parseInt(p[5])});
         }
-
-        if(part1){
-            int xlimit = 101;
-            int ylimit = 103;
-            for(Robot robot: robots){
-                robot.updateBatch(xlimit, ylimit, 100);
-            }
-
-            int[] quadrants = new int[]{0,0,0,0};
-            for(Robot robot: robots){
-                if(robot.x%xlimit > (xlimit - 1)/2){
-                    if(robot.y%ylimit > (ylimit - 1)/2){
-                        quadrants[0]++;
-                    }
-                    if(robot.y%ylimit < (ylimit - 1)/2){
-                        quadrants[1]++;
-                    }
-                }
-                if(robot.x%xlimit < (xlimit - 1)/2){
-                    if(robot.y%ylimit > (ylimit - 1)/2){
-                        quadrants[2]++;
-                    }
-                    if(robot.y%ylimit < (ylimit - 1)/2){
-                        quadrants[3]++;
-                    }
+        if (part1) {
+            int[] q = new int[4];
+            for (int[] r : robots) {
+                move(r, 100);
+                if (r[0] != 50 && r[1] != 51) {
+                    q[(r[0] < 50 ? 0 : 1) + (r[1] < 51 ? 0 : 2)]++;
                 }
             }
-            answer = (long)quadrants[0] * quadrants[1]* quadrants[2] * quadrants[3];
+            return "" + (long) q[0] * q[1] * q[2] * q[3];
         }
-        else{
-            int xlimit = 101;
-            int ylimit = 103;
-            int counter = 1;
-            int increment = 1;
-            int[] xCounts = new int[xlimit];
-            int[] yCounts = new int[ylimit];
-            while(counter < 103 * 101){
-                for(Robot robot: robots){
-                    robot.updateBatch(xlimit, ylimit, increment);
-                }
-                boolean boxX = boxX(robots, xCounts);
-                boolean boxY = boxY(robots, yCounts);
-                if(boxX && boxY){
-                    return counter + "";
-                }
-                if(boxX){
-                    increment = 101;
-                }
-                counter += increment;
-
+        int[] xs = new int[101], ys = new int[103];
+        for (int time = 1, jump = 1; time < 10403; time += jump) {
+            for (int[] r : robots) {
+                move(r, jump);
+            }
+            boolean bx = crowded(robots, xs, 0), by = crowded(robots, ys, 1);
+            if (bx && by) {
+                return "" + time;
+            }
+            if (bx) {
+                jump = 101;
             }
         }
-        return answer + "";
+        return "0";
     }
 
-//    private boolean box(List<Robot> robots){
-//        HashMap<Integer, Integer> mapX = new HashMap<>();
-//        HashMap<Integer, Integer> mapY = new HashMap<>();
-//        for(Robot robot: robots){
-//            mapX.merge(robot.x, 1, Integer::sum);
-//            mapY.merge(robot.y, 1, Integer::sum);
-//        }
-//
-//        boolean xbox = false;
-//        boolean ybox = false;
-//
-//        for(int key: mapX.keySet()){
-//            if(mapX.get(key) > 30){
-//                xbox = true;
-//            }
-//        }
-//        for(int key: mapY.keySet()){
-//            if(mapY.get(key) > 30){
-//                ybox = true;
-//            }
-//        }
-//        return xbox && ybox;
-//    }
+    private void move(int[] r, int n) {
+        r[0] = ((r[0] + r[2] * n) % 101 + 101) % 101;
+        r[1] = ((r[1] + r[3] * n) % 103 + 103) % 103;
+    }
 
-    private boolean boxX(List<Robot> robots, int[] counts){
-        Arrays.fill(counts, 0);
-        for(Robot robot: robots){
-            if(++counts[robot.x] > 30){
+    private boolean crowded(List<int[]> robots, int[] count, int axis) {
+        Arrays.fill(count, 0);
+        for (int[] r : robots) {
+            if (++count[r[axis]] > 30) {
                 return true;
             }
         }
         return false;
-    }
-
-    private boolean boxY(List<Robot> robots, int[] counts){
-        Arrays.fill(counts, 0);
-        for(Robot robot: robots){
-            if(++counts[robot.y] > 30){
-                return true;
-            }
-        }
-        return false;
-    }
-}
-
-class Robot{
-    int x;
-    int y;
-    int vx;
-    int vy;
-
-    public Robot(int x, int y, int vx, int vy){
-        this.x = x;
-        this.y = y;
-        this.vx = vx;
-        this.vy = vy;
-    }
-
-    public void update(int xlimit, int ylimit){
-        x += vx;
-        y += vy;
-        x = (x%xlimit + xlimit)%xlimit;
-        y = (y%ylimit + ylimit)%ylimit;
-    }
-
-    public void updateBatch(int xlimit, int ylimit, int numUpdate){
-        x += vx * numUpdate;
-        y += vy * numUpdate;
-        x = (x%xlimit + xlimit)%xlimit;
-        y = (y%ylimit + ylimit)%ylimit;
     }
 }

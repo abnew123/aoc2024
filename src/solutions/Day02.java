@@ -2,72 +2,42 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Day02 extends DayTemplate {
-
     public String solve(boolean part1, Scanner in) {
-
-        long answer = 0;
-        List<String[]> tmp = new ArrayList<>();
-        while (in.hasNext()) {
-            String line = in.nextLine();
-            tmp.add(line.split(" "));
-        }
-
-        if(part1){
-            for(String[] arr: tmp){
-                if(safe(arr)){
-                    answer++;
-                }
-            }
-        }
-        else{
-            for(String[] arr: tmp){
-                boolean any = false;
-                for(int i = 0; i < arr.length; i++){
-                    String[] newarr = new String[arr.length - 1];
-                    System.arraycopy(arr, 0, newarr, 0, i);
-                    if (arr.length >= i + 1)
-                        System.arraycopy(arr, i + 1, newarr, i + 1 - 1, arr.length - (i + 1));
-                    if(safe(newarr)){
-                        any = true;
+        int answer = 0;
+        while (in.hasNextLine()) {
+            int[] report = Arrays.stream(in.nextLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+            if (safe(report, -1)) {
+                answer++;
+            } else if (!part1) {
+                for (int skip = 0; skip < report.length; skip++) {
+                    if (safe(report, skip)) {
+                        answer++;
+                        break;
                     }
                 }
-                if(any){
-                    answer++;
-                }
             }
         }
-        return answer + "";
+        return "" + answer;
     }
 
-    private boolean safe(String[] steps){
-        int[] nums = new int[steps.length];
-        for(int i = 0; i < nums.length; i++){
-            nums[i] = Integer.parseInt(steps[i]);
-        }
-        boolean decreasing = nums[0] > nums[1];
-        if(nums[0] == nums[1]){
-            return false;
-        }
-        for(int i = 1; i < nums.length; i++){
-            if(Math.abs(nums[i] - nums[i-1]) > 3){
-                return false;
+    private boolean safe(int[] report, int skip) {
+        int last = -1, direction = 0;
+        for (int i = 0; i < report.length; i++) {
+            if (i == skip) {
+                continue;
             }
-            if(nums[i] > nums[i - 1] && decreasing){
-                return false;
+            if (last >= 0) {
+                int diff = report[i] - last, sign = Integer.signum(diff);
+                if (diff == 0 || Math.abs(diff) > 3 || direction != 0 && sign != direction) {
+                    return false;
+                }
+                direction = sign;
             }
-            if(nums[i] < nums[i - 1] && !decreasing){
-                return false;
-            }
-            if(nums[i] == nums[i-1]){
-                return false;
-            }
+            last = report[i];
         }
         return true;
-
     }
 }

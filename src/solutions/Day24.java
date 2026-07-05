@@ -5,8 +5,8 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day24 extends DayTemplate {
-    private final Map<String, Integer> map = new HashMap<>();
-    private final List<Instruction> instructions = new ArrayList<>();
+    private final Map<String, Integer> v = new HashMap<>();
+    private final List<I> ins = new ArrayList<>();
 
     public String solve(boolean part1, Scanner in) {
         for (boolean gates = false; in.hasNextLine();) {
@@ -14,27 +14,27 @@ public class Day24 extends DayTemplate {
             if (line.isEmpty()) {
                 gates = true;
             } else if (gates) {
-                instructions.add(new Instruction(line));
+                ins.add(new I(line));
             } else {
                 String[] p = line.split(": ");
-                map.put(p[0], Integer.parseInt(p[1]));
+                v.put(p[0], Integer.parseInt(p[1]));
             }
         }
         if (!part1) {
             swaps();
             return "";
         }
-        for (int n = 0; !instructions.isEmpty() && n++ < 100;) {
-            for (ListIterator<Instruction> it = instructions.listIterator(instructions.size()); it.hasPrevious();) {
-                Instruction i = it.previous();
-                if (map.containsKey(i.a) && map.containsKey(i.b)) {
-                    map.put(i.out, i.run(map));
+        for (int n = 0; !ins.isEmpty() && n++ < 100;) {
+            for (ListIterator<I> it = ins.listIterator(ins.size()); it.hasPrevious();) {
+                I i = it.previous();
+                if (v.containsKey(i.a) && v.containsKey(i.b)) {
+                    v.put(i.o, i.run(v));
                     it.remove();
                 }
             }
         }
         List<String> z = new ArrayList<>();
-        for (String k : map.keySet()) {
+        for (String k : v.keySet()) {
             if (k.startsWith("z")) {
                 z.add(k);
             }
@@ -42,79 +42,69 @@ public class Day24 extends DayTemplate {
         z.sort(Comparator.reverseOrder());
         StringBuilder bits = new StringBuilder();
         for (String k : z) {
-            bits.append(map.get(k));
+            bits.append(v.get(k));
         }
         return "" + Long.parseLong(bits.toString(), 2);
     }
 
     private void swaps() {
-        Map<String, Integer> gen = new HashMap<>(), prop = new HashMap<>(), or = new HashMap<>(),
-                and = new HashMap<>(), out = new HashMap<>();
-        Set<Instruction> bad = new HashSet<>();
-        and.put("fake0bitAND", 0);
-        for (ListIterator<Instruction> it = instructions.listIterator(instructions.size()); it.hasPrevious();) {
-            Instruction i = it.previous();
+        Map<String, Integer> gen = new HashMap<>(), prop = new HashMap<>(), or = new HashMap<>();
+        Set<I> bad = new HashSet<>();
+        for (ListIterator<I> it = ins.listIterator(ins.size()); it.hasPrevious();) {
+            I i = it.previous();
             if ((i.a.equals("x00") || i.a.equals("y00"))) {
-                (i.op.equals("AND") ? gen : prop).put(i.out, 0);
-                (i.op.equals("AND") ? or : out).put(i.out, 0);
-                it.remove();
-            }
-        }
-        for (ListIterator<Instruction> it = instructions.listIterator(instructions.size()); it.hasPrevious();) {
-            Instruction i = it.previous();
-            if (i.a.startsWith("x") || i.a.startsWith("y")) {
-                if (i.out.startsWith("z")) {
-                    bad.add(i);
-                } else {
-                    (i.op.equals("AND") ? gen : prop).put(i.out, Integer.parseInt(i.a.substring(1)));
+                (i.op.equals("AND") ? gen : prop).put(i.o, 0);
+                if (i.op.equals("AND")) {
+                    or.put(i.o, 0);
                 }
                 it.remove();
             }
         }
-        for (Instruction i : instructions) {
+        for (ListIterator<I> it = ins.listIterator(ins.size()); it.hasPrevious();) {
+            I i = it.previous();
+            if (i.a.startsWith("x") || i.a.startsWith("y")) {
+                if (i.o.startsWith("z")) {
+                    bad.add(i);
+                } else {
+                    (i.op.equals("AND") ? gen : prop).put(i.o, Integer.parseInt(i.a.substring(1)));
+                }
+                it.remove();
+            }
+        }
+        for (I i : ins) {
             if (i.op.equals("OR")) {
                 Integer n = gen.getOrDefault(i.a, gen.get(i.b));
                 if (n == null) {
                     bad.add(i);
                 } else {
-                    or.put(i.out, n);
+                    or.put(i.o, n);
                 }
             }
         }
-        for (Instruction i : instructions) {
+        for (I i : ins) {
             int n = link(prop, or, i);
-            if (i.op.equals("AND")) {
-                if (n < 0) {
-                    bad.add(i);
-                } else {
-                    and.put(i.out, n);
-                }
-            } else if (i.op.equals("XOR")) {
-                if (n < 0) {
-                    bad.add(i);
-                } else {
-                    out.put(i.out, n);
-                }
+            if ((i.op.equals("AND") || i.op.equals("XOR")) && n < 0) {
+                bad.add(i);
             }
         }
-        bad.stream().map(i -> i.out).sorted().forEach(System.out::println);
+        bad.stream().map(i -> i.o).sorted().forEach(System.out::println);
     }
 
-    private int link(Map<String, Integer> a, Map<String, Integer> b, Instruction i) {
+    private int link(Map<String, Integer> a, Map<String, Integer> b, I i) {
         return a.containsKey(i.a) && b.containsKey(i.b) ? a.get(i.a)
                 : a.containsKey(i.b) && b.containsKey(i.a) ? a.get(i.b) : -1;
     }
 }
 
-class Instruction {
-    String a, b, op, out;
+class I {
+    String a, b, op, o;
 
-    Instruction(String line) {
+    I(String line) {
         String[] p = line.split(" ");
         a = p[0];
         op = p[1];
         b = p[2];
-        out = p[4];
+        o = p[4];
     }
 
     int run(Map<String, Integer> map) {

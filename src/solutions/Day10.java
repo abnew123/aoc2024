@@ -1,92 +1,70 @@
 package src.solutions;
 
-import java.util.Scanner;
-
 import src.meta.DayTemplate;
-import src.objects.Coordinate;
 
 import java.util.*;
 
-import static src.meta.Utils.*;
-
 public class Day10 extends DayTemplate {
+    private static final int[] DR = {-1, 1, 0, 0}, DC = {0, 0, -1, 1};
+
     public String solve(boolean part1, Scanner in) {
-        long answer = 0;
         List<String> lines = new ArrayList<>();
-        while(in.hasNext()){
-            String line = in.nextLine();
-            lines.add(line);
+        while (in.hasNextLine()) {
+            lines.add(in.nextLine());
         }
-        int[][] grid = buildGrid( lines, a -> a - '0');
-        List<Coordinate> trailheads = new ArrayList<>();
-        for(int i = 0; i < grid.length; i++){
-            for(int j = 0; j < grid[0].length; j++){
-                if(grid[i][j] == 0){
-                    trailheads.add(new Coordinate(i,j));
-                }
-            }
-        }
-
-        if(part1){
-            for(Coordinate c: trailheads){
-                answer += reachable(grid, c);
-            }
-        }
-        else{
-            answer = rating(grid);
-        }
-        return answer + "";
-    }
-
-    private int reachable(int[][] grid, Coordinate c){
-        Set<Coordinate> level = new HashSet<>();
-        level.add(c);
-        int counter = 0;
-        while(counter++ < 9){
-            Set<Coordinate> newLevel = new HashSet<>();
-            for(Coordinate l: level){
-                List<Coordinate> neighbors = getNeighbors(l.x, l.y, grid);
-                for(Coordinate n: neighbors){
-                    if(grid[n.x][n.y] == counter){
-                        newLevel.add(n);
-                    }
-                }
-            }
-            level = newLevel;
-        }
-        return level.size();
-    }
-
-    private long rating(int[][] grid){
+        int rows = lines.size(), cols = lines.get(0).length();
+        int[][] paths = new int[rows][cols];
         long answer = 0;
-        Set<Coordinate> peaks = new HashSet<>();
-        long[][] paths = new long[grid.length][grid[0].length];
-        for(int i = 0; i < grid.length; i++){
-            for(int j = 0; j < grid[0].length; j++){
-                if(grid[i][j] == 9){
-                    peaks.add(new Coordinate(i,j));
-                    paths[i][j] = 1;
-                }
-            }
-        }
-        int level = 9;
-        while(level-- > 0){
-            Set<Coordinate> newPeaks = new HashSet<>();
-            for(Coordinate l: peaks){
-                List<Coordinate> neighbors = getNeighbors(l.x, l.y, grid);
-                for(Coordinate n: neighbors){
-                    if(grid[n.x][n.y] == level){
-                        newPeaks.add(n);
-                        paths[n.x][n.y] += paths[l.x][l.y];
+        for (int h = 9; h >= 0; h--) {
+            for (int r = 0; r < rows; r++) {
+                for (int c = 0; c < cols; c++) {
+                    if (lines.get(r).charAt(c) - '0' != h) {
+                        continue;
+                    }
+                    if (h == 9) {
+                        paths[r][c] = 1;
+                    } else {
+                        for (int d = 0; d < 4; d++) {
+                            int nr = r + DR[d], nc = c + DC[d];
+                            if (nr >= 0 && nc >= 0 && nr < rows && nc < cols && lines.get(nr).charAt(nc) - '0' == h + 1) {
+                                paths[r][c] += part1 && h == 0 ? reaches(lines, nr, nc, new boolean[rows][cols]) : paths[nr][nc];
+                            }
+                        }
+                    }
+                    if (!part1 && h == 0) {
+                        answer += paths[r][c];
                     }
                 }
             }
-            peaks = newPeaks;
         }
+        return "" + (part1 ? scoreHeads(lines) : answer);
+    }
 
-        for(Coordinate c: peaks){
-            answer += paths[c.x][c.y];
+    private int scoreHeads(List<String> lines) {
+        int answer = 0;
+        for (int r = 0; r < lines.size(); r++) {
+            for (int c = 0; c < lines.get(0).length(); c++) {
+                if (lines.get(r).charAt(c) == '0') {
+                    answer += reaches(lines, r, c, new boolean[lines.size()][lines.get(0).length()]);
+                }
+            }
         }
         return answer;
+    }
+
+    private int reaches(List<String> lines, int r, int c, boolean[][] seen) {
+        int h = lines.get(r).charAt(c) - '0';
+        if (h == 9) {
+            return seen[r][c] ? 0 : (seen[r][c] = true) ? 1 : 0;
+        }
+        int total = 0;
+        for (int d = 0; d < 4; d++) {
+            int nr = r + DR[d], nc = c + DC[d];
+            if (nr >= 0 && nc >= 0 && nr < lines.size() && nc < lines.get(0).length()
+                    && lines.get(nr).charAt(nc) - '0' == h + 1) {
+                total += reaches(lines, nr, nc, seen);
+            }
+        }
+        return total;
     }
 }

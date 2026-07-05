@@ -2,78 +2,52 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Day04 extends DayTemplate {
-
     private char[][] grid;
-    private int rows;
-    private int cols;
 
     public String solve(boolean part1, Scanner in) {
         List<String> lines = new ArrayList<>();
         while (in.hasNextLine()) {
             lines.add(in.nextLine());
         }
-
-        rows = lines.size();
-        cols = lines.get(0).length();
-        grid = new char[rows][cols];
-        for (int row = 0; row < rows; row++) {
-            grid[row] = lines.get(row).toCharArray();
+        grid = new char[lines.size()][];
+        for (int i = 0; i < lines.size(); i++) {
+            grid[i] = lines.get(i).toCharArray();
         }
-
-        long answer = 0;
-        if (part1) {
-            for (int row = 0; row < rows; row++) {
-                for (int col = 0; col < cols; col++) {
-                    answer += checkPattern(row, col, 1, 0)
-                            + checkPattern(row, col, 0, 1)
-                            + checkPattern(row, col, 1, 1)
-                            + checkPattern(row, col, -1, 1);
-                }
-            }
-        } else {
-            for (int row = 1; row + 1 < rows; row++) {
-                for (int col = 1; col + 1 < cols; col++) {
-                    if (grid[row][col] == 'A' && isMasCross(row, col)) {
-                        answer++;
+        int answer = 0, rows = grid.length, cols = grid[0].length;
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                if (part1) {
+                    for (int dr = -1; dr <= 1; dr++) {
+                        for (int dc = -1; dc <= 1; dc++) {
+                            if ((dr != 0 || dc != 0) && word(r, c, dr, dc)) {
+                                answer++;
+                            }
+                        }
                     }
+                } else if (r > 0 && c > 0 && r + 1 < rows && c + 1 < cols && grid[r][c] == 'A'
+                        && mas(grid[r - 1][c - 1], grid[r + 1][c + 1])
+                        && mas(grid[r - 1][c + 1], grid[r + 1][c - 1])) {
+                    answer++;
                 }
             }
         }
-        return answer + "";
+        return "" + answer;
     }
 
-    private int checkPattern(int row, int col, int rowStep, int colStep) {
-        if (!inBounds(row + 3 * rowStep, col + 3 * colStep)) {
-            return 0;
+    private boolean word(int r, int c, int dr, int dc) {
+        String x = "XMAS";
+        for (int i = 0; i < x.length(); i++, r += dr, c += dc) {
+            if (r < 0 || c < 0 || r == grid.length || c == grid[0].length || grid[r][c] != x.charAt(i)) {
+                return false;
+            }
         }
-
-        char first = grid[row][col];
-        char second = grid[row + rowStep][col + colStep];
-        char third = grid[row + 2 * rowStep][col + 2 * colStep];
-        char fourth = grid[row + 3 * rowStep][col + 3 * colStep];
-        boolean xmas = first == 'X' && second == 'M' && third == 'A' && fourth == 'S';
-        boolean samx = first == 'S' && second == 'A' && third == 'M' && fourth == 'X';
-        return xmas || samx ? 1 : 0;
+        return true;
     }
 
-    private boolean isMasCross(int row, int col) {
-        char nw = grid[row - 1][col - 1];
-        char ne = grid[row - 1][col + 1];
-        char sw = grid[row + 1][col - 1];
-        char se = grid[row + 1][col + 1];
-        return isMas(nw, se) && isMas(ne, sw);
-    }
-
-    private boolean isMas(char first, char second) {
-        return (first == 'M' && second == 'S') || (first == 'S' && second == 'M');
-    }
-
-    private boolean inBounds(int row, int col) {
-        return row >= 0 && col >= 0 && row < rows && col < cols;
+    private boolean mas(char a, char b) {
+        return a + b == 'M' + 'S' && a != b;
     }
 }

@@ -1,56 +1,52 @@
 package src.solutions;
 
 import src.meta.DayTemplate;
-import src.objects.Coordinate;
 
 import java.util.*;
 
-import static src.meta.Utils.*;
-
 public class Day08 extends DayTemplate {
     public String solve(boolean part1, Scanner in) {
-        long answer = 0;
-        Map<Character, List<Coordinate>> freqs = new HashMap<>();
-        char[][] grid = getGrid(in);
-        for(int i = 0; i < grid.length; i++){
-            for(int j = 0; j < grid[0].length; j++){
-                if(grid[i][j] != '.'){
-                    freqs.computeIfAbsent(grid[i][j], k -> new ArrayList<>());
-                    freqs.get(grid[i][j]).add(new Coordinate(i,j));
+        List<String> lines = new ArrayList<>();
+        while (in.hasNextLine()) {
+            lines.add(in.nextLine());
+        }
+        int rows = lines.size(), cols = lines.get(0).length();
+        Map<Character, List<int[]>> antennas = new HashMap<>();
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                char ch = lines.get(r).charAt(c);
+                if (ch != '.') {
+                    antennas.computeIfAbsent(ch, k -> new ArrayList<>()).add(new int[]{r, c});
                 }
             }
         }
-        Set<Coordinate> antinodes = new HashSet<>();
-        for(Character c: freqs.keySet()){
-            List<Coordinate> lst = freqs.get(c);
-            for(int i = 0; i < lst.size(); i++){
-                for(int j = i + 1; j < lst.size(); j++){
-                    Coordinate a = lst.get(i);
-                    Coordinate b = lst.get(j);
-                    addAntiNodes(a,b,antinodes, part1);
+        boolean[][] seen = new boolean[rows][cols];
+        for (List<int[]> list : antennas.values()) {
+            for (int i = 0; i < list.size(); i++) {
+                for (int j = i + 1; j < list.size(); j++) {
+                    int[] a = list.get(i), b = list.get(j);
+                    add(seen, a[0], a[1], a[0] - b[0], a[1] - b[1], part1);
+                    add(seen, b[0], b[1], b[0] - a[0], b[1] - a[1], part1);
                 }
             }
         }
-        for(Coordinate c: antinodes){
-            if(safe(c.x, c.y, grid)){
-                answer++;
+        int answer = 0;
+        for (boolean[] row : seen) {
+            for (boolean x : row) {
+                if (x) {
+                    answer++;
+                }
             }
         }
-        return answer + "";
+        return "" + answer;
     }
 
-    private void addAntiNodes(Coordinate a, Coordinate b, Set<Coordinate> antinodes, boolean part1){
-        int diffX = a.x - b.x;
-        int diffY = a.y - b.y;
-        if (part1) {
-            antinodes.add(new Coordinate(b.x - diffX, b.y - diffY));
-            antinodes.add(new Coordinate(a.x + diffX, a.y + diffY));
-        }
-        else{
-            int gcd = gcd(diffY, diffX);
-            for(int i = 0; i < 51; i++){
-                antinodes.add(new Coordinate(b.x - (i * diffX/gcd), b.y - (i * diffY/gcd)));
-                antinodes.add(new Coordinate(b.x + (i * diffX/gcd), b.y + (i * diffY/gcd)));
+    private void add(boolean[][] seen, int r, int c, int dr, int dc, boolean part1) {
+        for (int k = part1 ? 1 : 0; r + k * dr >= 0 && r + k * dr < seen.length
+                && c + k * dc >= 0 && c + k * dc < seen[0].length; k++) {
+            seen[r + k * dr][c + k * dc] = true;
+            if (part1) {
+                return;
             }
         }
     }
