@@ -81,6 +81,12 @@ public class Day12 extends DayTemplate {
         if(garden == null){
             return -1;
         }
+        long perimeter = gardenPerimeter(garden);
+        cleanup(grid);
+        return garden.size() * perimeter;
+    }
+
+    private long gardenPerimeter(Set<Coordinate> garden) {
         long perimeter = garden.size() * 4L;
         for(Coordinate c1: garden){
             for(Coordinate c2: garden){
@@ -96,8 +102,7 @@ public class Day12 extends DayTemplate {
                 }
             }
         }
-        cleanup(grid);
-        return garden.size() * perimeter;
+        return perimeter;
     }
 
     private long flood2(int[][] grid){
@@ -105,6 +110,12 @@ public class Day12 extends DayTemplate {
         if(garden == null){
             return -1;
         }
+        long sides = countSides(grid, garden);
+        cleanup(grid);
+        return garden.size() * sides;
+    }
+
+    private long countSides(int[][] grid, Set<Coordinate> garden) {
         long sides = 0L;
 
         List<Integer> vert = new ArrayList<>();
@@ -152,8 +163,7 @@ public class Day12 extends DayTemplate {
             }
             horiz = tmp2;
         }
-        cleanup(grid);
-        return garden.size() * sides;
+        return sides;
     }
 
 }
