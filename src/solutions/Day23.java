@@ -6,100 +6,146 @@ import java.util.*;
 
 public class Day23 extends DayTemplate {
 
-    Set<String> computers = new HashSet<>();
-    Map<String, Set<String>> connections = new HashMap<>();
-    Set<Set<String>> maximalCliques = new HashSet<>();
+    private final Map<String, Integer> nameToIndex = new HashMap<>();
+    private final List<String> names = new ArrayList<>();
+    private final List<BitSet> connections = new ArrayList<>();
+    private boolean[] startsWithT;
+    private BitSet bestClique;
+    private int bestCliqueSize;
 
     public String solve(boolean part1, Scanner in) {
-        long answer = 0;
-        List<String> lines = new ArrayList<>();
-        while (in.hasNext()) {
+        readConnections(in);
+        if (part1) {
+            return countTrianglesWithT() + "";
+        }
+        findLargestClique();
+        return cliqueToString(bestClique);
+    }
+
+    private void readConnections(Scanner in) {
+        nameToIndex.clear();
+        names.clear();
+        connections.clear();
+
+        while (in.hasNextLine()) {
             String line = in.nextLine();
-            lines.add(line);
+            if (line.isEmpty()) {
+                continue;
+            }
+            int split = line.indexOf('-');
+            int first = indexFor(line.substring(0, split));
+            int second = indexFor(line.substring(split + 1));
+            connections.get(first).set(second);
+            connections.get(second).set(first);
         }
 
-        for(String line: lines){
-            String first = line.split("-")[0];
-            String second = line.split("-")[1];
-            Set<String> f = connections.getOrDefault(first, new HashSet<>());
-            Set<String> s = connections.getOrDefault(second, new HashSet<>());
-            f.add(second);
-            s.add(first);
-            connections.put(first, f);
-            connections.put(second, s);
-            computers.add(first);
-            computers.add(second);
+        startsWithT = new boolean[names.size()];
+        for (int i = 0; i < names.size(); i++) {
+            startsWithT[i] = names.get(i).startsWith("t");
         }
+    }
 
-        List<String> forIndices = new ArrayList<>(computers);
+    private int indexFor(String name) {
+        Integer existing = nameToIndex.get(name);
+        if (existing != null) {
+            return existing;
+        }
+        int index = names.size();
+        nameToIndex.put(name, index);
+        names.add(name);
+        connections.add(new BitSet());
+        return index;
+    }
 
-        if(part1){
-            for(String first: forIndices){
-                for(String second: connections.get(first)){
-                    for(String third: connections.get(second)){
-                        if(connections.get(third).contains(first)){
-                            if(first.startsWith("t") || second.startsWith("t") || third.startsWith("t")){
-                                answer++;
-                            }
-                        }
+    private long countTrianglesWithT() {
+        long total = 0;
+        for (int first = 0; first < names.size(); first++) {
+            BitSet firstConnections = connections.get(first);
+            for (int second = firstConnections.nextSetBit(first + 1); second >= 0; second = firstConnections.nextSetBit(second + 1)) {
+                BitSet common = (BitSet) firstConnections.clone();
+                common.and(connections.get(second));
+                for (int third = common.nextSetBit(second + 1); third >= 0; third = common.nextSetBit(third + 1)) {
+                    if (startsWithT[first] || startsWithT[second] || startsWithT[third]) {
+                        total++;
                     }
                 }
             }
-            answer/=6;
         }
-        else{
-            BronKerbosch(new HashSet<>(), computers, new HashSet<>());
-            Set<String> biggest = new HashSet<>();
-            for(Set<String> candidate: maximalCliques){
-                if(candidate.size() > biggest.size()){
-                    biggest = candidate;
-                }
-            }
-            return listToString(new ArrayList<>(biggest));
-        }
-        return answer+"";
+        return total;
     }
 
-    private void BronKerbosch(Set<String> R, Set<String> P, Set<String> X){
-        if(P.isEmpty() && X.isEmpty()){
-            maximalCliques.add(R);
-        }
-        else{
-            Set<String> P_UNION_X = new HashSet<>(P);
-            P_UNION_X.addAll(X);
-            String pivot = P_UNION_X.iterator().next();
-            P.removeAll(connections.get(pivot));
-            for(String v: List.copyOf(P)){
-                Set<String> RPrime = new HashSet<>(R);
-                RPrime.add(v);
-                Set<String> PPrime = new HashSet<>(connections.get(v));
-                PPrime.retainAll(P);
-                Set<String> XPrime = new HashSet<>(connections.get(v));
-                XPrime.retainAll(X);
+    private void findLargestClique() {
+        bestClique = new BitSet();
+        bestCliqueSize = 0;
 
-                BronKerbosch(RPrime, PPrime, XPrime);
-                P.remove(v);
-                X.add(v);
+        BitSet candidates = new BitSet(names.size());
+        candidates.set(0, names.size());
+        bronKerbosch(new BitSet(names.size()), candidates, new BitSet(names.size()));
+    }
+
+    private void bronKerbosch(BitSet required, BitSet candidates, BitSet excluded) {
+        int requiredSize = required.cardinality();
+        if (requiredSize + candidates.cardinality() <= bestCliqueSize) {
+            return;
+        }
+        if (candidates.isEmpty() && excluded.isEmpty()) {
+            if (requiredSize > bestCliqueSize) {
+                bestCliqueSize = requiredSize;
+                bestClique = (BitSet) required.clone();
             }
-            Set<String> RPrime = new HashSet<>(R);
-            RPrime.add(pivot);
-            Set<String> PPrime = new HashSet<>(connections.get(pivot));
-            PPrime.retainAll(P);
-            Set<String> XPrime = new HashSet<>(connections.get(pivot));
-            XPrime.retainAll(X);
-            BronKerbosch(RPrime, PPrime, XPrime);
-            P.remove(pivot);
-            X.add(pivot);
+            return;
+        }
+
+        BitSet toVisit = (BitSet) candidates.clone();
+        int pivot = choosePivot(candidates, excluded);
+        if (pivot >= 0) {
+            toVisit.andNot(connections.get(pivot));
+        }
+
+        for (int vertex = toVisit.nextSetBit(0); vertex >= 0; vertex = toVisit.nextSetBit(vertex + 1)) {
+            BitSet nextRequired = (BitSet) required.clone();
+            nextRequired.set(vertex);
+
+            BitSet nextCandidates = (BitSet) candidates.clone();
+            nextCandidates.and(connections.get(vertex));
+
+            BitSet nextExcluded = (BitSet) excluded.clone();
+            nextExcluded.and(connections.get(vertex));
+
+            bronKerbosch(nextRequired, nextCandidates, nextExcluded);
+
+            candidates.clear(vertex);
+            excluded.set(vertex);
+            if (requiredSize + candidates.cardinality() <= bestCliqueSize) {
+                return;
+            }
         }
     }
 
-    private String listToString(List<String> computers){
-        Collections.sort(computers);
-        String result = "";
-        for(String computer: computers){
-            result+=computer;
-            result+=",";
+    private int choosePivot(BitSet candidates, BitSet excluded) {
+        BitSet choices = (BitSet) candidates.clone();
+        choices.or(excluded);
+
+        int bestPivot = -1;
+        int bestReach = -1;
+        for (int vertex = choices.nextSetBit(0); vertex >= 0; vertex = choices.nextSetBit(vertex + 1)) {
+            BitSet reachableCandidates = (BitSet) connections.get(vertex).clone();
+            reachableCandidates.and(candidates);
+            int reach = reachableCandidates.cardinality();
+            if (reach > bestReach) {
+                bestReach = reach;
+                bestPivot = vertex;
+            }
         }
-        return result.substring(0, result.length() - 1);
+        return bestPivot;
+    }
+
+    private String cliqueToString(BitSet clique) {
+        List<String> cliqueNames = new ArrayList<>(clique.cardinality());
+        for (int index = clique.nextSetBit(0); index >= 0; index = clique.nextSetBit(index + 1)) {
+            cliqueNames.add(names.get(index));
+        }
+        Collections.sort(cliqueNames);
+        return String.join(",", cliqueNames);
     }
 }
