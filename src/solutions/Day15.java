@@ -12,22 +12,8 @@ public class Day15 extends DayTemplate {
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
-        List<String> lines = new ArrayList<>();
-        List<String> movements = new ArrayList<>();
-        boolean movement = false;
-        while (in.hasNext()) {
-            String line = in.nextLine();
-            if(line.isEmpty()){
-                movement = true;
-                continue;
-            }
-            if(!movement){
-                lines.add(line);
-            }
-            else{
-                movements.add(line);
-            }
-        }
+        WarehouseInput input = readInput(in);
+        List<String> lines = input.lines;
         if(!part1){
             lines = convert(lines);
         }
@@ -48,11 +34,7 @@ public class Day15 extends DayTemplate {
             }
         }
 
-        StringBuilder allMovements = new StringBuilder();
-        for(String move: movements){
-            allMovements.append(move);
-        }
-        for(char c: allMovements.toString().toCharArray()){
+        for(char c: input.movementSequence().toCharArray()){
             oneCycle(c, robot, grid, part1);
         }
         for(int i = 0; i < grid.length; i++) {
@@ -63,6 +45,25 @@ public class Day15 extends DayTemplate {
             }
         }
         return answer + "";
+    }
+
+    private WarehouseInput readInput(Scanner in) {
+        WarehouseInput input = new WarehouseInput();
+        boolean movement = false;
+        while (in.hasNext()) {
+            String line = in.nextLine();
+            if(line.isEmpty()){
+                movement = true;
+                continue;
+            }
+            if(!movement){
+                input.lines.add(line);
+            }
+            else{
+                input.movements.add(line);
+            }
+        }
+        return input;
     }
 
     private static List<String> convert(List<String> lines) {
@@ -167,6 +168,19 @@ public class Day15 extends DayTemplate {
             }
             robot.x += xs[direction];
             robot.y += ys[direction];
+        }
+    }
+
+    private static class WarehouseInput {
+        List<String> lines = new ArrayList<>();
+        List<String> movements = new ArrayList<>();
+
+        String movementSequence() {
+            StringBuilder allMovements = new StringBuilder();
+            for(String move: movements){
+                allMovements.append(move);
+            }
+            return allMovements.toString();
         }
     }
 }
