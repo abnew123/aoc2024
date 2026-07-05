@@ -4,232 +4,115 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day24 extends DayTemplate {
-
-
-    List<String> registers = new ArrayList<>();
-
-    Map<String, Integer> map = new HashMap<>();
-
-    List<Instruction> instructions = new ArrayList<>();
-
-    boolean hitEmpty = false;
+    private final Map<String, Integer> values = new HashMap<>();
+    private final List<Gate> gates = new ArrayList<>();
 
     public String solve(boolean part1, Scanner in) {
-        StringBuilder answer = new StringBuilder();
-        while (in.hasNext()) {
+        values.clear();
+        gates.clear();
+        for (boolean gateSection = false; in.hasNextLine();) {
             String line = in.nextLine();
-            if(line.equals("")){
-                hitEmpty = true;
-                continue;
-            }
-            if(!hitEmpty){
-                Register r = new Register(line);
-                registers.add(r.name);
-                map.put(r.name, r.value);
-            }
-            else{
-                instructions.add(new Instruction(line));
+            if (line.isEmpty()) {
+                gateSection = true;
+            } else if (gateSection) {
+                gates.add(new Gate(line));
+            } else {
+                String[] parts = line.split(": ");
+                values.put(parts[0], Integer.parseInt(parts[1]));
             }
         }
-
-        if(part1){
-            int counter = 0;
-            while(!instructions.isEmpty() && counter++<100){
-                for(int i = instructions.size() - 1; i >= 0; i--){
-                    Instruction instruction = instructions.get(i);
-                    if (map.containsKey(instruction.firstReg) && map.containsKey(instruction.secondReg)) {
-                        map.put(instruction.output, instruction.run(map));
-                        instructions.remove(instruction);
-                    }
-                }
-            }
-            List<String> outputs = new ArrayList<>();
-
-            for(String key: map.keySet()){
-                if(key.startsWith("z")){
-                    outputs.add(key);
-                }
-            }
-            Collections.sort(outputs);
-            Collections.reverse(outputs);
-
-            for(String output: outputs){
-                answer.append(map.get(output));
-            }
-            answer = new StringBuilder(String.valueOf(Long.parseLong(answer.toString(), 2)));
+        if (!part1) {
+            return swappedOutputs();
         }
-        else{
-            Map<String, Integer> generateBits = new HashMap<>(); //determines whether the current x and y bits will generate a carry
-            Map<String, Integer> propagateBits = new HashMap<>(); //determines whether the current carry will propagate up
-            Map<String, Integer> intermediateOrs = new HashMap<>(); //don't really know conceptually what it does, but only type of operation with OR
-            Map<String, Integer> intermediateAnds = new HashMap<>(); //the ANDs that don't involve x and y
-            Map<String, Integer> outputs = new HashMap<>(); //ops that involve z
-            Set<Instruction> potentialSwaps = new HashSet<>();
-
-            //special cases
-            intermediateAnds.put("fake0bitAND", 0); //there's no intermediate AND for the first bit
-            for(int i = instructions.size() - 1; i >= 0; i--) {
-                Instruction instruction = instructions.get(i);
-                if(instruction.firstReg.equals("x00") || instruction.firstReg.equals("y00")){
-                    if(instruction.operation.equals("XOR")){
-                        //x00 XOR y00 = z00 is kind of both an output and a propagate bit, since there's no carry
-                        outputs.put(instruction.output, 0);
-                        propagateBits.put(instruction.output, 0);
-                        instructions.remove(i);
-                    }
-                    if(instruction.operation.equals("AND")){
-                        //Similar to above, x00 AND y00 = ??? is kind of both an intermediate or and a generate bit, since there's no carry
-                        generateBits.put(instruction.output, 0);
-                        intermediateOrs.put(instruction.output, 0);
-                        instructions.remove(i);
-                    }
+        for (int n = 0; !gates.isEmpty() && n++ < 100;) {
+            for (ListIterator<Gate> it = gates.listIterator(gates.size()); it.hasPrevious();) {
+                Gate gate = it.previous();
+                if (values.containsKey(gate.left) && values.containsKey(gate.right)) {
+                    values.put(gate.output, gate.run(values));
+                    it.remove();
                 }
             }
-
-            //generate and propagates
-            for(int i = instructions.size() - 1; i >= 0; i--){
-                Instruction instruction = instructions.get(i);
-                if(instruction.firstReg.startsWith("x") || instruction.firstReg.startsWith("y")){ //x and y bits are always paired together since only the outputs are swapped
-                    if(instruction.output.startsWith("z")){
-                        potentialSwaps.add(instruction);
-                        continue;
-                    }
-                    if(instruction.operation.equals("AND")){
-                        generateBits.put(instruction.output, Integer.parseInt(instruction.firstReg.substring(1)));
-                    }
-                    else{ //always XOR, x and y bits are never used in an OR
-                        propagateBits.put(instruction.output, Integer.parseInt(instruction.firstReg.substring(1)));
-                    }
-                    instructions.remove(i);
-                }
-            }
-
-            //intermediate Ors
-            for(Instruction instruction: instructions){
-                if(instruction.operation.equals("OR")){
-                    if(generateBits.containsKey(instruction.firstReg)){
-                        int level = generateBits.get(instruction.firstReg);
-                        intermediateOrs.put(instruction.output, level);
-                        continue;
-                    }
-                    if(generateBits.containsKey(instruction.secondReg)){
-                        int level = generateBits.get(instruction.secondReg);
-                        intermediateOrs.put(instruction.output, level);
-                        continue;
-                    }
-                    potentialSwaps.add(instruction);
-                }
-            }
-
-           // intermediate ands and outputs
-            for(Instruction instruction: instructions){
-                if(instruction.operation.equals("AND")){
-                    if(propagateBits.containsKey(instruction.firstReg)){
-                        if(intermediateOrs.containsKey(instruction.secondReg)){
-                            int level = propagateBits.get(instruction.firstReg);
-                            intermediateAnds.put(instruction.output, level);
-                            continue;
-                        }
-                    }
-                    if(propagateBits.containsKey(instruction.secondReg)){
-                        if(intermediateOrs.containsKey(instruction.firstReg)){
-                            int level = propagateBits.get(instruction.secondReg);
-                            intermediateAnds.put(instruction.output, level);
-                            continue;
-                        }
-                    }
-                    potentialSwaps.add(instruction);
-                }
-                if(instruction.operation.equals("XOR")){
-                    if(propagateBits.containsKey(instruction.firstReg)){
-                        if(intermediateOrs.containsKey(instruction.secondReg)){
-                            int level = propagateBits.get(instruction.firstReg);
-                            outputs.put(instruction.output, level);
-                            continue;
-                        }
-                    }
-                    if(propagateBits.containsKey(instruction.secondReg)){
-                        if(intermediateOrs.containsKey(instruction.firstReg)){
-                            int level = propagateBits.get(instruction.secondReg);
-                            outputs.put(instruction.output, level);
-                            continue;
-                        }
-                    }
-                    potentialSwaps.add(instruction);
-                }
-            }
-//            for(int i = 0; i < registers.size()/2; i++){
-//                if(!propagateBits.containsValue(i)){
-//                    System.out.println("missing a propagate symbol for bit: " + i);
-//                }
-//                if(!generateBits.containsValue(i)){
-//                    System.out.println("missing a generate symbol for bit: " + i);
-//                }
-//                if(!intermediateOrs.containsValue(i)){
-//                    System.out.println("missing a intermediate or symbol for bit: " + i);
-//                }
-//                if(!intermediateAnds.containsValue(i)){
-//                    System.out.println("missing a intermediate and symbol for bit: " + i);
-//                }
-//                if(!outputs.containsValue(i)){
-//                    System.out.println("missing a output symbol for bit: " + i);
-//                }
-//            }
-
-            for(Instruction i: potentialSwaps){
-                System.out.println(i.output);
-            }
-
-
         }
-
-        return answer + "";
+        List<String> outputs = new ArrayList<>();
+        for (String wire : values.keySet()) {
+            if (wire.startsWith("z")) {
+                outputs.add(wire);
+            }
+        }
+        outputs.sort(Comparator.reverseOrder());
+        StringBuilder bits = new StringBuilder();
+        for (String output : outputs) {
+            bits.append(values.get(output));
+        }
+        return "" + Long.parseLong(bits.toString(), 2);
     }
 
+    private String swappedOutputs() {
+        int finalZ = gates.stream()
+                .filter(gate -> gate.output.startsWith("z"))
+                .mapToInt(gate -> Integer.parseInt(gate.output.substring(1)))
+                .max()
+                .orElseThrow();
+        Set<String> bad = new TreeSet<>();
+        for (Gate gate : gates) {
+            boolean firstInputBit = gate.left.equals("x00") || gate.left.equals("y00");
+            boolean xyInput = isXY(gate.left) && isXY(gate.right);
+            // A ripple-carry adder has x/y XORs feeding sum XORs and carry ANDs,
+            // carry-generating ANDs feeding ORs, and z outputs from XORs except the final carry.
+            if (gate.output.startsWith("z")
+                    && Integer.parseInt(gate.output.substring(1)) != finalZ
+                    && !gate.op.equals("XOR")) {
+                bad.add(gate.output);
+            }
+            if (gate.op.equals("XOR") && !xyInput && !gate.output.startsWith("z")) {
+                bad.add(gate.output);
+            }
+            if (gate.op.equals("AND") && !firstInputBit && !feeds(gate.output, "OR")) {
+                bad.add(gate.output);
+            }
+            if (gate.op.equals("XOR") && xyInput && !firstInputBit
+                    && (!feeds(gate.output, "XOR") || !feeds(gate.output, "AND"))) {
+                bad.add(gate.output);
+            }
+        }
+        return String.join(",", bad);
+    }
 
-}
+    private boolean isXY(String wire) {
+        return wire.startsWith("x") || wire.startsWith("y");
+    }
 
-class Register{
-    int value;
-    String name;
-
-    public Register(String line){
-        value = Integer.parseInt(line.split(": ")[1]);
-        name = line.split(": ")[0];
+    private boolean feeds(String wire, String op) {
+        for (Gate gate : gates) {
+            if (gate.op.equals(op) && (gate.left.equals(wire) || gate.right.equals(wire))) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
-class Instruction{
-    String firstReg;
-    String secondReg;
-    String operation;
-
+class Gate {
+    String left;
+    String right;
+    String op;
     String output;
 
-    public Instruction(String line){
-        String[] parts = line.split(" |->");
-        firstReg = parts[0];
-        secondReg = parts[2];
-        operation = parts[1];
-        output = parts[5];
+    Gate(String line) {
+        String[] parts = line.split(" ");
+        left = parts[0];
+        op = parts[1];
+        right = parts[2];
+        output = parts[4];
     }
 
-    public int run(Map<String, Integer> map){
-        int input1 = map.get(firstReg);
-        int input2 = map.get(secondReg);
-        if(operation.equals("AND")){
-            return input1 & input2;
-        }
-        if(operation.equals("OR")){
-            return input1 | input2;
-        }
-        if(operation.equals("XOR")){
-            return input1 ^ input2;
-        }
-        return -1;
-    }
-
-    public String toString(){
-        return firstReg + " " + operation + " " + secondReg + " " + output;
+    int run(Map<String, Integer> values) {
+        int first = values.get(left);
+        int second = values.get(right);
+        return switch (op) {
+            case "AND" -> first & second;
+            case "OR" -> first | second;
+            default -> first ^ second;
+        };
     }
 }

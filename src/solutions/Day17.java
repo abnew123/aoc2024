@@ -6,8 +6,7 @@ import java.util.*;
 public class Day17 extends DayTemplate {
 
     public String solve(boolean part1, Scanner in) {
-        long registerA = 15401536L;
-        in.nextLine();
+        long registerA = Long.parseLong(in.nextLine().split(" ")[2]);
         long registerB = Long.parseLong(in.nextLine().split(" ")[2]);
         long registerC = Long.parseLong(in.nextLine().split(" ")[2]);
         in.nextLine();
@@ -18,7 +17,7 @@ public class Day17 extends DayTemplate {
         }
         if(part1){
             List<Integer> result = run(program, registerA, registerB, registerC);
-            return (result + "").replace(" ", "");
+            return formatOutput(result);
         }
         List<Long> possibilities = new ArrayList<>(List.of(0L));
         for(int outputStart = program.size() - 1; outputStart >= 0; outputStart--){
@@ -30,7 +29,7 @@ public class Day17 extends DayTemplate {
                 // reproduce the target suffix seen so far.
                 for(int digit = 0; digit < 8; digit++){
                     long potentialValue = (possibility << 3) + digit;
-                    if(run(program, potentialValue, 0, 0).equals(targetSuffix)){
+                    if(run(program, potentialValue, registerB, registerC).equals(targetSuffix)){
                         newPossibilities.add(potentialValue);
                     }
                 }
@@ -38,6 +37,17 @@ public class Day17 extends DayTemplate {
             possibilities = newPossibilities;
         }
         return possibilities.stream().min(Long::compareTo).orElseThrow() + "";
+    }
+
+    private String formatOutput(List<Integer> values) {
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < values.size(); i++) {
+            if (i > 0) {
+                output.append(',');
+            }
+            output.append(values.get(i));
+        }
+        return output.toString();
     }
 
     private List<Integer> run(List<Integer> program, long registerA, long registerB, long registerC){
