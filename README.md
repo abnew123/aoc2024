@@ -13,6 +13,12 @@ mkdir -p /tmp/aoc2024-classes
 javac -d /tmp/aoc2024-classes $(find src -name '*.java')
 ```
 
+To run a focused solver smoke after compiling, pass the day and part:
+
+```sh
+java -cp /tmp/aoc2024-classes src.meta.SingleDayRunner 21 1
+```
+
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
   2024 - 50 ⭐ - Java
