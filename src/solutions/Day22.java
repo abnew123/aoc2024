@@ -4,17 +4,15 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day22 extends DayTemplate {
+    private static final int MASK = (1 << 24) - 1;
+    private static final int SEQUENCE_COUNT = 1 << 20;
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
-        List<Long> lines = new ArrayList<>();
-        while (in.hasNext()) {
-            Long line = Long.parseLong(in.nextLine());
-            lines.add(line);
-        }
 
         if(part1){
-            for(long l: lines){
+            while (in.hasNext()) {
+                long l = Long.parseLong(in.nextLine());
                 for(int i = 0; i < 2000; i++){
                     l = oneIteration(l);
                 }
@@ -22,28 +20,27 @@ public class Day22 extends DayTemplate {
             }
         }
         else{
-            Map<Integer, Long> sequenceValues = new HashMap<>();
-            for(int i = 0; i < lines.size(); i++){
+            long[] lines = readLines(in);
+            int[] sequenceValues = new int[SEQUENCE_COUNT];
+            int[] viewedHashes = new int[SEQUENCE_COUNT];
+            for(int i = 0; i < lines.length; i++){
                 int diffHash = 0;
-                long past = lines.get(i);
-                Set<Integer> viewedHashes = new HashSet<>();
+                long past = lines[i];
+                int buyerId = i + 1;
                 for(int j = 0; j < 2000; j++){
-                    long future = oneIteration(past);
-                    diffHash <<= 5;
-                    diffHash += ( future%10 - past%10+ 9);
+                    int future = oneIteration(past);
+                    diffHash = ((diffHash << 5) | (int) (future % 10 - past % 10 + 9)) & (SEQUENCE_COUNT - 1);
                     if(j >= 3){
-                        if(!viewedHashes.contains(diffHash)){
-                            sequenceValues.merge(diffHash, future%10, Long::sum);
-                            viewedHashes.add(diffHash);
+                        if(viewedHashes[diffHash] != buyerId){
+                            int value = sequenceValues[diffHash] + future % 10;
+                            sequenceValues[diffHash] = value;
+                            viewedHashes[diffHash] = buyerId;
+                            if(value > answer){
+                                answer = value;
+                            }
                         }
-                        diffHash %= 1<<15;
                     }
                     past = future;
-                }
-            }
-            for(Integer key: sequenceValues.keySet()){
-                if(sequenceValues.get(key) > answer){
-                    answer = sequenceValues.get(key);
                 }
             }
         }
@@ -51,13 +48,24 @@ public class Day22 extends DayTemplate {
         return answer + "";
     }
 
-    private long oneIteration(long l){
+    private long[] readLines(Scanner in) {
+        long[] lines = new long[256];
+        int size = 0;
+        while (in.hasNext()) {
+            if(size == lines.length){
+                lines = Arrays.copyOf(lines, lines.length * 2);
+            }
+            lines[size++] = Long.parseLong(in.nextLine());
+        }
+        return Arrays.copyOf(lines, size);
+    }
+
+    private int oneIteration(long l){
         l ^= l<<6;
-        l %= 16777216L;
+        l &= MASK;
         l ^= l>>5;
-        l %= 16777216L;
+        l &= MASK;
         l ^= l<<11;
-        l %= 16777216L;
-        return l;
+        return (int) (l & MASK);
     }
 }
