@@ -100,7 +100,7 @@ See [performance notes](PERFORMANCE.md) for visual before/after examples and ben
 | 8 | [Resonant Collinearity](https://adventofcode.com/2024/day/8) | [Source](src/solutions/Day08.java) | 0.913 | 3.578 |
 | 9 | [Disk Fragmenter](https://adventofcode.com/2024/day/9) | [Source](src/solutions/Day09.java) | 2.860 | 3.263 |
 | 10 | [Hoof It](https://adventofcode.com/2024/day/10) | [Source](src/solutions/Day10.java) | 1.514 | 1.344 |
-| 11 | [Plutonian Pebbles](https://adventofcode.com/2024/day/11) | [Source](src/solutions/Day11.java) | 1.722 | 9.535 |
+| 11 | [Plutonian Pebbles](https://adventofcode.com/2024/day/11) | [Source](src/solutions/Day11.java) | 0.488 | 5.716 |
 | 12 | [Garden Groups](https://adventofcode.com/2024/day/12) | [Source](src/solutions/Day12.java) | 1.703 | 2.575 |
 | 13 | [Claw Contraption](https://adventofcode.com/2024/day/13) | [Source](src/solutions/Day13.java) | 2.524 | 2.572 |
 | 14 | [Restroom Redoubt](https://adventofcode.com/2024/day/14) | [Source](src/solutions/Day14.java) | 2.396 | 4.969 |
