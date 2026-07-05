@@ -11,7 +11,7 @@ public class Day09 extends DayTemplate {
         int[] parts = new int[line.length()];
         int length = 0;
         for(int i = 0; i < parts.length; i++){
-            parts[i] = Integer.parseInt(line.substring(i, i+1));
+            parts[i] = line.charAt(i) - '0';
             length += parts[i];
         }
         if(part1){
@@ -59,37 +59,59 @@ public class Day09 extends DayTemplate {
     }
 
     private long part2(int[] parts){
-        long answer = 0;
-        Map<Integer, int[]> starting = new HashMap<>();
-        Map<Integer, int[]> gaps = new HashMap<>();
-        int index = 0;
-        for(int i = 0; i < parts.length; i++) {
-            if(i %2 == 0){
-                starting.put(i / 2, new int[]{index, parts[i]});
-            }
-            if(i % 2 == 1){
-                gaps.put(i / 2, new int[]{index, parts[i]});
-            }
-            index += parts[i];
-        }
-        for(int i = parts.length/2 ; i >= 0; i--){
-            int size = starting.get(i)[1];
-            for(int j = 0; j < i; j++){
-                int gap = gaps.get(j)[1];
-                if(gap >= size){
-                    starting.put(i, new int[]{gaps.get(j)[0], size});
-                    gaps.put(j, new int[]{gaps.get(j)[0] + size, gaps.get(j)[1] - size});
-                    break;
-                }
-            }
+        int fileCount = (parts.length + 1) / 2;
+        int[] fileStarts = new int[fileCount];
+        int[] fileSizes = new int[fileCount];
+        @SuppressWarnings("unchecked")
+        PriorityQueue<Gap>[] gapsBySize = new PriorityQueue[10];
+        for (int i = 0; i < gapsBySize.length; i++) {
+            gapsBySize[i] = new PriorityQueue<>(Comparator.comparingInt(gap -> gap.start));
         }
 
-        for (Map.Entry<Integer, int[]> entry : starting.entrySet()) {
-            int[] value = entry.getValue();
-            for (int i = value[0]; i < value[0] + value[1]; i++) {
-                answer += (long) i * entry.getKey();
+        int index = 0;
+        for (int i = 0; i < parts.length; i++) {
+            int size = parts[i];
+            if (i % 2 == 0) {
+                int file = i / 2;
+                fileStarts[file] = index;
+                fileSizes[file] = size;
+            } else if (size > 0) {
+                gapsBySize[size].add(new Gap(index, size));
             }
+            index += size;
+        }
+
+        long answer = 0;
+        for (int file = fileCount - 1; file >= 0; file--) {
+            int fileSize = fileSizes[file];
+            int fileStart = fileStarts[file];
+            Gap bestGap = null;
+            int bestSize = -1;
+            for (int size = fileSize; size < gapsBySize.length; size++) {
+                Gap gap = gapsBySize[size].peek();
+                if (gap != null && gap.start < fileStart && (bestGap == null || gap.start < bestGap.start)) {
+                    bestGap = gap;
+                    bestSize = size;
+                }
+            }
+
+            int finalStart = fileStart;
+            if (bestGap != null) {
+                gapsBySize[bestSize].poll();
+                finalStart = bestGap.start;
+                int remaining = bestGap.size - fileSize;
+                if (remaining > 0) {
+                    gapsBySize[remaining].add(new Gap(bestGap.start + fileSize, remaining));
+                }
+            }
+            answer += checksum(file, finalStart, fileSize);
         }
         return answer;
     }
+
+    private long checksum(int fileId, int start, int size) {
+        return (long) fileId * size * (2L * start + size - 1) / 2;
+    }
+
+    private record Gap(int start, int size) {}
 }
