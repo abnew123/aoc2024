@@ -5,7 +5,7 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day10 extends DayTemplate {
-    private static final int[] DR = {-1, 1, 0, 0}, DC = {0, 0, -1, 1};
+    static final int[] DR = {-1, 1, 0, 0}, DC = {0, 0, -1, 1};
 
     public String solve(boolean part1, Scanner in) {
         List<String> lines = new ArrayList<>();
@@ -40,7 +40,7 @@ public class Day10 extends DayTemplate {
         return "" + (part1 ? scoreHeads(lines) : answer);
     }
 
-    private int scoreHeads(List<String> lines) {
+    int scoreHeads(List<String> lines) {
         int answer = 0;
         for (int r = 0; r < lines.size(); r++) {
             for (int c = 0; c < lines.get(0).length(); c++) {
@@ -52,7 +52,7 @@ public class Day10 extends DayTemplate {
         return answer;
     }
 
-    private int reaches(List<String> lines, int r, int c, boolean[][] seen) {
+    int reaches(List<String> lines, int r, int c, boolean[][] seen) {
         int h = lines.get(r).charAt(c) - '0';
         if (h == 9) {
             return seen[r][c] ? 0 : (seen[r][c] = true) ? 1 : 0;

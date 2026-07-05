@@ -21,7 +21,7 @@ public class Day07 extends DayTemplate {
         return "" + answer;
     }
 
-    private boolean ok(long target, int[] values, int i, boolean part1) {
+    boolean ok(long target, int[] values, int i, boolean part1) {
         if (i < 0) {
             return target == 0;
         }

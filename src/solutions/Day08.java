@@ -41,7 +41,7 @@ public class Day08 extends DayTemplate {
         return "" + answer;
     }
 
-    private void add(boolean[][] seen, int r, int c, int dr, int dc, boolean part1) {
+    void add(boolean[][] seen, int r, int c, int dr, int dc, boolean part1) {
         for (int k = part1 ? 1 : 0; r + k * dr >= 0 && r + k * dr < seen.length
                 && c + k * dc >= 0 && c + k * dc < seen[0].length; k++) {
             seen[r + k * dr][c + k * dc] = true;

@@ -5,7 +5,7 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day11 extends DayTemplate {
-    private final Map<String, Long> memo = new HashMap<>();
+    final Map<String, Long> memo = new HashMap<>();
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
@@ -15,7 +15,7 @@ public class Day11 extends DayTemplate {
         return "" + answer;
     }
 
-    private long count(long stone, int blinks) {
+    long count(long stone, int blinks) {
         if (blinks == 0) {
             return 1;
         }

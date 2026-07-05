@@ -5,10 +5,10 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day12 extends DayTemplate {
-    private static final int[] DR = {-1, 1, 0, 0}, DC = {0, 0, -1, 1};
-    private int rows, cols;
-    private char[] grid;
-    private boolean[] seen, region;
+    static final int[] DR = {-1, 1, 0, 0}, DC = {0, 0, -1, 1};
+    int rows, cols;
+    char[] grid;
+    boolean[] seen, region;
 
     public String solve(boolean part1, Scanner in) {
         List<String> lines = new ArrayList<>();
@@ -57,7 +57,7 @@ public class Day12 extends DayTemplate {
         return "" + answer;
     }
 
-    private int sides(int[] cells, int n) {
+    int sides(int[] cells, int n) {
         int total = 0;
         for (int i = 0; i < n; i++) {
             int r = cells[i] / cols, c = cells[i] % cols;
@@ -73,11 +73,11 @@ public class Day12 extends DayTemplate {
         return total;
     }
 
-    private boolean has(int r, int c) {
+    boolean has(int r, int c) {
         return r >= 0 && c >= 0 && r < rows && c < cols && region[id(r, c)];
     }
 
-    private int id(int r, int c) {
+    int id(int r, int c) {
         return r * cols + c;
     }
 }

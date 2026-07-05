@@ -5,7 +5,7 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day04 extends DayTemplate {
-    private char[][] grid;
+    char[][] grid;
 
     public String solve(boolean part1, Scanner in) {
         List<String> lines = new ArrayList<>();
@@ -37,7 +37,7 @@ public class Day04 extends DayTemplate {
         return "" + answer;
     }
 
-    private boolean word(int r, int c, int dr, int dc) {
+    boolean word(int r, int c, int dr, int dc) {
         String x = "XMAS";
         for (int i = 0; i < x.length(); i++, r += dr, c += dc) {
             if (r < 0 || c < 0 || r == grid.length || c == grid[0].length || grid[r][c] != x.charAt(i)) {
@@ -47,7 +47,7 @@ public class Day04 extends DayTemplate {
         return true;
     }
 
-    private boolean mas(char a, char b) {
+    boolean mas(char a, char b) {
         return a + b == 'M' + 'S' && a != b;
     }
 }

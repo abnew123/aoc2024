@@ -5,9 +5,9 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day06 extends DayTemplate {
-    private static final int[] DR = {-1, 0, 1, 0}, DC = {0, 1, 0, -1};
-    private int rows, cols, start;
-    private boolean[] wall;
+    static final int[] DR = {-1, 0, 1, 0}, DC = {0, 1, 0, -1};
+    int rows, cols, start;
+    boolean[] wall;
 
     public String solve(boolean part1, Scanner in) {
         List<String> lines = new ArrayList<>();
@@ -46,7 +46,7 @@ public class Day06 extends DayTemplate {
         return "" + loops;
     }
 
-    private boolean[] walk(int block) {
+    boolean[] walk(int block) {
         boolean[] cells = new boolean[rows * cols], states = new boolean[rows * cols * 4];
         int r = start / cols, c = start % cols, d = 0;
         for (;;) {
@@ -68,7 +68,7 @@ public class Day06 extends DayTemplate {
         }
     }
 
-    private int id(int r, int c) {
+    int id(int r, int c) {
         return r * cols + c;
     }
 }

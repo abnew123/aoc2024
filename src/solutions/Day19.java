@@ -5,8 +5,8 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day19 extends DayTemplate {
-    private String[] towels;
-    private Map<String, Long> memo;
+    String[] towels;
+    Map<String, Long> memo;
 
     public String solve(boolean part1, Scanner in) {
         towels = in.nextLine().split(", ");
@@ -20,7 +20,7 @@ public class Day19 extends DayTemplate {
         return "" + answer;
     }
 
-    private long ways(String design) {
+    long ways(String design) {
         if (design.isEmpty()) {
             return 1;
         }

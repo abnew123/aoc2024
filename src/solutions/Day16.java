@@ -5,9 +5,9 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day16 extends DayTemplate {
-    private static final int[] DR = {0, 1, 0, -1}, DC = {1, 0, -1, 0};
-    private int rows, cols, start, end;
-    private char[][] grid;
+    static final int[] DR = {0, 1, 0, -1}, DC = {1, 0, -1, 0};
+    int rows, cols, start, end;
+    char[][] grid;
 
     public String solve(boolean part1, Scanner in) {
         List<String> lines = new ArrayList<>();
@@ -53,7 +53,7 @@ public class Day16 extends DayTemplate {
         return "" + tiles;
     }
 
-    private int[] dijkstra(boolean reverse) {
+    int[] dijkstra(boolean reverse) {
         int inf = Integer.MAX_VALUE / 4;
         int[] dist = new int[rows * cols * 4];
         Arrays.fill(dist, inf);
@@ -81,18 +81,18 @@ public class Day16 extends DayTemplate {
         return dist;
     }
 
-    private void add(PriorityQueue<int[]> q, int[] dist, int score, int state) {
+    void add(PriorityQueue<int[]> q, int[] dist, int score, int state) {
         if (score < dist[state]) {
             dist[state] = score;
             q.add(new int[]{score, state});
         }
     }
 
-    private int cell(int r, int c) {
+    int cell(int r, int c) {
         return r * cols + c;
     }
 
-    private int state(int cell, int direction) {
+    int state(int cell, int direction) {
         return cell * 4 + direction;
     }
 }

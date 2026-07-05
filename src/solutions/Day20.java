@@ -5,8 +5,8 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day20 extends DayTemplate {
-    private int rows, cols;
-    private boolean[] wall;
+    int rows, cols;
+    boolean[] wall;
 
     public String solve(boolean part1, Scanner in) {
         List<String> lines = new ArrayList<>();
@@ -55,7 +55,7 @@ public class Day20 extends DayTemplate {
         return "" + total;
     }
 
-    private int[] bfs(int start) {
+    int[] bfs(int start) {
         int[] dist = new int[rows * cols], q = new int[dist.length], step = {-cols, cols, -1, 1};
         Arrays.fill(dist, -1);
         dist[start] = 0;
@@ -77,7 +77,7 @@ public class Day20 extends DayTemplate {
         return dist;
     }
 
-    private int id(int r, int c) {
+    int id(int r, int c) {
         return r * cols + c;
     }
 }

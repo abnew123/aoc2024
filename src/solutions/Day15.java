@@ -5,9 +5,9 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day15 extends DayTemplate {
-    private static final int[] DR = {-1, 1, 0, 0}, DC = {0, 0, -1, 1};
-    private char[][] grid;
-    private int r, c;
+    static final int[] DR = {-1, 1, 0, 0}, DC = {0, 0, -1, 1};
+    char[][] grid;
+    int r, c;
 
     public String solve(boolean part1, Scanner in) {
         List<String> map = new ArrayList<>();
@@ -47,7 +47,7 @@ public class Day15 extends DayTemplate {
         return "" + answer;
     }
 
-    private void step(int d, boolean part1) {
+    void step(int d, boolean part1) {
         int nr = r + DR[d], nc = c + DC[d];
         if (grid[nr][nc] == '#') {
             return;
@@ -76,7 +76,7 @@ public class Day15 extends DayTemplate {
         }
     }
 
-    private boolean pushVertical(int d) {
+    boolean pushVertical(int d) {
         List<Set<Integer>> layers = new ArrayList<>();
         layers.add(boxes(r + DR[d], c));
         for (int row = r + DR[d];;) {
@@ -105,7 +105,7 @@ public class Day15 extends DayTemplate {
         return true;
     }
 
-    private Set<Integer> boxes(int row, int col) {
+    Set<Integer> boxes(int row, int col) {
         Set<Integer> s = new HashSet<>();
         s.add(col);
         s.add(grid[row][col] == '[' ? col + 1 : col - 1);

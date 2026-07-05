@@ -5,8 +5,8 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day24 extends DayTemplate {
-    private final Map<String, Integer> v = new HashMap<>();
-    private final List<I> ins = new ArrayList<>();
+    final Map<String, Integer> v = new HashMap<>();
+    final List<I> ins = new ArrayList<>();
 
     public String solve(boolean part1, Scanner in) {
         v.clear();
@@ -48,7 +48,7 @@ public class Day24 extends DayTemplate {
         return "" + Long.parseLong(bits.toString(), 2);
     }
 
-    private String swaps() {
+    String swaps() {
         int finalZ = ins.stream()
                 .filter(i -> i.o.startsWith("z"))
                 .mapToInt(i -> Integer.parseInt(i.o.substring(1)))
@@ -74,11 +74,11 @@ public class Day24 extends DayTemplate {
         return String.join(",", bad);
     }
 
-    private boolean isXY(String wire) {
+    boolean isXY(String wire) {
         return wire.startsWith("x") || wire.startsWith("y");
     }
 
-    private boolean feeds(String wire, String op) {
+    boolean feeds(String wire, String op) {
         for (I i : ins) {
             if (i.op.equals(op) && (i.a.equals(wire) || i.b.equals(wire))) {
                 return true;

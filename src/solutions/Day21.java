@@ -5,8 +5,8 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day21 extends DayTemplate {
-    private static final String[] NUM = {"789", "456", "123", " 0A"}, DIR = {" ^A", "<v>"};
-    private final Map<String, Long> memo = new HashMap<>();
+    static final String[] NUM = {"789", "456", "123", " 0A"}, DIR = {" ^A", "<v>"};
+    final Map<String, Long> memo = new HashMap<>();
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
@@ -23,7 +23,7 @@ public class Day21 extends DayTemplate {
         return "" + answer;
     }
 
-    private long cost(char from, char to, int depth, String[] pad) {
+    long cost(char from, char to, int depth, String[] pad) {
         String key = (pad == NUM ? "N" : "D") + from + to + depth;
         if (memo.containsKey(key)) {
             return memo.get(key);
@@ -36,7 +36,7 @@ public class Day21 extends DayTemplate {
         return best;
     }
 
-    private long sequence(String path, int depth) {
+    long sequence(String path, int depth) {
         if (depth == 0) {
             return path.length();
         }
@@ -49,7 +49,7 @@ public class Day21 extends DayTemplate {
         return total;
     }
 
-    private List<String> paths(char from, char to, String[] pad) {
+    List<String> paths(char from, char to, String[] pad) {
         int ar = 0, ac = 0, br = 0, bc = 0;
         for (int r = 0; r < pad.length; r++) {
             for (int c = 0; c < pad[r].length(); c++) {
@@ -81,7 +81,7 @@ public class Day21 extends DayTemplate {
         return out;
     }
 
-    private void add(List<String> q, String[] pad, int oldR, int oldC, int r, int c, int br, int bc, String path, char move) {
+    void add(List<String> q, String[] pad, int oldR, int oldC, int r, int c, int br, int bc, String path, char move) {
         if (r >= 0 && r < pad.length && c >= 0 && c < pad[r].length()
                 && pad[r].charAt(c) != ' '
                 && Math.abs(r - br) + Math.abs(c - bc) < Math.abs(oldR - br) + Math.abs(oldC - bc)) {

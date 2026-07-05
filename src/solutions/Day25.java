@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class Day25 extends DayTemplate {
 
     public String solve(boolean part1, Scanner in){
-        if(!part1) { //part 2 doesn't exist for this day
+        if(!part1) {
             return "Merry Christmas!";
         }
         long answer = 0;

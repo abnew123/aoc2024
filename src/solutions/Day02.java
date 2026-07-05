@@ -23,7 +23,7 @@ public class Day02 extends DayTemplate {
         return "" + answer;
     }
 
-    private boolean safe(int[] report, int skip) {
+    boolean safe(int[] report, int skip) {
         int last = -1, direction = 0;
         for (int i = 0; i < report.length; i++) {
             if (i == skip) {

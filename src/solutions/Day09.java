@@ -10,7 +10,7 @@ public class Day09 extends DayTemplate {
         return "" + (part1 ? part1(a) : part2(a));
     }
 
-    private long part1(int[] a) {
+    long part1(int[] a) {
         int n = Arrays.stream(a).sum(), p = 0;
         int[] disk = new int[n];
         Arrays.fill(disk, -1);
@@ -37,7 +37,7 @@ public class Day09 extends DayTemplate {
         return answer;
     }
 
-    private long part2(int[] a) {
+    long part2(int[] a) {
         int files = (a.length + 1) / 2, p = 0;
         int[] start = new int[files], size = new int[files];
         PriorityQueue<Gap>[] gaps = new PriorityQueue[10];
@@ -76,5 +76,5 @@ public class Day09 extends DayTemplate {
         return answer;
     }
 
-    private record Gap(int start, int size) {}
+    record Gap(int start, int size) {}
 }

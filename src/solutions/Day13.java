@@ -22,7 +22,7 @@ public class Day13 extends DayTemplate {
         return answer+"";
     }
 
-    private long oneCycle(long x1, long y1, long x2, long y2, long x3, long y3){
+    long oneCycle(long x1, long y1, long x2, long y2, long x3, long y3){
         if(y3%gcd(y1,y2) != 0 || x3%gcd(x1,x2) !=0){
             return 0;
         }
@@ -60,7 +60,7 @@ public class Day13 extends DayTemplate {
         return a * 3 + b;
     }
 
-    private long helper(String[] lines, boolean part1){
+    long helper(String[] lines, boolean part1){
         String[] first =  lines[0].split("[,+]");
         String[] second = lines[1].split("[,+]");
         String[] third = lines[2].split("[,=]");

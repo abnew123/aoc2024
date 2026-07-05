@@ -5,12 +5,12 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day23 extends DayTemplate {
-    private final Map<String, Integer> ids = new HashMap<>();
-    private final List<String> names = new ArrayList<>();
-    private final List<BitSet> graph = new ArrayList<>();
-    private boolean[] startsT;
-    private BitSet best = new BitSet();
-    private int bs;
+    final Map<String, Integer> ids = new HashMap<>();
+    final List<String> names = new ArrayList<>();
+    final List<BitSet> graph = new ArrayList<>();
+    boolean[] startsT;
+    BitSet best = new BitSet();
+    int bs;
 
     public String solve(boolean part1, Scanner in) {
         while (in.hasNextLine()) {
@@ -37,7 +37,7 @@ public class Day23 extends DayTemplate {
         return String.join(",", out);
     }
 
-    private int id(String name) {
+    int id(String name) {
         return ids.computeIfAbsent(name, k -> {
             names.add(k);
             graph.add(new BitSet());
@@ -45,7 +45,7 @@ public class Day23 extends DayTemplate {
         });
     }
 
-    private long triangles() {
+    long triangles() {
         long total = 0;
         for (int a = 0; a < names.size(); a++) {
             for (int b = graph.get(a).nextSetBit(a + 1); b >= 0; b = graph.get(a).nextSetBit(b + 1)) {
@@ -61,7 +61,7 @@ public class Day23 extends DayTemplate {
         return total;
     }
 
-    private void clique(BitSet keep, BitSet can, BitSet skip) {
+    void clique(BitSet keep, BitSet can, BitSet skip) {
         int size = keep.cardinality();
         if (size + can.cardinality() <= bs) {
             return;
@@ -87,7 +87,7 @@ public class Day23 extends DayTemplate {
         }
     }
 
-    private int pivot(BitSet can, BitSet skip) {
+    int pivot(BitSet can, BitSet skip) {
         BitSet all = (BitSet) can.clone();
         all.or(skip);
         int pick = -1, most = -1;

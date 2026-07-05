@@ -30,7 +30,7 @@ public class Day17 extends DayTemplate {
         return "" + Collections.min(candidates);
     }
 
-    private List<Integer> run(int[] p, long a, long b, long c) {
+    List<Integer> run(int[] p, long a, long b, long c) {
         List<Integer> out = new ArrayList<>();
         for (int i = 0; i < p.length;) {
             int op = p[i++], x = p[i++];
@@ -53,11 +53,11 @@ public class Day17 extends DayTemplate {
         return out;
     }
 
-    private long shr(long a, long b) {
+    long shr(long a, long b) {
         return b >= 64 ? 0 : a >> b;
     }
 
-    private boolean suffix(List<Integer> out, int[] p, int from) {
+    boolean suffix(List<Integer> out, int[] p, int from) {
         if (out.size() != p.length - from) {
             return false;
         }

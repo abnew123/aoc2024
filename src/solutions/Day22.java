@@ -1,13 +1,11 @@
-// Inspired by https://github.com/maneatingape/advent-of-code-rust/blob/main/src/year2024/day22.rs
-// for encoding four price changes as base-19 digits instead of sparse bit-packed indices.
 package src.solutions;
 
 import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day22 extends DayTemplate {
-    private static final int MASK = (1 << 24) - 1;
-    private static final int SEQUENCE_COUNT = 19 * 19 * 19 * 19;
+    static final int MASK = (1 << 24) - 1;
+    static final int SEQUENCE_COUNT = 19 * 19 * 19 * 19;
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
@@ -61,7 +59,7 @@ public class Day22 extends DayTemplate {
         return answer + "";
     }
 
-    private int oneIteration(int secret){
+    int oneIteration(int secret){
         secret = (secret ^ (secret << 6)) & MASK;
         secret = (secret ^ (secret >> 5)) & MASK;
         return (secret ^ (secret << 11)) & MASK;

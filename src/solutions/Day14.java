@@ -37,12 +37,12 @@ public class Day14 extends DayTemplate {
         return "0";
     }
 
-    private void move(int[] r, int n) {
+    void move(int[] r, int n) {
         r[0] = ((r[0] + r[2] * n) % 101 + 101) % 101;
         r[1] = ((r[1] + r[3] * n) % 103 + 103) % 103;
     }
 
-    private boolean crowded(List<int[]> robots, int[] count, int axis) {
+    boolean crowded(List<int[]> robots, int[] count, int axis) {
         Arrays.fill(count, 0);
         for (int[] r : robots) {
             if (++count[r[axis]] > 30) {

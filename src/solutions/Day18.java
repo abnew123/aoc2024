@@ -5,7 +5,7 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day18 extends DayTemplate {
-    private static final int N = 71;
+    static final int N = 71;
 
     public String solve(boolean part1, Scanner in) {
         List<Integer> bytes = new ArrayList<>();
@@ -29,7 +29,7 @@ public class Day18 extends DayTemplate {
         return p % N + "," + p / N;
     }
 
-    private int bfs(List<Integer> bytes, int limit) {
+    int bfs(List<Integer> bytes, int limit) {
         boolean[] bad = new boolean[N * N], seen = new boolean[N * N];
         for (int i = 0; i < limit; i++) {
             bad[bytes.get(i)] = true;

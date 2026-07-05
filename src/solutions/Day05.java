@@ -5,7 +5,7 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day05 extends DayTemplate {
-    private final boolean[][] before = new boolean[100][100];
+    final boolean[][] before = new boolean[100][100];
 
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
@@ -27,7 +27,7 @@ public class Day05 extends DayTemplate {
         return "" + answer;
     }
 
-    private boolean ordered(Integer[] update) {
+    boolean ordered(Integer[] update) {
         for (int i = 0; i < update.length; i++) {
             for (int j = i + 1; j < update.length; j++) {
                 if (before[update[j]][update[i]]) {
