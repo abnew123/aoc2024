@@ -9,8 +9,26 @@ public class Day20 extends DayTemplate {
     private int rows;
     private int cols;
 
+    @Override
+    public String[] fullSolve(Scanner in) {
+        ParsedInput input = parse(in);
+        int[] bfsFromEnd = bfs(input.end());
+        int[] bfsFromStart = bfs(input.start());
+        int currentDistance = bfsFromEnd[input.start()];
+        return new String[]{
+                countCheats(bfsFromStart, bfsFromEnd, currentDistance, 2) + "",
+                countCheats(bfsFromStart, bfsFromEnd, currentDistance, 20) + ""
+        };
+    }
+
     public String solve(boolean part1, Scanner in) {
-        long answer = 0;
+        ParsedInput input = parse(in);
+        int[] bfsFromEnd = bfs(input.end());
+        int[] bfsFromStart = bfs(input.start());
+        return countCheats(bfsFromStart, bfsFromEnd, bfsFromEnd[input.start()], part1 ? 2 : 20) + "";
+    }
+
+    private ParsedInput parse(Scanner in) {
         List<String> lines = new ArrayList<>();
         while (in.hasNext()) {
             String line = in.nextLine();
@@ -42,10 +60,11 @@ public class Day20 extends DayTemplate {
 
         int start = toIndex(startX, startY);
         int end = toIndex(endX, endY);
-        int[] bfsFromEnd = bfs(end);
-        int[] bfsFromStart = bfs(start);
-        int currentDistance = bfsFromEnd[start];
-        int maxCheat = part1 ? 2 : 20;
+        return new ParsedInput(start, end);
+    }
+
+    private long countCheats(int[] bfsFromStart, int[] bfsFromEnd, int currentDistance, int maxCheat) {
+        long answer = 0;
         int targetDistance = currentDistance - 100;
         for(int x = 0; x < rows; x++){
             int rowStart = x * cols;
@@ -72,7 +91,7 @@ public class Day20 extends DayTemplate {
                 }
             }
         }
-        return answer + "";
+        return answer;
     }
 
     private int[] bfs(int start){
@@ -120,5 +139,8 @@ public class Day20 extends DayTemplate {
 
     private int toIndex(int x, int y){
         return x * cols + y;
+    }
+
+    private record ParsedInput(int start, int end) {
     }
 }

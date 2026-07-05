@@ -9,6 +9,47 @@ public class Day22 extends DayTemplate {
     private static final int MASK = (1 << 24) - 1;
     private static final int SEQUENCE_COUNT = 19 * 19 * 19 * 19;
 
+    @Override
+    public String[] fullSolve(Scanner in) {
+        long part1 = 0;
+        int part2 = 0;
+        int[] sequenceValues = new int[SEQUENCE_COUNT];
+        int[] viewedHashes = new int[SEQUENCE_COUNT];
+        int buyerId = 1;
+        while (in.hasNext()) {
+            int a = 0;
+            int b = 0;
+            int c = 0;
+            int d = 0;
+            long initial = Long.parseLong(in.nextLine());
+            int secret = (int) (initial & MASK);
+            int pastPrice = (int) (initial % 10);
+            for(int j = 0; j < 2000; j++){
+                secret = oneIteration(secret);
+                int futurePrice = secret % 10;
+                a = b;
+                b = c;
+                c = d;
+                d = futurePrice - pastPrice + 9;
+                if(j >= 3){
+                    int diffHash = ((a * 19 + b) * 19 + c) * 19 + d;
+                    if(viewedHashes[diffHash] != buyerId){
+                        int value = sequenceValues[diffHash] + futurePrice;
+                        sequenceValues[diffHash] = value;
+                        viewedHashes[diffHash] = buyerId;
+                        if(value > part2){
+                            part2 = value;
+                        }
+                    }
+                }
+                pastPrice = futurePrice;
+            }
+            part1 += secret;
+            buyerId++;
+        }
+        return new String[]{part1 + "", part2 + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
 

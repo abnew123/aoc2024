@@ -18,7 +18,28 @@ public class Day16 extends DayTemplate {
     private int cols;
     private boolean[] walls;
 
+    @Override
+    public String[] fullSolve(Scanner in) {
+        ParsedInput input = parse(in);
+        int[] fromStart = distancesFromStart(input.start());
+        int bestScore = bestExitScore(fromStart, input.exit());
+        int[] toExit = distancesToExit(input.exit());
+        return new String[]{bestScore + "", countBestPathTiles(fromStart, toExit, bestScore) + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
+        ParsedInput input = parse(in);
+        int[] fromStart = distancesFromStart(input.start());
+        int bestScore = bestExitScore(fromStart, input.exit());
+        if (part1) {
+            return bestScore + "";
+        }
+
+        int[] toExit = distancesToExit(input.exit());
+        return countBestPathTiles(fromStart, toExit, bestScore) + "";
+    }
+
+    private ParsedInput parse(Scanner in) {
         List<String> lines = new ArrayList<>();
         while (in.hasNextLine()) {
             lines.add(in.nextLine());
@@ -43,15 +64,7 @@ public class Day16 extends DayTemplate {
                 }
             }
         }
-
-        int[] fromStart = distancesFromStart(start);
-        int bestScore = bestExitScore(fromStart, exit);
-        if (part1) {
-            return bestScore + "";
-        }
-
-        int[] toExit = distancesToExit(exit);
-        return countBestPathTiles(fromStart, toExit, bestScore) + "";
+        return new ParsedInput(start, exit);
     }
 
     private int[] distancesFromStart(int start) {
@@ -171,6 +184,9 @@ public class Day16 extends DayTemplate {
 
     private int state(long entry) {
         return (int) entry;
+    }
+
+    private record ParsedInput(int start, int exit) {
     }
 
     private static final class LongHeap {

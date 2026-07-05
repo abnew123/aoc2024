@@ -84,7 +84,7 @@
 </a>
 <!-- AOC TILES END -->
 
-Current one-pass timing for `MasterSolver` is roughly 224ms on a 2024 MacBook Pro. The table below shows warm 10-run averages per part using the existing `DayTemplate.timer` convention; those numbers are useful for comparing individual solver changes, but they understate the first-run cost someone sees when running all 50 parts once.
+Current day-level timing for `MasterSolver` averages roughly 229ms over 10 separate process runs on a 2024 MacBook Pro. `MasterSolver` now times each day once through `fullSolve`, so days can parse shared input once for both parts. The table below shows warm 10-run averages per part using the existing `DayTemplate.timer` convention; those numbers are still useful for comparing individual solver changes, but the day-level total is the better end-to-end number.
 
 See [performance notes](PERFORMANCE.md) for visual before/after examples and benchmark caveats.
 

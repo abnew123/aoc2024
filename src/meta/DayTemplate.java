@@ -18,6 +18,13 @@ public abstract class DayTemplate {
         return (endTime - startTime) / 1000000.0;
     }
 
+    public double dayTimer(Scanner in) {
+        Long startTime = System.nanoTime();
+        fullSolve(in);
+        Long endTime = System.nanoTime();
+        return (endTime - startTime) / 1000000.0;
+    }
+
     /**
      * Main solving method.
      *
@@ -27,6 +34,14 @@ public abstract class DayTemplate {
      * @return Returns answer in string format.
      */
     public abstract String solve(boolean part1, Scanner in);
+
+    public String[] fullSolve(Scanner in) {
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        return new String[]{
+                solve(true, new Scanner(input)),
+                solve(false, new Scanner(input))
+        };
+    }
 
     /**
      * Some classes require additional, non code steps (e.g. judge an image output).
