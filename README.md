@@ -3,6 +3,16 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=abnew123_aoc2024&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=abnew123_aoc2024)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=abnew123_aoc2024&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=abnew123_aoc2024)
 
+## Local verification
+
+This repo does not use a build wrapper. To smoke-test that all Java sources compile
+without writing generated files into the checkout, run:
+
+```sh
+mkdir -p /tmp/aoc2024-classes
+javac -d /tmp/aoc2024-classes $(find src -name '*.java')
+```
+
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
   2024 - 50 ⭐ - Java
