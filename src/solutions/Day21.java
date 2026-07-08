@@ -12,12 +12,28 @@ public class Day21 extends DayTemplate {
     Map<Character, Integer> dirMap;
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
+        String[] inputs = readCodes(in);
+        initializeKeypads();
+
+        for(String input: inputs){
+            long a = shortest(input, part1);
+            long b = Integer.parseInt(input.substring(0, input.length() - 1));
+            answer +=  a * b;
+        }
+        return answer + "";
+    }
+
+    private String[] readCodes(Scanner in) {
         String[] inputs = new String[5];
-        inputs[0] = in.nextLine();
-        inputs[1] = in.nextLine();
-        inputs[2] = in.nextLine();
-        inputs[3] = in.nextLine();
-        inputs[4] = in.nextLine();
+        for(int i = 0; i < inputs.length; i++){
+            inputs[i] = in.nextLine();
+        }
+        return inputs;
+    }
+
+    private void initializeKeypads() {
+        numPad.clear();
+        dirPad.clear();
         numPad.add(new Coordinate(3,1));
         numPad.add(new Coordinate(2,0));
         numPad.add(new Coordinate(2,1));
@@ -35,13 +51,6 @@ public class Day21 extends DayTemplate {
         dirPad.add(new Coordinate(1,2));
         dirPad.add(new Coordinate(0,1));
         dirPad.add(new Coordinate(0,2));
-
-        for(String input: inputs){
-            long a = shortest(input, part1);
-            long b = Integer.parseInt(input.substring(0, input.length() - 1));
-            answer +=  a * b;
-        }
-        return answer + "";
     }
 
     private long shortest(String input, boolean part1){
@@ -222,42 +231,17 @@ public class Day21 extends DayTemplate {
     }
 
     private Set<String> shortestNumeric(String input){
-        int size = -1;
         Set<String> paths = new HashSet<>();
         paths.add("");
-        Set<String> newPaths = new HashSet<>();
-        for(String path: paths){
-            for(String addition: shortestNumericHelper(numPad.get(10), numPad.get(input.charAt(0) - '0'))){
-                newPaths.add(path + addition + "A");
-            }
-        }
-        paths= newPaths;
+        paths = extendPaths(paths, shortestNumericHelper(numPad.get(10), numPad.get(input.charAt(0) - '0')));
 
         for(int i = 0; i < input.length() - 1; i++){
             int beginning = (input.charAt(i) == 'A')?10:(input.charAt(i) - '0');
             int end = (input.charAt(i + 1) == 'A')?10:(input.charAt(i + 1) - '0');
-            newPaths = new HashSet<>();
-            for(String path: paths){
-                for(String addition: shortestNumericHelper(numPad.get(beginning), numPad.get(end))){
-                    newPaths.add(path + addition + "A");
-                }
-            }
-            paths= newPaths;
-        }
-        for(String path: paths){
-            if(size == -1 || path.length() < size){
-                size = path.length();
-            }
+            paths = extendPaths(paths, shortestNumericHelper(numPad.get(beginning), numPad.get(end)));
         }
 
-        Set<String> result = new HashSet<>();
-        for(String path: paths){
-            if(size == path.length()){
-                result.add(path);
-            }
-        }
-
-        return result;
+        return keepShortest(paths);
     }
 
     private Set<String> shortestNumericHelper(Coordinate a, Coordinate b){
@@ -358,32 +342,34 @@ public class Day21 extends DayTemplate {
     private Set<String> shortestDirectional(String input){
         Set<String> paths = new HashSet<>();
         paths.add("");
-        Set<String> newPaths = new HashSet<>();
-        for(String path: paths){
-            for(String addition: shortestDirectionalHelper(dirPad.get(dirMap.get('A')), dirPad.get(dirMap.get(input.charAt(0))))){
-                newPaths.add(path + addition + "A");
-            }
-        }
-        paths = newPaths;
+        paths = extendPaths(paths, shortestDirectionalHelper(dirPad.get(dirMap.get('A')), dirPad.get(dirMap.get(input.charAt(0)))));
 
         for(int i = 0; i < input.length() - 1; i++){
             int beginning = dirMap.get(input.charAt(i));
             int end = dirMap.get(input.charAt(i + 1));
-            newPaths = new HashSet<>();
-            for(String path: paths){
-                for(String addition: shortestDirectionalHelper(dirPad.get(beginning), dirPad.get(end))){
-                    newPaths.add(path + addition + "A");
-                }
-            }
-            paths= newPaths;
+            paths = extendPaths(paths, shortestDirectionalHelper(dirPad.get(beginning), dirPad.get(end)));
         }
+
+        return keepShortest(paths);
+    }
+
+    private Set<String> extendPaths(Set<String> paths, Set<String> additions) {
+        Set<String> newPaths = new HashSet<>();
+        for(String path: paths){
+            for(String addition: additions){
+                newPaths.add(path + addition + "A");
+            }
+        }
+        return newPaths;
+    }
+
+    private Set<String> keepShortest(Set<String> paths) {
         int size = -1;
         for(String path: paths){
             if(size == -1 || path.length() < size){
                 size = path.length();
             }
         }
-
         Set<String> result = new HashSet<>();
         for(String path: paths){
             if(size == path.length()){

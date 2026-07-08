@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   run-timer:
     runs-on: ubuntu-latest
@@ -21,6 +26,8 @@ jobs:
 
       - name: Build and run solutions
         run: |
+          mkdir -p out/production/aoc2024
+          javac -d out/production/aoc2024 $(find src -name '*.java')
           java -cp out/production/aoc2024 src.meta.TimerRunner
 
       - name: Compare timing
