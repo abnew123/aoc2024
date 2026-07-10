@@ -23,8 +23,7 @@ public class Day16 extends DayTemplate {
         ParsedInput input = parse(in);
         int[] fromStart = distancesFromStart(input.start());
         int bestScore = bestExitScore(fromStart, input.exit());
-        int[] toExit = distancesToExit(input.exit());
-        return new String[]{bestScore + "", countBestPathTiles(fromStart, toExit, bestScore) + ""};
+        return new String[]{bestScore + "", countBestPathTiles(fromStart, input.exit(), bestScore) + ""};
     }
 
     public String solve(boolean part1, Scanner in) {
@@ -34,9 +33,7 @@ public class Day16 extends DayTemplate {
         if (part1) {
             return bestScore + "";
         }
-
-        int[] toExit = distancesToExit(input.exit());
-        return countBestPathTiles(fromStart, toExit, bestScore) + "";
+        return countBestPathTiles(fromStart, input.exit(), bestScore) + "";
     }
 
     private ParsedInput parse(Scanner in) {
@@ -86,28 +83,6 @@ public class Day16 extends DayTemplate {
         return distances;
     }
 
-    private int[] distancesToExit(int exit) {
-        int[] distances = emptyDistances();
-        LongHeap heap = new LongHeap();
-        for (int direction = 0; direction < 4; direction++) {
-            int state = state(exit, direction);
-            distances[state] = 0;
-            heap.add(0, state);
-        }
-        while (!heap.isEmpty()) {
-            long entry = heap.poll();
-            int score = score(entry);
-            int state = state(entry);
-            if (score != distances[state]) {
-                continue;
-            }
-            addMove(distances, heap, state, score, false);
-            addTurn(distances, heap, state, score, (direction(state) + 1) & 3);
-            addTurn(distances, heap, state, score, (direction(state) + 3) & 3);
-        }
-        return distances;
-    }
-
     private int[] emptyDistances() {
         int[] distances = new int[rows * cols * 4];
         Arrays.fill(distances, INF);
@@ -149,17 +124,58 @@ public class Day16 extends DayTemplate {
         return best;
     }
 
-    private long countBestPathTiles(int[] fromStart, int[] toExit, int bestScore) {
-        long total = 0;
-        for (int cell = 0; cell < walls.length; cell++) {
-            if (walls[cell]) {
-                continue;
+    private long countBestPathTiles(int[] fromStart, int exit, int bestScore) {
+        boolean[] seenStates = new boolean[fromStart.length];
+        boolean[] bestPathCells = new boolean[walls.length];
+        int[] stack = new int[fromStart.length];
+        int stackSize = 0;
+
+        for (int direction = 0; direction < 4; direction++) {
+            int exitState = state(exit, direction);
+            if (fromStart[exitState] == bestScore) {
+                seenStates[exitState] = true;
+                stack[stackSize++] = exitState;
             }
-            for (int direction = 0; direction < 4; direction++) {
-                int state = state(cell, direction);
-                if (fromStart[state] + toExit[state] == bestScore) {
-                    total++;
-                    break;
+        }
+
+        long total = 0;
+        while (stackSize > 0) {
+            int currentState = stack[--stackSize];
+            int currentCell = cell(currentState);
+            int currentScore = fromStart[currentState];
+            int currentDirection = direction(currentState);
+
+            if (!bestPathCells[currentCell]) {
+                bestPathCells[currentCell] = true;
+                total++;
+            }
+
+            int predecessor = state(currentCell, (currentDirection + 1) & 3);
+            if (!seenStates[predecessor]
+                    && fromStart[predecessor] + TURN_COST == currentScore) {
+                seenStates[predecessor] = true;
+                stack[stackSize++] = predecessor;
+            }
+
+            predecessor = state(currentCell, (currentDirection + 3) & 3);
+            if (!seenStates[predecessor]
+                    && fromStart[predecessor] + TURN_COST == currentScore) {
+                seenStates[predecessor] = true;
+                stack[stackSize++] = predecessor;
+            }
+
+            int row = currentCell / cols;
+            int col = currentCell % cols;
+            int previousRow = row - DR[currentDirection];
+            int previousCol = col - DC[currentDirection];
+            if (previousRow >= 0 && previousCol >= 0
+                    && previousRow < rows && previousCol < cols) {
+                int previousCell = previousRow * cols + previousCol;
+                predecessor = state(previousCell, currentDirection);
+                if (!walls[previousCell] && !seenStates[predecessor]
+                        && fromStart[predecessor] + 1 == currentScore) {
+                    seenStates[predecessor] = true;
+                    stack[stackSize++] = predecessor;
                 }
             }
         }

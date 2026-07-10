@@ -84,9 +84,28 @@
 </a>
 <!-- AOC TILES END -->
 
-Current day-level timing for `MasterSolver` averages roughly 229ms over 10 separate process runs on a 2024 MacBook Pro. `MasterSolver` now times each day once through `fullSolve`, so days can parse shared input once for both parts. The table below shows warm 10-run averages per part using the existing `DayTemplate.timer` convention; those numbers are still useful for comparing individual solver changes, but the day-level total is the better end-to-end number.
+## Performance
 
-See [performance notes](PERFORMANCE.md) for visual before/after examples and benchmark caveats.
+The tracked [`FreshJvmBenchmark`](src/FreshJvmBenchmark.java) is the authoritative fresh-JVM benchmark and answer-consistency runner. It checks all 50 independent `solve` results against all 25 `fullSolve` pairs, computes a deterministic length-framed SHA-256 checksum, and launches one excluded cold JVM followed by 10 strictly sequential measured JVMs. It does not contain independent expected answers. [`timing-output.txt`](timing-output.txt) is retained as legacy output and is not a current benchmark source.
+
+On a 2024 MacBook Pro running macOS 15.6 (build 24G84), OpenJDK 23.0.1, `aarch64`, and 14 processors, the current 10-process means are 276.021 ms wall time and 202.712 ms summed solver time. An alternating comparison against pristine commit `88e8388` measured solver time improving from 207.799 ms to 202.477 ms (-2.56%); the paired 95% confidence interval for the solver delta is approximately [-7.36, -3.28] ms.
+
+Day 16 produces the same answers with one forward Dijkstra followed by a reverse walk over optimal predecessor states, eliminating its second Dijkstra. Correctness evidence combines exact pre/post identity of the 50-record checksum against known-good pristine commit `88e8388`, both official examples, and differential tests against the pristine implementation on generated rectangular mazes. See the [performance notes](PERFORMANCE.md) for raw samples, metric definitions, validation, and the complete comparison.
+
+Run from the repository root with the private inputs in `data/`:
+
+```sh
+mkdir -p /tmp/aoc2024-classes
+javac -d /tmp/aoc2024-classes $(git ls-files '*.java')
+java -cp /tmp/aoc2024-classes src.FreshJvmBenchmark --verify
+java -cp /tmp/aoc2024-classes src.FreshJvmBenchmark
+```
+
+The answer-equivalence checksum for this revision is `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
+### Historical July warm per-part timings
+
+The table below preserves the July warm 10-run averages recorded with the older `DayTemplate.timer` convention. These values remain useful historical context for individual solvers, but they are not directly comparable to the fresh-process results above.
 
 | Day | Problem | Solution | Part 1 (ms) | Part 2 (ms) |
 | --- | --- | --- |------------:|------------:|
