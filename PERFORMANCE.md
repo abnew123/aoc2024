@@ -38,7 +38,9 @@ The default command repeats those consistency checks, launches one cold child JV
 
 These intervals are intentionally not additive. Child main timing begins before the start marker is emitted, so startup overlaps the beginning of main. Wall timing continues after main timing stops and includes result transport and JVM shutdown. “Cold” means a new JVM with no shared classes or JIT state; it does not claim cleared operating-system file caches.
 
-## Current fresh-JVM results
+## Pre-Day 20 fresh-JVM results
+
+This retained snapshot measured the Day 16 candidate before the additional Day 20 change. The later Day 20 section reports the current branch result.
 
 The excluded cold process was:
 
@@ -100,33 +102,33 @@ A separate Day 22 manual-parser/rolling-key experiment was rejected after it reg
 
 ## Day 20 ordered-track comparison
 
-The prompt guarantees one racetrack path from `S` to `E`. The full solve now walks that path once, records each cell's path index, and evaluates both cheat radii in the same radius-20 scan. For a cheat from path index `i` to `j`, the saved time is exactly `j - i - ManhattanDistance`; this replaces two general BFS traversals and two separate scans without imposing an assumption beyond the prompt. The independent per-part `solve` path remains the general BFS implementation and therefore serves as a separate correctness oracle.
+The prompt guarantees one route from `S` to `E`, but it does not rule out dead-end track branches. The full solve therefore computes one distance-to-end array, follows the uniquely decreasing route, and converts every reachable track cell's distance into progress toward the end. For a cheat starting at route step `i`, the saved time is exactly `targetProgress - i - ManhattanDistance`. This handles branch endpoints, evaluates both cheat radii in one radius-20 scan, and replaces the previous two BFS traversals plus two separate scans without adding an input assumption. The independent per-part `solve` path remains the general two-BFS implementation and serves as a separate correctness oracle.
 
-Commit `d5bdcd3` and the candidate were compiled into separate classpaths. A cold candidate process and 10 measured candidate processes ran first; the baseline cold process and 10 measured baseline processes then ran as a reverse-order replication. Every JVM ran serially with the same Java executable, data, harness, and answer checksum.
+Commit `d5bdcd3` and the final branch source were compiled into separate classpaths. Each classpath ran one excluded cold process and 10 measured fresh processes, all serially with the same Java executable, data, harness, and answer checksum.
 
 | Sample | Baseline wall | Candidate wall | Baseline solver | Candidate solver |
 | ---: | ---: | ---: | ---: | ---: |
-| Cold | 275.419 | 271.279 | 199.012 | 193.255 |
-| 1 | 272.907 | 260.052 | 197.946 | 188.013 |
-| 2 | 273.975 | 262.666 | 200.520 | 189.790 |
-| 3 | 280.558 | 274.757 | 206.640 | 198.533 |
-| 4 | 278.818 | 270.129 | 202.698 | 194.792 |
-| 5 | 278.274 | 267.796 | 203.842 | 195.503 |
-| 6 | 274.199 | 268.968 | 203.891 | 193.359 |
-| 7 | 276.837 | 267.436 | 203.532 | 192.317 |
-| 8 | 275.356 | 272.212 | 201.161 | 197.213 |
-| 9 | 272.234 | 270.561 | 202.435 | 195.281 |
-| 10 | 276.686 | 263.643 | 201.915 | 187.813 |
+| Cold | 275.419 | 270.803 | 199.012 | 192.871 |
+| 1 | 272.907 | 273.840 | 197.946 | 197.734 |
+| 2 | 273.975 | 275.744 | 200.520 | 202.227 |
+| 3 | 280.558 | 273.618 | 206.640 | 197.480 |
+| 4 | 278.818 | 283.514 | 202.698 | 200.961 |
+| 5 | 278.274 | 275.240 | 203.842 | 198.805 |
+| 6 | 274.199 | 267.041 | 203.891 | 192.539 |
+| 7 | 276.837 | 267.330 | 203.532 | 195.858 |
+| 8 | 275.356 | 265.047 | 201.161 | 191.458 |
+| 9 | 272.234 | 269.503 | 202.435 | 193.148 |
+| 10 | 276.686 | 262.900 | 201.915 | 188.838 |
 
 | Metric | Baseline mean | Candidate mean | Change | Baseline SD | Candidate SD |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Wall | 275.984 | 267.822 | -8.162 ms (-2.96%) | 2.720 | 4.547 |
-| Main | 232.678 | 224.243 | -8.435 ms (-3.63%) | 2.230 | 3.444 |
-| Solver | 202.458 | 193.261 | -9.197 ms (-4.54%) | 2.328 | 3.727 |
-| Startup | 24.869 | 25.407 | +0.538 ms | 0.897 | 1.711 |
-| Harness | 30.219 | 30.981 | +0.762 ms | 0.670 | 0.904 |
+| Wall | 275.984 | 271.378 | -4.607 ms (-1.67%) | 2.720 | 6.173 |
+| Main | 232.678 | 227.439 | -5.239 ms (-2.25%) | 2.230 | 5.515 |
+| Solver | 202.458 | 195.905 | -6.553 ms (-3.24%) | 2.328 | 4.326 |
+| Startup | 24.869 | 25.843 | +0.973 ms | 0.897 | 1.643 |
+| Harness | 30.219 | 31.534 | +1.314 ms | 0.670 | 1.350 |
 
-The approximate unpaired 95% confidence interval for the solver difference is **[-12.16, -6.24] ms**, excluding zero. A preceding independent baseline set measured a 202.620 ms solver mean, consistent with the reported reverse-order baseline.
+The approximate unpaired 95% confidence interval for the solver difference is **[-9.89, -3.21] ms**, excluding zero. A preceding independent baseline set measured a 202.620 ms solver mean, consistent with the reported baseline.
 
 ## Answer equivalence and correctness evidence
 

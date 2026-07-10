@@ -12,7 +12,8 @@ public class Day20 extends DayTemplate {
     @Override
     public String[] fullSolve(Scanner in) {
         ParsedInput input = parse(in);
-        long[] answers = countPathCheats(input.start(), input.end());
+        int[] distanceToEnd = bfs(input.end());
+        long[] answers = countPathCheats(input.start(), input.end(), distanceToEnd);
         return new String[]{
                 answers[0] + "",
                 answers[1] + ""
@@ -92,43 +93,54 @@ public class Day20 extends DayTemplate {
         return answer;
     }
 
-    private long[] countPathCheats(int start, int end) {
-        int[] pathIndex = new int[walls.length];
-        Arrays.fill(pathIndex, -1);
+    private long[] countPathCheats(int start, int end, int[] distanceToEnd) {
         int[] path = new int[walls.length];
         int length = 0;
-        int previous = -1;
         int current = start;
         while (true) {
             path[length] = current;
-            pathIndex[current] = length++;
+            length++;
             if (current == end) {
                 break;
             }
             int row = current / cols;
             int col = current - row * cols;
+            int nextDistance = distanceToEnd[current] - 1;
             int next = -1;
-            if (row > 0 && current - cols != previous && !walls[current - cols]) {
+            if (row > 0 && distanceToEnd[current - cols] == nextDistance) {
                 next = current - cols;
             }
-            if (row + 1 < rows && current + cols != previous && !walls[current + cols]) {
+            if (row + 1 < rows && distanceToEnd[current + cols] == nextDistance) {
+                if (next >= 0) {
+                    throw new IllegalArgumentException("Racetrack must have one shortest path from S to E");
+                }
                 next = current + cols;
             }
-            if (col > 0 && current - 1 != previous && !walls[current - 1]) {
+            if (col > 0 && distanceToEnd[current - 1] == nextDistance) {
+                if (next >= 0) {
+                    throw new IllegalArgumentException("Racetrack must have one shortest path from S to E");
+                }
                 next = current - 1;
             }
-            if (col + 1 < cols && current + 1 != previous && !walls[current + 1]) {
+            if (col + 1 < cols && distanceToEnd[current + 1] == nextDistance) {
+                if (next >= 0) {
+                    throw new IllegalArgumentException("Racetrack must have one shortest path from S to E");
+                }
                 next = current + 1;
             }
-            if (next < 0 || pathIndex[next] >= 0) {
-                throw new IllegalArgumentException("Racetrack must contain one path from S to E");
+            if (next < 0) {
+                throw new IllegalArgumentException("No path from S to E");
             }
-            previous = current;
             current = next;
         }
 
         long shortCheats = 0;
         long longCheats = 0;
+        int routeLength = distanceToEnd[start];
+        for (int position = 0; position < distanceToEnd.length; position++) {
+            int distance = distanceToEnd[position];
+            distanceToEnd[position] = distance < 0 ? -1_000_000_000 : routeLength - distance;
+        }
         for (int step = 0; step < length; step++) {
             int position = path[step];
             int row = position / cols;
@@ -144,8 +156,8 @@ public class Day20 extends DayTemplate {
                 int maxCol = Math.min(cols - 1, col + columnRange);
                 for (int targetCol = minCol; targetCol <= maxCol; targetCol++) {
                     int distance = distanceInRows + Math.abs(targetCol - col);
-                    int targetStep = pathIndex[targetRowStart + targetCol];
-                    if (targetStep - step - distance >= 100) {
+                    int targetProgress = distanceToEnd[targetRowStart + targetCol];
+                    if (targetProgress - step - distance >= 100) {
                         longCheats++;
                         if (distance <= 2) {
                             shortCheats++;
