@@ -134,3 +134,40 @@ The table below preserves the July warm 10-run averages recorded with the older 
 | 23 | [LAN Party](https://adventofcode.com/2024/day/23) | [Source](src/solutions/Day23.java) | 3.077 | 2.886 |
 | 24 | [Crossed Wires](https://adventofcode.com/2024/day/24) | [Source](src/solutions/Day24.java) | 2.145 | 1.906 |
 | 25 | [Code Chronicle](https://adventofcode.com/2024/day/25) | [Source](src/solutions/Day25.java) | 7.522 | 0.002 |
+
+<!-- CHAR COUNTS BEGIN -->
+
+## Character counts
+
+The table below counts non-whitespace characters in each normal solution file and its golfed sibling. The golfed files are intentionally separate from the readable/performance-oriented `DayXX.java` files so the PR tracks can merge independently.
+
+| Day | Solution | Golfed solution | Source chars | Golfed chars |
+| --- | --- | --- |-------------:|-------------:|
+| 1 | [Source](src/solutions/Day01.java) | [Golfed](src/solutions/Day01Golfed.java) | 926 | 407 |
+| 2 | [Source](src/solutions/Day02.java) | [Golfed](src/solutions/Day02Golfed.java) | 1,078 | 436 |
+| 3 | [Source](src/solutions/Day03.java) | [Golfed](src/solutions/Day03Golfed.java) | 862 | 347 |
+| 4 | [Source](src/solutions/Day04.java) | [Golfed](src/solutions/Day04Golfed.java) | 1,584 | 455 |
+| 5 | [Source](src/solutions/Day05.java) | [Golfed](src/solutions/Day05Golfed.java) | 2,127 | 568 |
+| 6 | [Source](src/solutions/Day06.java) | [Golfed](src/solutions/Day06Golfed.java) | 2,324 | 512 |
+| 7 | [Source](src/solutions/Day07.java) | [Golfed](src/solutions/Day07Golfed.java) | 1,276 | 437 |
+| 8 | [Source](src/solutions/Day08.java) | [Golfed](src/solutions/Day08Golfed.java) | 1,220 | 504 |
+| 9 | [Source](src/solutions/Day09.java) | [Golfed](src/solutions/Day09Golfed.java) | 2,221 | 747 |
+| 10 | [Source](src/solutions/Day10.java) | [Golfed](src/solutions/Day10Golfed.java) | 1,582 | 465 |
+| 11 | [Source](src/solutions/Day11.java) | [Golfed](src/solutions/Day11Golfed.java) | 2,963 | 450 |
+| 12 | [Source](src/solutions/Day12.java) | [Golfed](src/solutions/Day12Golfed.java) | 2,405 | 728 |
+| 13 | [Source](src/solutions/Day13.java) | [Golfed](src/solutions/Day13Golfed.java) | 1,303 | 276 |
+| 14 | [Source](src/solutions/Day14.java) | [Golfed](src/solutions/Day14Golfed.java) | 2,336 | 697 |
+| 15 | [Source](src/solutions/Day15.java) | [Golfed](src/solutions/Day15Golfed.java) | 3,268 | 838 |
+| 16 | [Source](src/solutions/Day16.java) | [Golfed](src/solutions/Day16Golfed.java) | 5,356 | 724 |
+| 17 | [Source](src/solutions/Day17.java) | [Golfed](src/solutions/Day17Golfed.java) | 2,459 | 733 |
+| 18 | [Source](src/solutions/Day18.java) | [Golfed](src/solutions/Day18Golfed.java) | 1,506 | 666 |
+| 19 | [Source](src/solutions/Day19.java) | [Golfed](src/solutions/Day19Golfed.java) | 1,459 | 393 |
+| 20 | [Source](src/solutions/Day20.java) | [Golfed](src/solutions/Day20Golfed.java) | 2,760 | 644 |
+| 21 | [Source](src/solutions/Day21.java) | [Golfed](src/solutions/Day21Golfed.java) | 10,068 | 727 |
+| 22 | [Source](src/solutions/Day22.java) | [Golfed](src/solutions/Day22Golfed.java) | 2,079 | 515 |
+| 23 | [Source](src/solutions/Day23.java) | [Golfed](src/solutions/Day23Golfed.java) | 3,581 | 931 |
+| 24 | [Source](src/solutions/Day24.java) | [Golfed](src/solutions/Day24Golfed.java) | 2,621 | 1,081 |
+| 25 | [Source](src/solutions/Day25.java) | [Golfed](src/solutions/Day25Golfed.java) | 1,111 | 411 |
+| Total |  |  | 60,475 | 14,692 |
+
+<!-- CHAR COUNTS END -->

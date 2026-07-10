@@ -3,11 +3,15 @@ package src.meta;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.Scanner;
 import java.util.concurrent.*;
 
 public class TimerRunner {
     private static final String PATH_NAME_PREFIX = "src.solutions.Day";
+    private static final String[] GOLFED_DAYS = "A B C D E F G H I J K L M N O P Q R S T U V W X Y".split(" ");
+    private static final boolean USE_GOLFED = false;
 
     public static void main(String[] args) throws IOException {
         String outputFile = "timing-output.txt";
@@ -41,13 +45,25 @@ public class TimerRunner {
 
     private static Double timeSolution(String zeroFilledDay, int part, File inputFile) throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Callable<Double> task = () -> (Double) Class.forName(PATH_NAME_PREFIX + zeroFilledDay)
-                .getMethod("timer", boolean.class, Scanner.class)
-                .invoke(Class.forName(PATH_NAME_PREFIX + zeroFilledDay)
-                                .getDeclaredConstructor()
-                                .newInstance(),
-                        part == 1,
-                        new Scanner(inputFile));
+        Callable<Double> task = () -> {
+            Class<?> cls = Class.forName(USE_GOLFED ? GOLFED_DAYS[Integer.parseInt(zeroFilledDay) - 1] : PATH_NAME_PREFIX + zeroFilledDay);
+            Object solver = cls.getDeclaredConstructor().newInstance();
+            if (!USE_GOLFED) {
+                return (Double) cls.getMethod("timer", boolean.class, Scanner.class)
+                        .invoke(solver, part == 1, new Scanner(inputFile));
+            }
+            long start = System.nanoTime();
+            try {
+                Method solve = cls.getDeclaredMethod("s", boolean.class, String.class);
+                solve.setAccessible(true);
+                solve.invoke(solver, part == 1, Files.readString(inputFile.toPath()));
+            } catch (NoSuchMethodException e) {
+                Method solve = cls.getDeclaredMethod("s", boolean.class, Scanner.class);
+                solve.setAccessible(true);
+                solve.invoke(solver, part == 1, new Scanner(inputFile));
+            }
+            return (System.nanoTime() - start) / 1000000.0;
+        };
 
         Future<Double> future = executor.submit(task);
         try {
