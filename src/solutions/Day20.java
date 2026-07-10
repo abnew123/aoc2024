@@ -12,12 +12,10 @@ public class Day20 extends DayTemplate {
     @Override
     public String[] fullSolve(Scanner in) {
         ParsedInput input = parse(in);
-        int[] bfsFromEnd = bfs(input.end());
-        int[] bfsFromStart = bfs(input.start());
-        int currentDistance = bfsFromEnd[input.start()];
+        long[] answers = countPathCheats(input.start(), input.end());
         return new String[]{
-                countCheats(bfsFromStart, bfsFromEnd, currentDistance, 2) + "",
-                countCheats(bfsFromStart, bfsFromEnd, currentDistance, 20) + ""
+                answers[0] + "",
+                answers[1] + ""
         };
     }
 
@@ -92,6 +90,71 @@ public class Day20 extends DayTemplate {
             }
         }
         return answer;
+    }
+
+    private long[] countPathCheats(int start, int end) {
+        int[] pathIndex = new int[walls.length];
+        Arrays.fill(pathIndex, -1);
+        int[] path = new int[walls.length];
+        int length = 0;
+        int previous = -1;
+        int current = start;
+        while (true) {
+            path[length] = current;
+            pathIndex[current] = length++;
+            if (current == end) {
+                break;
+            }
+            int row = current / cols;
+            int col = current - row * cols;
+            int next = -1;
+            if (row > 0 && current - cols != previous && !walls[current - cols]) {
+                next = current - cols;
+            }
+            if (row + 1 < rows && current + cols != previous && !walls[current + cols]) {
+                next = current + cols;
+            }
+            if (col > 0 && current - 1 != previous && !walls[current - 1]) {
+                next = current - 1;
+            }
+            if (col + 1 < cols && current + 1 != previous && !walls[current + 1]) {
+                next = current + 1;
+            }
+            if (next < 0 || pathIndex[next] >= 0) {
+                throw new IllegalArgumentException("Racetrack must contain one path from S to E");
+            }
+            previous = current;
+            current = next;
+        }
+
+        long shortCheats = 0;
+        long longCheats = 0;
+        for (int step = 0; step < length; step++) {
+            int position = path[step];
+            int row = position / cols;
+            int col = position - row * cols;
+            int minDr = Math.max(-20, -row);
+            int maxDr = Math.min(20, rows - 1 - row);
+            for (int dr = minDr; dr <= maxDr; dr++) {
+                int distanceInRows = Math.abs(dr);
+                int columnRange = 20 - distanceInRows;
+                int targetRow = row + dr;
+                int targetRowStart = targetRow * cols;
+                int minCol = Math.max(0, col - columnRange);
+                int maxCol = Math.min(cols - 1, col + columnRange);
+                for (int targetCol = minCol; targetCol <= maxCol; targetCol++) {
+                    int distance = distanceInRows + Math.abs(targetCol - col);
+                    int targetStep = pathIndex[targetRowStart + targetCol];
+                    if (targetStep - step - distance >= 100) {
+                        longCheats++;
+                        if (distance <= 2) {
+                            shortCheats++;
+                        }
+                    }
+                }
+            }
+        }
+        return new long[]{shortCheats, longCheats};
     }
 
     private int[] bfs(int start){

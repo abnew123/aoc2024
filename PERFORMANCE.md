@@ -98,11 +98,42 @@ For solver time, the approximate paired 95% confidence interval for candidate mi
 
 A separate Day 22 manual-parser/rolling-key experiment was rejected after it regressed the measured full run. Day 22 was restored exactly to `88e8388`, so that experiment is not included in these results.
 
+## Day 20 ordered-track comparison
+
+The prompt guarantees one racetrack path from `S` to `E`. The full solve now walks that path once, records each cell's path index, and evaluates both cheat radii in the same radius-20 scan. For a cheat from path index `i` to `j`, the saved time is exactly `j - i - ManhattanDistance`; this replaces two general BFS traversals and two separate scans without imposing an assumption beyond the prompt. The independent per-part `solve` path remains the general BFS implementation and therefore serves as a separate correctness oracle.
+
+Commit `d5bdcd3` and the candidate were compiled into separate classpaths. A cold candidate process and 10 measured candidate processes ran first; the baseline cold process and 10 measured baseline processes then ran as a reverse-order replication. Every JVM ran serially with the same Java executable, data, harness, and answer checksum.
+
+| Sample | Baseline wall | Candidate wall | Baseline solver | Candidate solver |
+| ---: | ---: | ---: | ---: | ---: |
+| Cold | 275.419 | 271.279 | 199.012 | 193.255 |
+| 1 | 272.907 | 260.052 | 197.946 | 188.013 |
+| 2 | 273.975 | 262.666 | 200.520 | 189.790 |
+| 3 | 280.558 | 274.757 | 206.640 | 198.533 |
+| 4 | 278.818 | 270.129 | 202.698 | 194.792 |
+| 5 | 278.274 | 267.796 | 203.842 | 195.503 |
+| 6 | 274.199 | 268.968 | 203.891 | 193.359 |
+| 7 | 276.837 | 267.436 | 203.532 | 192.317 |
+| 8 | 275.356 | 272.212 | 201.161 | 197.213 |
+| 9 | 272.234 | 270.561 | 202.435 | 195.281 |
+| 10 | 276.686 | 263.643 | 201.915 | 187.813 |
+
+| Metric | Baseline mean | Candidate mean | Change | Baseline SD | Candidate SD |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Wall | 275.984 | 267.822 | -8.162 ms (-2.96%) | 2.720 | 4.547 |
+| Main | 232.678 | 224.243 | -8.435 ms (-3.63%) | 2.230 | 3.444 |
+| Solver | 202.458 | 193.261 | -9.197 ms (-4.54%) | 2.328 | 3.727 |
+| Startup | 24.869 | 25.407 | +0.538 ms | 0.897 | 1.711 |
+| Harness | 30.219 | 30.981 | +0.762 ms | 0.670 | 0.904 |
+
+The approximate unpaired 95% confidence interval for the solver difference is **[-12.16, -6.24] ms**, excluding zero. A preceding independent baseline set measured a 202.620 ms solver mean, consistent with the reported reverse-order baseline.
+
 ## Answer equivalence and correctness evidence
 
 - The current 50-record length-framed checksum is exactly identical to the pre-change checksum from known-good pristine commit `88e8388`, and all 50 independent `solve` results match all 25 `fullSolve` pairs.
 - Day 16 matches the official examples `7036 / 45` and `11048 / 64`.
 - Day 16 also matched the pristine implementation on 40 deterministic generated rectangular mazes, with separate `solve` and combined `fullSolve` agreement.
+- Day 20's ordered full solve matches its independent BFS solves on the personal input, the official sample at the 100-picosecond threshold, and a one-row corridor edge case.
 
 ## Historical July warm visual examples
 
