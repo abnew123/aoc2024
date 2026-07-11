@@ -88,7 +88,7 @@
 
 The tracked [`FreshJvmBenchmark`](src/FreshJvmBenchmark.java) is the authoritative fresh-JVM benchmark and answer-consistency runner. It checks all 50 independent `solve` results against all 25 `fullSolve` pairs, computes a deterministic length-framed SHA-256 checksum, and launches one excluded cold JVM followed by 10 strictly sequential measured JVMs. It does not contain independent expected answers. [`timing-output.txt`](timing-output.txt) is retained as legacy output and is not a current benchmark source.
 
-On a 2024 MacBook Pro running macOS 15.6 (build 24G84), OpenJDK 23.0.1, `aarch64`, and 14 processors, the latest current-source 10-process means are 271.837 ms wall time and 202.390 ms summed solver time under explicitly nonuniform interactive load. An earlier alternating comparison against pristine commit `88e8388` measured solver time improving from 207.799 ms to 202.477 ms (-2.56%); the paired 95% confidence interval for that solver delta is approximately [-7.36, -3.28] ms.
+On a 2024 MacBook Pro running macOS 15.6 (build 24G84), OpenJDK 23.0.1, `aarch64`, and 14 processors, the latest current-source 10-process means are 270.748 ms wall time and 196.917 ms summed solver time under explicitly nonuniform interactive load. An earlier alternating comparison against pristine commit `88e8388` measured solver time improving from 207.799 ms to 202.477 ms (-2.56%); the paired 95% confidence interval for that solver delta is approximately [-7.36, -3.28] ms.
 
 Day 16 produces the same answers with one forward Dijkstra followed by a reverse walk over optimal predecessor states, eliminating its second Dijkstra. Correctness evidence combines exact pre/post identity of the 50-record checksum against known-good pristine commit `88e8388`, both official examples, and differential tests against the pristine implementation on generated rectangular mazes. See the [performance notes](PERFORMANCE.md) for raw samples, metric definitions, validation, and the complete comparison.
 
@@ -101,6 +101,8 @@ Day 6 now parses once and derives the visited-cell count while walking the same 
 Day 2 now parses every report once into primitive levels and tests dampener candidates by skipping an index instead of copying and reparsing arrays. Its counterbalanced isolated `fullSolve` mean fell from 13.805 ms to 8.450 ms (-38.8%), with a paired 95% confidence interval of [-5.997, -4.714] ms; the whole-suite paired interval remained inconclusive under interactive load.
 
 Day 3 now computes both multiplication totals in one direct character pass instead of compiling regexes and scanning duplicate input. Its isolated mean fell from 10.474 ms to 6.457 ms (-38.4%), with a paired 95% confidence interval of [-4.270, -3.763] ms; the whole-suite paired interval remained inconclusive under interactive load.
+
+Day 4 now parses the word-search grid once and counts straight words and diagonal crosses in one traversal. Its isolated mean fell from 7.627 ms to 4.779 ms (-37.3%), with a paired 95% confidence interval of [-3.096, -2.599] ms; the whole-suite paired interval also excluded zero.
 
 Run from the repository root with the private inputs in `data/`:
 

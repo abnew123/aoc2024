@@ -13,6 +13,34 @@ public class Day04 extends DayTemplate {
     private int cols;
 
     public String solve(boolean part1, Scanner in) {
+        parse(in);
+        return (part1 ? countXmas() : countMasCrosses()) + "";
+    }
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        parse(in);
+        long xmas = 0;
+        long crosses = 0;
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                char current = grid[row][col];
+                if (current == 'X' || current == 'S') {
+                    xmas += checkPattern(row, col, 1, 0)
+                            + checkPattern(row, col, 0, 1)
+                            + checkPattern(row, col, 1, 1)
+                            + checkPattern(row, col, -1, 1);
+                }
+                if (current == 'A' && row > 0 && row + 1 < rows
+                        && col > 0 && col + 1 < cols && isMasCross(row, col)) {
+                    crosses++;
+                }
+            }
+        }
+        return new String[]{xmas + "", crosses + ""};
+    }
+
+    private void parse(Scanner in) {
         List<String> lines = new ArrayList<>();
         while (in.hasNextLine()) {
             lines.add(in.nextLine());
@@ -24,27 +52,34 @@ public class Day04 extends DayTemplate {
         for (int row = 0; row < rows; row++) {
             grid[row] = lines.get(row).toCharArray();
         }
+    }
 
+    private long countXmas() {
         long answer = 0;
-        if (part1) {
-            for (int row = 0; row < rows; row++) {
-                for (int col = 0; col < cols; col++) {
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                char current = grid[row][col];
+                if (current == 'X' || current == 'S') {
                     answer += checkPattern(row, col, 1, 0)
                             + checkPattern(row, col, 0, 1)
                             + checkPattern(row, col, 1, 1)
                             + checkPattern(row, col, -1, 1);
                 }
             }
-        } else {
-            for (int row = 1; row + 1 < rows; row++) {
-                for (int col = 1; col + 1 < cols; col++) {
-                    if (grid[row][col] == 'A' && isMasCross(row, col)) {
-                        answer++;
-                    }
+        }
+        return answer;
+    }
+
+    private long countMasCrosses() {
+        long answer = 0;
+        for (int row = 1; row + 1 < rows; row++) {
+            for (int col = 1; col + 1 < cols; col++) {
+                if (grid[row][col] == 'A' && isMasCross(row, col)) {
+                    answer++;
                 }
             }
         }
-        return answer + "";
+        return answer;
     }
 
     private int checkPattern(int row, int col, int rowStep, int colStep) {

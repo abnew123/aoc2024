@@ -372,6 +372,46 @@ Their 10-process means were:
 
 The accepted evidence is the isolated paired Day 3 interval; the whole-suite paired interval is explicitly inconclusive under nonuniform interactive load, and the phase split is retained transparently. All 50 independent answers and 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. Both official examples passed; 300 deterministic prompt-valid/malformed streams with LF/CRLF and cross-line instructions matched the exact regex implementation; four-digit operands were rejected per the prompt; and 3,000 valid `mul(999,999)` instructions produced the correct `2994003000` long total.
 
+## Day 4 shared word-search traversal
+
+Day 4's default combined solve previously materialized the input, created two additional Scanners, and parsed the grid twice. It now parses once and accumulates straight XMAS/SAMX lines plus diagonal MAS crosses in one grid traversal. Straight-line checks are skipped unless the starting cell is `X` or `S`; standalone parts retain selective counting paths.
+
+An isolated runner constructed the solver and input `Scanner` before timing the exact `fullSolve` call, checked both answers, and ran one excluded cold JVM per variant followed by 10 counterbalanced pairs of separate JVMs. Odd pairs ran the `3aeb72b` duplicate-parse baseline then candidate (`B-C`); even pairs reversed the order (`C-B`).
+
+| Pair | Order | Duplicate parse (ms) | Shared traversal (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 8.175 | 4.602 | -3.574 |
+| 2 | C-B | 7.225 | 4.933 | -2.291 |
+| 3 | B-C | 7.282 | 4.615 | -2.667 |
+| 4 | C-B | 7.606 | 4.880 | -2.726 |
+| 5 | B-C | 8.018 | 4.918 | -3.100 |
+| 6 | C-B | 7.473 | 4.573 | -2.899 |
+| 7 | B-C | 7.422 | 4.666 | -2.756 |
+| 8 | C-B | 7.708 | 5.093 | -2.615 |
+| 9 | B-C | 7.693 | 4.943 | -2.750 |
+| 10 | C-B | 7.669 | 4.569 | -3.100 |
+
+Table deltas and summary statistics use the unrounded nanosecond records. The excluded cold values were 7.360 ms baseline and 4.710 ms candidate. The measured means were **7.627 ms baseline** and **4.779 ms candidate**, a **2.848 ms (37.3%) reduction**. The paired-delta sample standard deviation was 0.347 ms and the t(9) 95% confidence interval was **[-3.096 ms, -2.599 ms]**.
+
+The authoritative whole-suite counterbalanced comparison also showed a statistically clear solver reduction: its 10-pair means were 206.300 ms baseline and 200.395 ms candidate, a -5.906 ms delta with a 95% confidence interval of **[-9.683 ms, -2.128 ms]**. Separate standard phase runs had these excluded cold processes:
+
+| Variant | Wall (ms) | Main (ms) | Solver (ms) | Startup (ms) | Harness (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 272.796 | 229.357 | 200.156 | 26.909 | 29.201 |
+| Candidate | 279.665 | 235.854 | 206.129 | 26.983 | 29.725 |
+
+Their 10-process means were:
+
+| Metric | Baseline mean (ms) | Candidate mean (ms) | Change (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 268.421 | 270.748 | +2.326 |
+| Main | 228.205 | 227.289 | -0.916 |
+| Solver | 198.130 | 196.917 | -1.212 |
+| Startup | 27.844 | 27.027 | -0.817 |
+| Harness | 30.076 | 30.372 | +0.296 |
+
+All 50 independent answers and 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. The official sample returned `18 / 9`, and 1,000 deterministic rectangular grids ranging down to one row or column matched the exact pre-change implementation with separate/combined agreement and optional final newlines.
+
 ## Answer equivalence and correctness evidence
 
 - The current 50-record length-framed checksum is exactly identical to the pre-change checksum from known-good pristine commit `88e8388`, and all 50 independent `solve` results match all 25 `fullSolve` pairs.
@@ -383,6 +423,7 @@ The accepted evidence is the isolated paired Day 3 interval; the whole-suite pai
 - Day 6 matches its separate solve entry points, the `41 / 6` official example, an immediate-exit edge case, and the pre-change implementation on 500 deterministic exit-guaranteed rectangular grids with and without final newlines.
 - Day 2 matches its separate solve entry points, the `2 / 4` official example, and an independent reference across 19,545 reports including exhaustive short sequences, mixed whitespace, and signed-integer extremes.
 - Day 3 matches both official examples and the pre-change regex implementation on 300 deterministic streams, including toggles, malformed instructions, line-ending variants, and cross-line tokens; prompt-valid totals use `long` accumulation.
+- Day 4 matches the official `18 / 9` sample and the pre-change implementation on 1,000 deterministic rectangular grids, including tiny dimensions, borders, overlaps, and reverse words.
 
 ## Historical July warm visual examples
 
