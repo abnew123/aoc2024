@@ -3,73 +3,88 @@ package src.solutions;
 import src.meta.DayTemplate;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
 public class Day25 extends DayTemplate {
 
+    private static final String NO_PART_TWO = "Merry Christmas!";
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        return new String[]{countFits(in) + "", NO_PART_TWO};
+    }
+
     public String solve(boolean part1, Scanner in){
         if(!part1) { //part 2 doesn't exist for this day
-            return "Merry Christmas!";
+            return NO_PART_TWO;
         }
+        return countFits(in) + "";
+    }
+
+    private long countFits(Scanner in) {
+        List<Schematic> locks = new ArrayList<>();
+        List<Schematic> keys = new ArrayList<>();
+        int[] heights = null;
+        int rows = 0;
+        boolean lock = false;
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        Iterator<String> lines = input.lines().iterator();
+
+        while (lines.hasNext()) {
+            String line = lines.next();
+            if (line.isEmpty()) {
+                if (heights != null) {
+                    (lock ? locks : keys).add(new Schematic(heights, rows));
+                    heights = null;
+                    rows = 0;
+                }
+                continue;
+            }
+
+            if (heights == null) {
+                heights = new int[line.length()];
+                lock = line.charAt(0) == '#';
+            } else if (line.length() != heights.length) {
+                throw new IllegalArgumentException("Inconsistent schematic width");
+            }
+            for (int column = 0; column < heights.length; column++) {
+                if (line.charAt(column) == '#') {
+                    heights[column]++;
+                }
+            }
+            rows++;
+        }
+
+        if (heights != null) {
+            (lock ? locks : keys).add(new Schematic(heights, rows));
+        }
+
         long answer = 0;
-        List<String> grid = new ArrayList<>();
-        List<List<String>> grids = new ArrayList<>();
-        while(in.hasNext()){
-            String line = in.nextLine();
-            if(line.isEmpty()){
-                grids.add(grid);
-                grid = new ArrayList<>();
-            }
-            else{
-                grid.add(line);
-            }
-        }
-
-        if(!grid.isEmpty()){
-            grids.add(grid);
-        }
-
-        List<int[]> locks = new ArrayList<>();
-        List<int[]> keys = new ArrayList<>();
-        for(List<String> lines: grids){
-            int[][] g = new int[lines.get(0).length()][lines.size()];
-            for(int i = 0; i < lines.size(); i++){
-                String line = lines.get(i);
-                for(int j = 0; j < line.length(); j++){
-                    g[j][i] = lines.get(i).charAt(j) == '#'? 1 : 0;
+        for (Schematic lockSchematic : locks) {
+            for (Schematic keySchematic : keys) {
+                int[] lockHeights = lockSchematic.heights();
+                int[] keyHeights = keySchematic.heights();
+                if (lockSchematic.rows() != keySchematic.rows()
+                        || lockHeights.length != keyHeights.length) {
+                    throw new IllegalArgumentException("Inconsistent schematic dimensions");
                 }
-            }
-            int[] heights = new int[5];
-
-            for(int i = 0; i < 5; i++){
-                for(int j = 0; j < 7; j++){
-                    if(g[i][j] == 1){
-                        heights[i]++;
-                    }
-                }
-            }
-            if(lines.get(0).startsWith(".")){
-                locks.add(heights);
-            }
-            else{
-                keys.add(heights);
-            }
-        }
-
-        for(int[] lock: locks){
-            for(int[] key: keys){
                 boolean fits = true;
-                for(int i = 0; i < 5; i++){
-                    if(lock[i] + key[i] > 7){
+                for (int column = 0; column < lockHeights.length; column++) {
+                    if (lockHeights[column] + keyHeights[column] > lockSchematic.rows()) {
                         fits = false;
+                        break;
                     }
                 }
-                if(fits){
+                if (fits) {
                     answer++;
                 }
             }
         }
-        return answer + "";
+        return answer;
+    }
+
+    private record Schematic(int[] heights, int rows) {
     }
 }

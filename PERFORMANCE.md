@@ -170,12 +170,53 @@ The 10-process means were:
 
 The full phase run independently confirms the targeted harness reduction. Interactive machine load was explicitly nonuniform during this burst, so the wall, main, and solver movements are not treated as evidence for this harness-only change. All 50 independent answers and all 25 combined solves remain unchanged.
 
+## Day 25 single-pass schematics
+
+Day 25 now reads the outer `Scanner` once, traverses the resulting text with `String.lines()`, and accumulates column heights directly. It no longer stores every schematic line, allocates and fills a transposed two-dimensional grid, or uses the default `fullSolve` path that creates two more `Scanner` instances. Width and height are derived from each schematic rather than fixed at 5×7; prompt-valid schematics are still compatible exactly when every pair of filled-column counts is at most the schematic height.
+
+An isolated runner constructed the solver and input `Scanner` before timing the exact `fullSolve` call, checked both answers, and ran one excluded cold JVM per variant followed by 10 counterbalanced pairs of separate JVMs. Odd pairs ran the `617af5c` baseline then candidate (`B-C`), and even pairs reversed the order (`C-B`).
+
+| Pair | Order | Baseline Day 25 (ms) | Candidate Day 25 (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 12.263 | 8.840 | -3.423 |
+| 2 | C-B | 12.353 | 8.282 | -4.071 |
+| 3 | B-C | 12.011 | 8.817 | -3.193 |
+| 4 | C-B | 12.218 | 8.676 | -3.542 |
+| 5 | B-C | 11.907 | 7.744 | -4.163 |
+| 6 | C-B | 12.648 | 8.191 | -4.457 |
+| 7 | B-C | 12.260 | 8.238 | -4.023 |
+| 8 | C-B | 12.965 | 8.163 | -4.801 |
+| 9 | B-C | 11.857 | 7.492 | -4.366 |
+| 10 | C-B | 12.088 | 7.368 | -4.721 |
+
+The excluded cold values were 11.700 ms baseline and 8.780 ms candidate. The measured means were **12.257 ms baseline** and **8.181 ms candidate**, a **4.076 ms (33.3%) reduction**. The paired-delta sample standard deviation was 0.545 ms and the t(9) 95% confidence interval was **[-4.47 ms, -3.69 ms]**.
+
+The exact final sources also ran through the authoritative whole-suite harness. A counterbalanced 10-pair child comparison measured 191.999 ms baseline and 192.270 ms candidate solver means; its +0.272 ms paired delta had a wide 95% confidence interval of [-2.48 ms, +3.02 ms]. This aggregate is explicitly inconclusive under the nonuniform interactive load and is not used to claim a whole-suite improvement.
+
+Separate standard cold-plus-10 runs retained the complete phase split:
+
+| Variant | Cold wall (ms) | Cold main (ms) | Cold solver (ms) | Cold startup (ms) | Cold harness (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 264.431 | 222.253 | 192.057 | 26.997 | 30.195 |
+| Candidate | 267.245 | 223.050 | 192.405 | 25.733 | 30.645 |
+
+| Metric | Baseline mean (ms) | Candidate mean (ms) | Change (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 264.802 | 265.635 | +0.834 |
+| Main | 221.971 | 222.707 | +0.736 |
+| Solver | 192.314 | 193.298 | +0.984 |
+| Startup | 24.699 | 25.052 | +0.353 |
+| Harness | 29.657 | 29.409 | -0.248 |
+
+The accepted evidence is the isolated, fully paired Day 25 solver result; the complete phase table is retained transparently rather than interpreted through unrelated day-to-day load. All 50 independent answers and all 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. In addition, 100 deterministic generated cases checked independently computed fit counts, varying widths and heights, LF and CRLF separators, optional trailing blanks, and inputs with no locks or no keys.
+
 ## Answer equivalence and correctness evidence
 
 - The current 50-record length-framed checksum is exactly identical to the pre-change checksum from known-good pristine commit `88e8388`, and all 50 independent `solve` results match all 25 `fullSolve` pairs.
 - Day 16 matches the official examples `7036 / 45` and `11048 / 64`.
 - Day 16 also matched the pristine implementation on 40 deterministic generated rectangular mazes, with separate `solve` and combined `fullSolve` agreement.
 - Day 20's ordered full solve matches its independent BFS solves on the personal input, the official sample at the 100-picosecond threshold, and a one-row corridor edge case.
+- Day 25 matches independently calculated fit counts on 100 deterministic generalized schematic inputs, including alternate line endings and dimensions; the repository's prompt-shaped 5×7 puzzle input retains the established checksum.
 
 ## Historical July warm visual examples
 
