@@ -250,6 +250,48 @@ Their 10-process means were:
 
 The accepted evidence is the isolated paired Day 12 interval; the whole-suite paired interval is explicitly inconclusive under interactive load, while the separate phase means are retained as the latest current-source run. All 50 independent answers and 25 combined solves retain the established checksum. The official `140 / 80` sample and 500 deterministic rectangular gardens also matched both independent solves and the exact pre-change implementation.
 
+## Day 6 shared guard traversal
+
+Day 6's default `fullSolve` previously parsed the grid twice and walked the unobstructed guard route once for each part. The combined path now parses once and counts every first-entered route cell while the existing part 2 traversal tests that cell as an obstruction candidate. The independent part 1 entry point retains its cheaper visited-cell-only walk, and part 2 retains the same obstacle-state simulation.
+
+An isolated runner constructed the solver and input `Scanner` before timing the exact `fullSolve` call, checked both answers, and ran one excluded cold JVM per variant followed by 10 counterbalanced pairs of separate JVMs. Odd pairs ran the `11f77ad` two-parse baseline then candidate (`B-C`); even pairs reversed the order (`C-B`).
+
+| Pair | Order | Two parses/walks (ms) | Shared traversal (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 19.814 | 17.657 | -2.157 |
+| 2 | C-B | 19.914 | 17.961 | -1.953 |
+| 3 | B-C | 19.783 | 17.810 | -1.972 |
+| 4 | C-B | 19.624 | 17.613 | -2.011 |
+| 5 | B-C | 19.410 | 17.513 | -1.897 |
+| 6 | C-B | 19.872 | 17.355 | -2.516 |
+| 7 | B-C | 19.659 | 17.607 | -2.052 |
+| 8 | C-B | 19.697 | 17.895 | -1.802 |
+| 9 | B-C | 19.639 | 17.632 | -2.006 |
+| 10 | C-B | 19.563 | 17.656 | -1.907 |
+
+Table deltas and summary statistics use the unrounded nanosecond records rather than the displayed three-decimal values.
+
+The excluded cold values were 19.783 ms baseline and 17.470 ms candidate. The measured means were **19.697 ms baseline** and **17.670 ms candidate**, a **2.027 ms (10.3%) reduction**. The paired-delta sample standard deviation was 0.197 ms and the t(9) 95% confidence interval was **[-2.168 ms, -1.887 ms]**.
+
+The authoritative whole-suite child comparison was directionally consistent but noisier: its counterbalanced 10-pair solver means were 195.355 ms baseline and 194.570 ms candidate, a -0.785 ms delta with a 95% confidence interval of [-3.320 ms, +1.749 ms]. Separate standard phase runs had these excluded cold processes:
+
+| Variant | Wall (ms) | Main (ms) | Solver (ms) | Startup (ms) | Harness (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 281.547 | 232.660 | 199.043 | 33.739 | 33.618 |
+| Candidate | 288.747 | 242.386 | 207.934 | 29.879 | 34.451 |
+
+Their 10-process means were:
+
+| Metric | Baseline mean (ms) | Candidate mean (ms) | Change (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 279.885 | 281.043 | +1.158 |
+| Main | 234.810 | 235.135 | +0.326 |
+| Solver | 201.404 | 201.051 | -0.353 |
+| Startup | 29.031 | 30.214 | +1.183 |
+| Harness | 33.406 | 34.085 | +0.679 |
+
+The accepted evidence is the isolated paired Day 6 interval; the whole-suite paired interval is explicitly inconclusive under the user's nonuniform interactive load, and the complete phase split is retained transparently. All 50 independent answers and 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. The official `41 / 6` sample, the immediate-exit `1 / 0` edge case, and 500 deterministic exit-guaranteed rectangular grids also matched separate solves, combined solves, and the exact pre-change implementation.
+
 ## Answer equivalence and correctness evidence
 
 - The current 50-record length-framed checksum is exactly identical to the pre-change checksum from known-good pristine commit `88e8388`, and all 50 independent `solve` results match all 25 `fullSolve` pairs.
@@ -258,6 +300,7 @@ The accepted evidence is the isolated paired Day 12 interval; the whole-suite pa
 - Day 20's ordered full solve matches its independent BFS solves on the personal input, the official sample at the 100-picosecond threshold, and a one-row corridor edge case.
 - Day 25 matches independently calculated fit counts on 100 deterministic generalized schematic inputs, including alternate line endings and dimensions; the repository's prompt-shaped 5×7 puzzle input retains the established checksum.
 - Day 12 matches its separate solve entry points, the `140 / 80` official example, and the pre-change implementation on 500 deterministic rectangular gardens.
+- Day 6 matches its separate solve entry points, the `41 / 6` official example, an immediate-exit edge case, and the pre-change implementation on 500 deterministic exit-guaranteed rectangular grids with and without final newlines.
 
 ## Historical July warm visual examples
 

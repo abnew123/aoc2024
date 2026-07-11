@@ -88,13 +88,15 @@
 
 The tracked [`FreshJvmBenchmark`](src/FreshJvmBenchmark.java) is the authoritative fresh-JVM benchmark and answer-consistency runner. It checks all 50 independent `solve` results against all 25 `fullSolve` pairs, computes a deterministic length-framed SHA-256 checksum, and launches one excluded cold JVM followed by 10 strictly sequential measured JVMs. It does not contain independent expected answers. [`timing-output.txt`](timing-output.txt) is retained as legacy output and is not a current benchmark source.
 
-On a 2024 MacBook Pro running macOS 15.6 (build 24G84), OpenJDK 23.0.1, `aarch64`, and 14 processors, the latest current-source 10-process means are 267.243 ms wall time and 191.895 ms summed solver time under explicitly nonuniform interactive load. An earlier alternating comparison against pristine commit `88e8388` measured solver time improving from 207.799 ms to 202.477 ms (-2.56%); the paired 95% confidence interval for that solver delta is approximately [-7.36, -3.28] ms.
+On a 2024 MacBook Pro running macOS 15.6 (build 24G84), OpenJDK 23.0.1, `aarch64`, and 14 processors, the latest current-source 10-process means are 281.043 ms wall time and 201.051 ms summed solver time under explicitly nonuniform interactive load. An earlier alternating comparison against pristine commit `88e8388` measured solver time improving from 207.799 ms to 202.477 ms (-2.56%); the paired 95% confidence interval for that solver delta is approximately [-7.36, -3.28] ms.
 
 Day 16 produces the same answers with one forward Dijkstra followed by a reverse walk over optimal predecessor states, eliminating its second Dijkstra. Correctness evidence combines exact pre/post identity of the 50-record checksum against known-good pristine commit `88e8388`, both official examples, and differential tests against the pristine implementation on generated rectangular mazes. See the [performance notes](PERFORMANCE.md) for raw samples, metric definitions, validation, and the complete comparison.
 
 Day 25 parses schematic column heights in one pass and bypasses the default duplicate-`Scanner` combined-solve path. A counterbalanced isolated fresh-process comparison reduced its mean from 12.257 ms to 8.181 ms (-33.3%), with a paired 95% confidence interval of [-4.47, -3.69] ms; the whole-suite comparison remained inconclusive under interactive load.
 
 Day 12 now computes perimeter and side prices from one region traversal. Its counterbalanced isolated mean fell from 10.045 ms to 6.776 ms (-32.5%), with a paired 95% confidence interval of [-3.50, -3.04] ms; the whole-suite paired interval remained inconclusive, although its point estimate favored the candidate.
+
+Day 6 now parses once and derives the visited-cell count while walking the same guard route used to test obstruction candidates. Its counterbalanced isolated `fullSolve` mean fell from 19.697 ms to 17.670 ms (-10.3%), with a paired 95% confidence interval of [-2.168, -1.887] ms; the whole-suite paired interval remained inconclusive under interactive load.
 
 Run from the repository root with the private inputs in `data/`:
 

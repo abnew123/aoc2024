@@ -17,6 +17,21 @@ public class Day06 extends DayTemplate {
     private int loopStamp = 1;
 
     public String solve(boolean part1, Scanner in) {
+        Grid grid = parse(in);
+        if (part1) {
+            return countVisited(grid.start, grid.walls) + "";
+        }
+        return countVisitedAndLoopObstructions(grid.start, grid.walls)[1] + "";
+    }
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        Grid grid = parse(in);
+        int[] counts = countVisitedAndLoopObstructions(grid.start, grid.walls);
+        return new String[]{counts[0] + "", counts[1] + ""};
+    }
+
+    private Grid parse(Scanner in) {
         List<String> lines = new ArrayList<>();
         while (in.hasNextLine()) {
             lines.add(in.nextLine());
@@ -38,11 +53,7 @@ public class Day06 extends DayTemplate {
                 }
             }
         }
-
-        if (part1) {
-            return countVisited(start, walls) + "";
-        }
-        return countLoopObstructions(start, walls) + "";
+        return new Grid(walls, start);
     }
 
     private int countVisited(int start, boolean[] walls) {
@@ -73,9 +84,10 @@ public class Day06 extends DayTemplate {
         }
     }
 
-    private int countLoopObstructions(int start, boolean[] walls) {
+    private int[] countVisitedAndLoopObstructions(int start, boolean[] walls) {
         boolean[] tested = new boolean[walls.length];
         loopSeen = new int[walls.length * 4];
+        int visited = 1;
         int loops = 0;
         int row = start / cols;
         int col = start % cols;
@@ -85,7 +97,7 @@ public class Day06 extends DayTemplate {
             int nextRow = row + DR[dir];
             int nextCol = col + DC[dir];
             if (!inBounds(nextRow, nextCol)) {
-                return loops;
+                return new int[]{visited, loops};
             }
 
             int next = nextRow * cols + nextCol;
@@ -96,6 +108,7 @@ public class Day06 extends DayTemplate {
 
             if (next != start && !tested[next]) {
                 tested[next] = true;
+                visited++;
                 if (loopsWithObstacle(row, col, (dir + 1) & 3, next, walls)) {
                     loops++;
                 }
@@ -140,5 +153,15 @@ public class Day06 extends DayTemplate {
 
     private boolean inBounds(int row, int col) {
         return row >= 0 && col >= 0 && row < rows && col < cols;
+    }
+
+    private static class Grid {
+        private final boolean[] walls;
+        private final int start;
+
+        private Grid(boolean[] walls, int start) {
+            this.walls = walls;
+            this.start = start;
+        }
     }
 }
