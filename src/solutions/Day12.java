@@ -12,6 +12,17 @@ public class Day12 extends DayTemplate {
     private static final int[] DC = {0, 0, -1, 1};
 
     public String solve(boolean part1, Scanner in) {
+        long[] prices = prices(in, part1, !part1);
+        return (part1 ? prices[0] : prices[1]) + "";
+    }
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        long[] prices = prices(in, true, true);
+        return new String[]{prices[0] + "", prices[1] + ""};
+    }
+
+    private long[] prices(Scanner in, boolean needPerimeter, boolean needSides) {
         List<String> lines = new ArrayList<>();
         while (in.hasNextLine()) {
             lines.add(in.nextLine());
@@ -31,7 +42,8 @@ public class Day12 extends DayTemplate {
         boolean[] inRegion = new boolean[grid.length];
         int[] queue = new int[grid.length];
         int[] region = new int[grid.length];
-        long answer = 0;
+        long perimeterPrice = 0;
+        long sidePrice = 0;
 
         for (int start = 0; start < grid.length; start++) {
             if (visited[start]) {
@@ -49,7 +61,9 @@ public class Day12 extends DayTemplate {
             while (head < tail) {
                 int current = queue[head++];
                 region[regionSize++] = current;
-                inRegion[current] = true;
+                if (needSides) {
+                    inRegion[current] = true;
+                }
                 int row = current / cols;
                 int col = current % cols;
 
@@ -71,13 +85,17 @@ public class Day12 extends DayTemplate {
                 }
             }
 
-            long price = part1 ? perimeter : countSides(region, regionSize, inRegion, rows, cols);
-            answer += regionSize * price;
-            for (int i = 0; i < regionSize; i++) {
-                inRegion[region[i]] = false;
+            if (needPerimeter) {
+                perimeterPrice += (long) regionSize * perimeter;
+            }
+            if (needSides) {
+                sidePrice += (long) regionSize * countSides(region, regionSize, inRegion, rows, cols);
+                for (int i = 0; i < regionSize; i++) {
+                    inRegion[region[i]] = false;
+                }
             }
         }
-        return answer + "";
+        return new long[]{perimeterPrice, sidePrice};
     }
 
     private int countSides(int[] region, int regionSize, boolean[] inRegion, int rows, int cols) {
