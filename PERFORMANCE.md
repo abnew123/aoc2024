@@ -130,6 +130,46 @@ Commit `d5bdcd3` and the final branch source were compiled into separate classpa
 
 The approximate unpaired 95% confidence interval for the solver difference is **[-9.89, -3.21] ms**, excluding zero. A preceding independent baseline set measured a 202.620 ms solver mean, consistent with the reported baseline.
 
+## Direct solver factory
+
+The authoritative fresh-JVM harness now constructs each speed solver through a direct switch-based factory instead of formatting a class name and using `Class.forName`, constructor lookup, and reflective instantiation. Solver construction remains before the outer input `Scanner` and outside the timed `fullSolve` call, so no work moved across the solver boundary.
+
+The exact final factory and reflective `dccd8db` baseline first ran one cold child each, followed by 10 counterbalanced pairs of fresh child JVMs. Odd pairs ran reflection then factory (`B-C`); even pairs ran factory then reflection (`C-B`). Every process returned the established checksum. The cold harness values (`main - solver`) were 39.861 ms for reflection and 31.811 ms for the factory.
+
+| Pair | Order | Reflection harness (ms) | Factory harness (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 33.379 | 30.346 | -3.033 |
+| 2 | C-B | 34.629 | 30.717 | -3.912 |
+| 3 | B-C | 33.806 | 33.655 | -0.150 |
+| 4 | C-B | 34.122 | 31.427 | -2.696 |
+| 5 | B-C | 35.112 | 31.762 | -3.351 |
+| 6 | C-B | 35.005 | 31.655 | -3.349 |
+| 7 | B-C | 34.192 | 31.713 | -2.479 |
+| 8 | C-B | 34.227 | 32.873 | -1.354 |
+| 9 | B-C | 35.136 | 32.059 | -3.077 |
+| 10 | C-B | 32.540 | 32.860 | +0.319 |
+
+The paired harness means were **34.215 ms reflection** and **31.907 ms factory**, a 2.308 ms reduction. The paired-delta sample standard deviation was 1.434 ms; using Student's t with 9 degrees of freedom gives an approximate 95% confidence interval of **[-3.33 ms, -1.28 ms]**.
+
+Separate standard cold-plus-10 parent runs recorded the complete phase split. Their excluded cold processes were:
+
+| Variant | Wall (ms) | Main (ms) | Solver (ms) | Startup (ms) | Harness (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Reflection | 274.207 | 235.812 | 198.985 | 34.665 | 36.826 |
+| Factory | 296.259 | 247.965 | 214.558 | 31.890 | 33.407 |
+
+The 10-process means were:
+
+| Metric | Reflection mean (ms) | Factory mean (ms) | Change (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 283.460 | 290.115 | +6.655 |
+| Main | 242.400 | 245.556 | +3.156 |
+| Solver | 207.476 | 212.493 | +5.017 |
+| Startup | 29.607 | 29.635 | +0.028 |
+| Harness | 34.924 | 33.063 | **-1.862** |
+
+The full phase run independently confirms the targeted harness reduction. Interactive machine load was explicitly nonuniform during this burst, so the wall, main, and solver movements are not treated as evidence for this harness-only change. All 50 independent answers and all 25 combined solves remain unchanged.
+
 ## Answer equivalence and correctness evidence
 
 - The current 50-record length-framed checksum is exactly identical to the pre-change checksum from known-good pristine commit `88e8388`, and all 50 independent `solve` results match all 25 `fullSolve` pairs.
