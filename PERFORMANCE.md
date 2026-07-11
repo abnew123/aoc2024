@@ -332,6 +332,46 @@ Their 10-process means were:
 
 The accepted evidence is the isolated paired Day 2 interval; the whole-suite paired interval is explicitly inconclusive under the user's nonuniform interactive load, and the complete phase split is retained transparently. All 50 independent answers and 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. The official `2 / 4` sample plus 19,539 short, mixed-whitespace, extreme-integer, and exhaustive generated reports matched an independent copy-and-remove reference; separate and combined entry points agreed on all 19,545 reports.
 
+## Day 3 direct corrupted-memory parser
+
+Day 3 previously concatenated the input twice, compiled multiplication and enable-range regexes repeatedly, and rescanned enabled substrings for part 2. It now concatenates once and recognizes `do()`, `don't()`, and prompt-valid `mul(a,b)` instructions in a single character pass, accumulating both answers together. Operands remain limited to the prompt's one-to-three digits, line boundaries are removed exactly as before, malformed instructions are skipped, and `long` totals avoid the old 32-bit sum overflow on sufficiently many valid instructions.
+
+An isolated runner constructed the solver and input `Scanner` before timing the exact `fullSolve` call, checked both answers, and ran one excluded cold JVM per variant followed by 10 counterbalanced pairs of separate JVMs. Odd pairs ran the `2b922d9` regex baseline then candidate (`B-C`); even pairs reversed the order (`C-B`).
+
+| Pair | Order | Regex passes (ms) | Direct parser (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 9.996 | 5.848 | -4.149 |
+| 2 | C-B | 10.985 | 7.160 | -3.826 |
+| 3 | B-C | 10.666 | 6.835 | -3.830 |
+| 4 | C-B | 10.321 | 6.060 | -4.260 |
+| 5 | B-C | 10.990 | 6.349 | -4.641 |
+| 6 | C-B | 10.201 | 6.581 | -3.620 |
+| 7 | B-C | 10.714 | 6.198 | -4.516 |
+| 8 | C-B | 9.829 | 6.063 | -3.767 |
+| 9 | B-C | 10.491 | 6.795 | -3.696 |
+| 10 | C-B | 10.544 | 6.682 | -3.862 |
+
+Table deltas and summary statistics use the unrounded nanosecond records. The excluded cold values were 11.131 ms baseline and 6.918 ms candidate. The measured means were **10.474 ms baseline** and **6.457 ms candidate**, a **4.017 ms (38.4%) reduction**. The paired-delta sample standard deviation was 0.355 ms and the t(9) 95% confidence interval was **[-4.270 ms, -3.763 ms]**.
+
+The authoritative whole-suite child comparison was directionally consistent but noisy: its counterbalanced 10-pair solver means were 204.001 ms baseline and 203.189 ms candidate, a -0.811 ms delta with a 95% confidence interval of [-5.998 ms, +4.375 ms]. Separate standard phase runs had these excluded cold processes:
+
+| Variant | Wall (ms) | Main (ms) | Solver (ms) | Startup (ms) | Harness (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 291.085 | 242.081 | 209.664 | 32.461 | 32.416 |
+| Candidate | 274.193 | 230.578 | 200.010 | 26.683 | 30.567 |
+
+Their 10-process means were:
+
+| Metric | Baseline mean (ms) | Candidate mean (ms) | Change (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 274.840 | 271.837 | -3.003 |
+| Main | 232.795 | 232.830 | +0.035 |
+| Solver | 201.235 | 202.390 | +1.155 |
+| Startup | 27.207 | 26.818 | -0.389 |
+| Harness | 31.560 | 30.440 | -1.120 |
+
+The accepted evidence is the isolated paired Day 3 interval; the whole-suite paired interval is explicitly inconclusive under nonuniform interactive load, and the phase split is retained transparently. All 50 independent answers and 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. Both official examples passed; 300 deterministic prompt-valid/malformed streams with LF/CRLF and cross-line instructions matched the exact regex implementation; four-digit operands were rejected per the prompt; and 3,000 valid `mul(999,999)` instructions produced the correct `2994003000` long total.
+
 ## Answer equivalence and correctness evidence
 
 - The current 50-record length-framed checksum is exactly identical to the pre-change checksum from known-good pristine commit `88e8388`, and all 50 independent `solve` results match all 25 `fullSolve` pairs.
@@ -342,6 +382,7 @@ The accepted evidence is the isolated paired Day 2 interval; the whole-suite pai
 - Day 12 matches its separate solve entry points, the `140 / 80` official example, and the pre-change implementation on 500 deterministic rectangular gardens.
 - Day 6 matches its separate solve entry points, the `41 / 6` official example, an immediate-exit edge case, and the pre-change implementation on 500 deterministic exit-guaranteed rectangular grids with and without final newlines.
 - Day 2 matches its separate solve entry points, the `2 / 4` official example, and an independent reference across 19,545 reports including exhaustive short sequences, mixed whitespace, and signed-integer extremes.
+- Day 3 matches both official examples and the pre-change regex implementation on 300 deterministic streams, including toggles, malformed instructions, line-ending variants, and cross-line tokens; prompt-valid totals use `long` accumulation.
 
 ## Historical July warm visual examples
 
