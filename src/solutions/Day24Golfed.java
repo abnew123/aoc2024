@@ -2,12 +2,12 @@ import java.util.*;
 class X{
  Map<String,Integer>m=new HashMap();
  List<I>l=new ArrayList();
- String s(boolean p,String S){
-  var A=S.split("\\s+");
-  for(int j=0;j<A.length;){
-   var s=A[j++];
-   if(s.length()>3)m.put(s.substring(0,3),Integer.parseInt(A[j++]));
-   else l.add(new I(s,A[j++],A[j++],A[j++],A[j++]));
+ String s(boolean p,String[]S){
+  for(var s:S){
+   var A=s.split("\\s+");
+   if(A.length<2)continue;
+   if(A.length<3)m.put(A[0].substring(0,3),Integer.parseInt(A[1]));
+   else l.add(new I(A[0],A[1],A[2],A[3],A[4]));
   }
   if(!p)return s();
   for(int n=100;n-->0;)for(I i:l)if(m.get(i.o)==null&m.get(i.a)!=null&m.get(i.b)!=null)m.put(i.o,i.r());
