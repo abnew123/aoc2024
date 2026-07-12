@@ -452,6 +452,46 @@ Their 10-process means were:
 
 All 50 independent answers and 25 combined solves retain the established checksum. The official sample returned `14 / 34`; 500 deterministic rectangular grids matched the exact pre-change implementation; and a candidate-only 1-by-120 collinear case returned `1 / 120`, demonstrating that tracing no longer truncates beyond 51 steps.
 
+## Day 19 shared five-color trie DP
+
+Day 19's default combined solve previously copied the full input into two new Scanners, built the towel trie twice with boxed-character `HashMap` edges, and ran separate reachability and arrangement DPs. It now builds one fixed-five-color trie—the complete color alphabet given by the prompt—and updates independent boolean reachability and checked-`long` arrangement arrays together in one reverse pass per design. An overflowing design is recomputed with `BigInteger`, and the total promotes on overflow, so arbitrary prompt-valid arrangement counts remain exact without charging the personal input for big-number arithmetic.
+
+An isolated runner constructed the solver and input `Scanner` before timing the exact `fullSolve` call, checked both answers, and ran one excluded cold JVM per variant followed by 10 counterbalanced pairs of separate JVMs against baseline `3b9d0e2`.
+
+| Pair | Order | Duplicate map tries/DPs (ms) | Shared primitive trie DP (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 15.082 | 7.304 | -7.777 |
+| 2 | C-B | 12.400 | 7.104 | -5.296 |
+| 3 | B-C | 12.395 | 7.315 | -5.080 |
+| 4 | C-B | 12.234 | 7.038 | -5.197 |
+| 5 | B-C | 12.454 | 7.262 | -5.192 |
+| 6 | C-B | 12.235 | 7.185 | -5.050 |
+| 7 | B-C | 12.584 | 7.080 | -5.504 |
+| 8 | C-B | 12.642 | 7.348 | -5.294 |
+| 9 | B-C | 12.800 | 7.480 | -5.320 |
+| 10 | C-B | 12.384 | 7.182 | -5.201 |
+
+The excluded cold values were 12.600 ms baseline and 7.459 ms candidate. The measured means were **12.721 ms baseline** and **7.230 ms candidate**, a **5.491 ms (43.2%) reduction**. The paired-delta sample standard deviation was 0.814 ms and the t(9) 95% confidence interval was **[-6.073 ms, -4.909 ms]**.
+
+The authoritative whole-suite counterbalanced comparison also showed a statistically clear solver reduction: its 10-pair means were 191.394 ms baseline and 188.332 ms candidate, a -3.061 ms delta with a 95% confidence interval of **[-5.311 ms, -0.812 ms]**. Separate standard phase runs had these excluded cold processes:
+
+| Variant | Wall (ms) | Main (ms) | Solver (ms) | Startup (ms) | Harness (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 270.942 | 220.279 | 188.413 | 31.936 | 31.866 |
+| Candidate | 269.343 | 219.237 | 187.148 | 32.443 | 32.089 |
+
+Their 10-process means were:
+
+| Metric | Baseline mean (ms) | Candidate mean (ms) | Change (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 267.214 | 262.500 | -4.715 |
+| Main | 222.275 | 218.677 | -3.598 |
+| Solver | 191.300 | 187.768 | -3.532 |
+| Startup | 26.303 | 25.373 | -0.931 |
+| Harness | 30.975 | 30.909 | -0.066 |
+
+All 50 independent answers and 25 combined solves retain the established checksum. The official sample returned `6 / 16`; 300 deterministic prompt-alphabet pattern/design sets matched both the exact pre-change implementation and an independent `startsWith` DP oracle; and a 93-character overflow-shaped design returned the exact value from an independent `BigInteger` oracle beyond `long` range.
+
 ## Answer equivalence and correctness evidence
 
 - The current 50-record length-framed checksum is exactly identical to the pre-change checksum from known-good pristine commit `88e8388`, and all 50 independent `solve` results match all 25 `fullSolve` pairs.
@@ -465,6 +505,7 @@ All 50 independent answers and 25 combined solves retain the established checksu
 - Day 3 matches both official examples and the pre-change regex implementation on 300 deterministic streams, including toggles, malformed instructions, line-ending variants, and cross-line tokens; prompt-valid totals use `long` accumulation.
 - Day 4 matches the official `18 / 9` sample and the pre-change implementation on 1,000 deterministic rectangular grids, including tiny dimensions, borders, overlaps, and reverse words.
 - Day 8 matches the official `14 / 34` sample and the pre-change implementation on 500 deterministic rectangular grids; a 1-by-120 collinear case verifies boundary-driven tracing beyond the old fixed cap.
+- Day 19 matches the official `6 / 16` sample, the pre-change implementation, and an independent DP on 300 deterministic pattern/design sets plus an overflow-shaped reachable design.
 
 ## Historical July warm visual examples
 
