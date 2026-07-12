@@ -7,7 +7,7 @@ class X{
    var A=s.split("\\s+");
    if(A.length<2)continue;
    if(A.length<3)m.put(A[0].substring(0,3),Integer.parseInt(A[1]));
-   else l.add(new I(A[0],A[1],A[2],A[3],A[4]));
+   else l.add(new I(A[0],A[1],A[2],A[4]));
   }
   if(!p)return s();
   for(int n=100;n-->0;)for(I i:l)if(m.get(i.o)==null&m.get(i.a)!=null&m.get(i.b)!=null)m.put(i.o,i.r());
@@ -28,7 +28,7 @@ class X{
  boolean e(String w,int p){for(I i:l)if(i.p==p&(i.a.equals(w)|i.b.equals(w)))return 1>0;return 1<0;}
  class I{
   String a,b,o;int p;
-  I(String x,String q,String y,String r,String z){a=x;p=q.charAt(0);b=y;o=z;}
+  I(String x,String q,String y,String z){a=x;p=q.charAt(0);b=y;o=z;}
   int r(){int x=m.get(a),y=m.get(b);return p==65?x&y:p==79?x|y:x^y;}
  }
 }
