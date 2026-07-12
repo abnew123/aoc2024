@@ -412,6 +412,46 @@ Their 10-process means were:
 
 All 50 independent answers and 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. The official sample returned `18 / 9`, and 1,000 deterministic rectangular grids ranging down to one row or column matched the exact pre-change implementation with separate/combined agreement and optional final newlines.
 
+## Day 8 bounded primitive antinode tracing
+
+Day 8 previously parsed the map twice for a combined solve, allocated `Coordinate` objects in hash sets, and stopped harmonic tracing after 51 iterations. It now parses once, marks both parts in flat primitive arrays, reduces each antenna-pair delta by its absolute GCD, and traces to the actual rectangular grid boundary. This removes the input-size assumption while avoiding duplicate parsing and allocation.
+
+An isolated runner constructed the solver and input `Scanner` before timing the exact `fullSolve` call, checked both answers, and ran one excluded cold JVM per variant followed by 10 counterbalanced pairs of separate JVMs against baseline `9c40120`.
+
+| Pair | Fixed-cap baseline (ms) | Bounded primitive trace (ms) | Delta (ms) |
+| ---: | ---: | ---: | ---: |
+| 1 | 9.601 | 3.283 | -6.318 |
+| 2 | 9.025 | 2.946 | -6.079 |
+| 3 | 9.167 | 3.585 | -5.582 |
+| 4 | 9.431 | 3.285 | -6.146 |
+| 5 | 10.313 | 3.295 | -7.018 |
+| 6 | 9.926 | 3.508 | -6.418 |
+| 7 | 10.019 | 3.245 | -6.774 |
+| 8 | 10.708 | 3.119 | -7.589 |
+| 9 | 11.296 | 3.869 | -7.426 |
+| 10 | 9.539 | 4.886 | -4.653 |
+
+The excluded cold values were 9.320 ms baseline and 3.334 ms candidate. The measured means were **9.903 ms baseline** and **3.502 ms candidate**, a **6.400 ms (64.6%) reduction**. The paired-delta sample standard deviation was 0.875 ms and the t(9) 95% confidence interval was **[-7.026 ms, -5.775 ms]**.
+
+The authoritative whole-suite counterbalanced comparison also showed a statistically clear solver reduction: its 10-pair means were 202.273 ms baseline and 197.228 ms candidate, a -5.045 ms delta with a 95% confidence interval of **[-7.354 ms, -2.736 ms]**. Separate standard phase runs had these excluded cold processes:
+
+| Variant | Wall (ms) | Main (ms) | Solver (ms) | Startup (ms) | Harness (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 283.825 | 234.863 | 201.117 | 32.284 | 33.747 |
+| Candidate | 272.541 | 225.584 | 193.159 | 30.382 | 32.426 |
+
+Their 10-process means were:
+
+| Metric | Baseline mean (ms) | Candidate mean (ms) | Change (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 283.076 | 278.101 | -4.975 |
+| Main | 235.894 | 230.241 | -5.653 |
+| Solver | 201.686 | 197.288 | -4.398 |
+| Startup | 30.681 | 31.679 | +0.998 |
+| Harness | 34.207 | 32.953 | -1.255 |
+
+All 50 independent answers and 25 combined solves retain the established checksum. The official sample returned `14 / 34`; 500 deterministic rectangular grids matched the exact pre-change implementation; and a candidate-only 1-by-120 collinear case returned `1 / 120`, demonstrating that tracing no longer truncates beyond 51 steps.
+
 ## Answer equivalence and correctness evidence
 
 - The current 50-record length-framed checksum is exactly identical to the pre-change checksum from known-good pristine commit `88e8388`, and all 50 independent `solve` results match all 25 `fullSolve` pairs.
@@ -424,6 +464,7 @@ All 50 independent answers and 25 combined solves retain checksum `1e220b27c7027
 - Day 2 matches its separate solve entry points, the `2 / 4` official example, and an independent reference across 19,545 reports including exhaustive short sequences, mixed whitespace, and signed-integer extremes.
 - Day 3 matches both official examples and the pre-change regex implementation on 300 deterministic streams, including toggles, malformed instructions, line-ending variants, and cross-line tokens; prompt-valid totals use `long` accumulation.
 - Day 4 matches the official `18 / 9` sample and the pre-change implementation on 1,000 deterministic rectangular grids, including tiny dimensions, borders, overlaps, and reverse words.
+- Day 8 matches the official `14 / 34` sample and the pre-change implementation on 500 deterministic rectangular grids; a 1-by-120 collinear case verifies boundary-driven tracing beyond the old fixed cap.
 
 ## Historical July warm visual examples
 
