@@ -456,41 +456,79 @@ All 50 independent answers and 25 combined solves retain the established checksu
 
 Day 19's default combined solve previously copied the full input into two new Scanners, built the towel trie twice with boxed-character `HashMap` edges, and ran separate reachability and arrangement DPs. It now builds one fixed-five-color trie—the complete color alphabet given by the prompt—and updates independent boolean reachability and checked-`long` arrangement arrays together in one reverse pass per design. An overflowing design is recomputed with `BigInteger`, and the total promotes on overflow, so arbitrary prompt-valid arrangement counts remain exact without charging the personal input for big-number arithmetic.
 
-An isolated runner constructed the solver and input `Scanner` before timing the exact `fullSolve` call, checked both answers, and ran one excluded cold JVM per variant followed by 10 counterbalanced pairs of separate JVMs against baseline `3b9d0e2`.
+The original measurements for this change overlapped leaked background AoC JVMs and are withdrawn. The clean recovery first verified through the OS process table that no AoC Java/Javac, benchmark, timing, or watchdog process was active. Every recovery Java/Javac invocation then ran in a tracked process group with a hard deadline and a final descendant check. An isolated runner constructed the solver and input `Scanner` before timing the exact `fullSolve` call, checked both answers, and ran one excluded cold JVM per variant followed by 10 counterbalanced pairs of separate JVMs against baseline `3b9d0e2`.
 
 | Pair | Order | Duplicate map tries/DPs (ms) | Shared primitive trie DP (ms) | Delta (ms) |
 | ---: | :---: | ---: | ---: | ---: |
-| 1 | B-C | 15.082 | 7.304 | -7.777 |
-| 2 | C-B | 12.400 | 7.104 | -5.296 |
-| 3 | B-C | 12.395 | 7.315 | -5.080 |
-| 4 | C-B | 12.234 | 7.038 | -5.197 |
-| 5 | B-C | 12.454 | 7.262 | -5.192 |
-| 6 | C-B | 12.235 | 7.185 | -5.050 |
-| 7 | B-C | 12.584 | 7.080 | -5.504 |
-| 8 | C-B | 12.642 | 7.348 | -5.294 |
-| 9 | B-C | 12.800 | 7.480 | -5.320 |
-| 10 | C-B | 12.384 | 7.182 | -5.201 |
+| 1 | B-C | 11.794 | 6.945 | -4.849 |
+| 2 | C-B | 11.965 | 7.319 | -4.646 |
+| 3 | B-C | 12.071 | 6.873 | -5.198 |
+| 4 | C-B | 12.631 | 6.886 | -5.746 |
+| 5 | B-C | 11.938 | 6.678 | -5.260 |
+| 6 | C-B | 12.165 | 6.812 | -5.353 |
+| 7 | B-C | 12.187 | 6.763 | -5.424 |
+| 8 | C-B | 12.078 | 6.781 | -5.298 |
+| 9 | B-C | 12.096 | 6.755 | -5.341 |
+| 10 | C-B | 11.777 | 6.869 | -4.908 |
 
-The excluded cold values were 12.600 ms baseline and 7.459 ms candidate. The measured means were **12.721 ms baseline** and **7.230 ms candidate**, a **5.491 ms (43.2%) reduction**. The paired-delta sample standard deviation was 0.814 ms and the t(9) 95% confidence interval was **[-6.073 ms, -4.909 ms]**.
+The excluded cold values were 12.046 ms baseline and 6.724 ms candidate. The measured means were **12.070 ms baseline** and **6.868 ms candidate**, a **5.202 ms (43.1%) reduction**. The paired-delta sample standard deviation was 0.320 ms and the t(9) 95% confidence interval was **[-5.431 ms, -4.974 ms]**.
 
-The authoritative whole-suite counterbalanced comparison also showed a statistically clear solver reduction: its 10-pair means were 191.394 ms baseline and 188.332 ms candidate, a -3.061 ms delta with a 95% confidence interval of **[-5.311 ms, -0.812 ms]**. Separate standard phase runs had these excluded cold processes:
+The authoritative whole-suite counterbalanced comparison also showed a statistically clear solver reduction: its 10-pair means were 187.637 ms baseline and 185.086 ms candidate, a -2.551 ms delta with a 95% confidence interval of **[-4.363 ms, -0.739 ms]**. Separate standard phase runs had these excluded cold processes:
 
 | Variant | Wall (ms) | Main (ms) | Solver (ms) | Startup (ms) | Harness (ms) |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Baseline | 270.942 | 220.279 | 188.413 | 31.936 | 31.866 |
-| Candidate | 269.343 | 219.237 | 187.148 | 32.443 | 32.089 |
+| Baseline | 259.673 | 215.623 | 187.142 | 27.501 | 28.481 |
+| Candidate | 262.121 | 216.753 | 187.128 | 27.026 | 29.624 |
 
 Their 10-process means were:
 
 | Metric | Baseline mean (ms) | Candidate mean (ms) | Change (ms) |
 | --- | ---: | ---: | ---: |
-| Wall | 267.214 | 262.500 | -4.715 |
-| Main | 222.275 | 218.677 | -3.598 |
-| Solver | 191.300 | 187.768 | -3.532 |
-| Startup | 26.303 | 25.373 | -0.931 |
-| Harness | 30.975 | 30.909 | -0.066 |
+| Wall | 260.059 | 258.953 | -1.106 |
+| Main | 215.927 | 214.686 | -1.241 |
+| Solver | 187.742 | 185.811 | -1.932 |
+| Startup | 25.750 | 26.258 | +0.508 |
+| Harness | 28.185 | 28.875 | +0.691 |
 
 All 50 independent answers and 25 combined solves retain the established checksum. The official sample returned `6 / 16`; 300 deterministic prompt-alphabet pattern/design sets matched both the exact pre-change implementation and an independent `startsWith` DP oracle; and a 93-character overflow-shaped design returned the exact value from an independent `BigInteger` oracle beyond `long` range.
+
+## Clean cumulative recovery comparison
+
+After the leaked background JVMs were removed, pristine commit `88e8388` and the current branch were compiled with the identical current benchmark, solver factory, and `DayTemplate`. The OS process table was checked immediately before measurement, all Java/Javac commands ran in tracked process groups with hard deadlines, and no other AoC JVM ran concurrently. One excluded cold pair preceded 10 counterbalanced pairs of full 25-day child JVMs.
+
+| Pair | Order | Pristine solver (ms) | Current solver (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 204.557 | 187.765 | -16.792 |
+| 2 | C-B | 201.712 | 187.299 | -14.413 |
+| 3 | B-C | 206.864 | 187.509 | -19.355 |
+| 4 | C-B | 202.375 | 186.124 | -16.251 |
+| 5 | B-C | 210.778 | 181.757 | -29.021 |
+| 6 | C-B | 205.526 | 184.231 | -21.295 |
+| 7 | B-C | 205.533 | 187.667 | -17.866 |
+| 8 | C-B | 213.408 | 185.715 | -27.693 |
+| 9 | B-C | 212.106 | 187.131 | -24.975 |
+| 10 | C-B | 211.122 | 187.380 | -23.742 |
+
+The excluded cold solver values were 213.871 ms pristine and 183.691 ms current. The paired means were **207.398 ms pristine** and **186.258 ms current**, a **21.140 ms (10.19%) reduction**. The paired-delta sample standard deviation was 5.039 ms and the t(9) 95% confidence interval was **[-24.745 ms, -17.536 ms]**.
+
+Separate standard cold-plus-10 runs retained the complete phase split. Their cold processes were:
+
+| Revision | Wall (ms) | Main (ms) | Solver (ms) | Startup (ms) | Harness (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Pristine | 281.626 | 233.997 | 204.670 | 29.095 | 29.327 |
+| Current | 262.121 | 216.753 | 187.128 | 27.026 | 29.624 |
+
+Their 10-process means were:
+
+| Metric | Pristine mean (ms) | Current mean (ms) | Change (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 282.723 | 258.953 | -23.770 |
+| Main | 237.287 | 214.686 | -22.601 |
+| Solver | 207.821 | 185.811 | -22.011 |
+| Startup | 27.059 | 26.258 | -0.802 |
+| Harness | 29.466 | 28.875 | -0.591 |
+
+This clean cumulative result supersedes the earlier cross-session 2024 headline. All 50 independent answers and 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
 
 ## Answer equivalence and correctness evidence
 
