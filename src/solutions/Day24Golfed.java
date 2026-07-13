@@ -6,7 +6,7 @@ class X{
   for(var s:S){
    var A=s.split("\\s+");
    if(A.length<2)continue;
-   if(A.length<3)m.put(A[0].substring(0,3),Integer.parseInt(A[1]));
+   if(A.length<3)m.put(A[0].substring(0,3),new Integer(A[1]));
    else l.add(new I(A[0],A[1],A[2],A[4]));
   }
   if(!p)return s();
