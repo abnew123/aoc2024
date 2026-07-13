@@ -492,9 +492,42 @@ Their 10-process means were:
 
 All 50 independent answers and 25 combined solves retain the established checksum. The official sample returned `6 / 16`; 300 deterministic prompt-alphabet pattern/design sets matched both the exact pre-change implementation and an independent `startsWith` DP oracle; and a 93-character overflow-shaped design returned the exact value from an independent `BigInteger` oracle beyond `long` range.
 
+## Day 1 shared exact sorted lists
+
+The default combined path previously copied the full input into two new Scanners, parsed both lists twice into boxed `ArrayList<Integer>` values, built a boxed frequency map even for part 1, and sorted separate copies. It also subtracted as `int` before widening, so extreme location IDs could overflow before `Math.abs`. Day 1 now parses flexible-whitespace pairs once into exact `BigInteger` arrays, sorts each array once, sums exact pairwise distances, and computes similarity by multiplying the run counts of equal values in the two sorted lists.
+
+An isolated runner constructed the solver and input `Scanner` before timing the exact `fullSolve` call. One excluded cold pair was followed by 10 counterbalanced pairs of separate JVM processes:
+
+| Pair | Order | Duplicate boxed parse (ms) | Shared exact sort (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 10.271 | 9.407 | -0.865 |
+| 2 | C-B | 10.200 | 8.358 | -1.842 |
+| 3 | B-C | 10.465 | 9.834 | -0.631 |
+| 4 | C-B | 10.271 | 9.434 | -0.837 |
+| 5 | B-C | 10.086 | 8.865 | -1.221 |
+| 6 | C-B | 11.170 | 9.416 | -1.755 |
+| 7 | B-C | 11.242 | 10.082 | -1.160 |
+| 8 | C-B | 10.247 | 8.936 | -1.311 |
+| 9 | B-C | 10.625 | 8.987 | -1.639 |
+| 10 | C-B | 9.919 | 8.820 | -1.099 |
+
+The excluded cold values were 9.988ms baseline and 9.912ms candidate. The measured means were **10.450ms baseline** and **9.214ms candidate**, a **1.236ms (11.8%) reduction**. The paired-delta sample standard deviation was 0.407ms and the t(9) 95% confidence interval was **[-1.527ms, -0.945ms]**.
+
+The candidate's standard phase run used one excluded cold JVM followed by 10 independent measured JVMs. The cold wall/main/solver/startup/harness values were 265.401/222.182/191.371/27.148/30.811ms. The measured means were:
+
+| Metric | Mean (ms) | Median (ms) | Sample SD (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 266.346 | 266.553 | 2.126 |
+| Main | 222.895 | 222.854 | 1.592 |
+| Solver | 192.033 | 191.990 | 1.702 |
+| Startup | 27.944 | 27.478 | 1.567 |
+| Harness | 30.862 | 30.946 | 0.514 |
+
+All 50 independent answers and 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. The official sample returned `11 / 31`; 400 deterministic signed datasets matched an independent `BigInteger` sort/frequency oracle; and candidate-only whitespace, blank-line, negative, and beyond-`long` cases remained exact. Separate and combined entry points agreed throughout.
+
 ## Clean cumulative recovery comparison
 
-After the leaked background JVMs were removed, pristine commit `88e8388` and the current branch were compiled with the identical current benchmark, solver factory, and `DayTemplate`. The OS process table was checked immediately before measurement, all Java/Javac commands ran in tracked process groups with hard deadlines, and no other AoC JVM ran concurrently. One excluded cold pair preceded 10 counterbalanced pairs of full 25-day child JVMs.
+After the leaked background JVMs were removed, pristine commit `88e8388` and pre-Day-1 source commit `12f75b8` were compiled with the identical current benchmark, solver factory, and `DayTemplate`. The OS process table was checked immediately before measurement, all Java/Javac commands ran in tracked process groups with hard deadlines, and no other AoC JVM ran concurrently. One excluded cold pair preceded 10 counterbalanced pairs of full 25-day child JVMs.
 
 | Pair | Order | Pristine solver (ms) | Current solver (ms) | Delta (ms) |
 | ---: | :---: | ---: | ---: | ---: |
@@ -544,6 +577,7 @@ This clean cumulative result supersedes the earlier cross-session 2024 headline.
 - Day 4 matches the official `18 / 9` sample and the pre-change implementation on 1,000 deterministic rectangular grids, including tiny dimensions, borders, overlaps, and reverse words.
 - Day 8 matches the official `14 / 34` sample and the pre-change implementation on 500 deterministic rectangular grids; a 1-by-120 collinear case verifies boundary-driven tracing beyond the old fixed cap.
 - Day 19 matches the official `6 / 16` sample, the pre-change implementation, and an independent DP on 300 deterministic pattern/design sets plus an overflow-shaped reachable design.
+- Day 1 matches the official `11 / 31` sample and an independent exact oracle on 400 deterministic datasets plus arbitrary-size and whitespace variants.
 
 ## Historical July warm visual examples
 
