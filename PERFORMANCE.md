@@ -591,6 +591,39 @@ The candidate's canonical phase run used one excluded cold JVM followed by 10 in
 
 The aggregate run reflects startup and unrelated-day variation and is retained for the complete phase split rather than used to judge this isolated change. The official sample returned `7 / co,de,ka,ta`; 300 deterministic small graphs matched an exhaustive triangle and maximum-clique oracle, including inputs with and without final newlines. The personal answers remained `1330 / hl,io,ku,pk,ps,qq,sh,tx,ty,wq,xi,xj,yp`, and all 50 independent answers plus all 25 combined solves retained checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
 
+## Day 10 shared descending-height DP
+
+The inherited combined path previously materialized the input, created two inner `Scanner`s, parsed the height map twice, and built object-heavy `HashSet<Coordinate>` frontiers independently for the two parts. Day 10 now parses any rectangular digit grid once. Starting at height 9, one descending pass propagates primitive path counts for trail ratings and flat peak-reachability bitsets for trailhead scores; standalone part solves allocate only the state they need.
+
+An isolated runner constructed the solver and input `Scanner` before timing the exact `fullSolve` call. One excluded cold pair was followed by 10 counterbalanced pairs of separate fresh JVM processes:
+
+| Pair | Order | Duplicate frontier solve (ms) | Shared DP (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 6.095 | 1.443 | -4.651 |
+| 2 | C-B | 5.933 | 1.642 | -4.291 |
+| 3 | B-C | 6.376 | 1.576 | -4.800 |
+| 4 | C-B | 6.091 | 1.475 | -4.616 |
+| 5 | B-C | 5.934 | 1.521 | -4.412 |
+| 6 | C-B | 6.428 | 1.398 | -5.031 |
+| 7 | B-C | 6.193 | 1.417 | -4.776 |
+| 8 | C-B | 5.853 | 1.537 | -4.317 |
+| 9 | B-C | 6.559 | 1.437 | -5.122 |
+| 10 | C-B | 5.986 | 1.439 | -4.547 |
+
+The excluded cold values were 5.904ms baseline and 1.561ms candidate. The measured means were **6.145ms baseline** and **1.488ms candidate**, a **4.656ms (75.8%) reduction**. The paired-delta sample standard deviation was 0.282ms and the t(9) 95% confidence interval was **[-4.858ms, -4.455ms]**.
+
+The candidate's standard phase run used one excluded cold JVM followed by 10 independent measured JVMs. Its cold wall/main/solver/startup/harness values were 259.687/223.577/192.183/32.062/31.394ms. The measured phase was:
+
+| Metric | Mean (ms) | Median (ms) | Sample SD (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 260.152 | 258.215 | 10.258 |
+| Main | 218.505 | 216.924 | 8.272 |
+| Solver | 187.499 | 186.819 | 7.296 |
+| Startup | 26.400 | 25.726 | 1.742 |
+| Harness | 31.006 | 30.773 | 2.055 |
+
+Whole-suite movement is noisy and is not used to judge the change; the isolated paired interval is the accepted evidence. The official sample returned `36 / 81`, a single-row trail returned `1 / 1`, and 60 deterministic rectangular grids matched the exact pre-change implementation through both standalone and combined entry points. The personal answers remained `566 / 1324`, and all 50 independent answers plus all 25 combined solves retained checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
 ## Clean cumulative recovery comparison
 
 After the leaked background JVMs were removed, pristine commit `88e8388` and pre-Day-1 source commit `12f75b8` were compiled with the identical current benchmark, solver factory, and `DayTemplate`. The OS process table was checked immediately before measurement, all Java/Javac commands ran in tracked process groups with hard deadlines, and no other AoC JVM ran concurrently. One excluded cold pair preceded 10 counterbalanced pairs of full 25-day child JVMs.
@@ -642,6 +675,7 @@ This clean cumulative result supersedes the earlier cross-session 2024 headline.
 - Day 3 matches both official examples and the pre-change regex implementation on 300 deterministic streams, including toggles, malformed instructions, line-ending variants, and cross-line tokens; prompt-valid totals use `long` accumulation.
 - Day 4 matches the official `18 / 9` sample and the pre-change implementation on 1,000 deterministic rectangular grids, including tiny dimensions, borders, overlaps, and reverse words.
 - Day 8 matches the official `14 / 34` sample and the pre-change implementation on 500 deterministic rectangular grids; a 1-by-120 collinear case verifies boundary-driven tracing beyond the old fixed cap.
+- Day 10 matches the official `36 / 81` sample, a one-row `1 / 1` trail, and the pre-change implementation on 60 deterministic rectangular grids, with standalone and combined entry-point agreement.
 - Day 19 matches the official `6 / 16` sample, the pre-change implementation, and an independent DP on 300 deterministic pattern/design sets plus an overflow-shaped reachable design.
 - Day 1 matches the official `11 / 31` sample and an independent exact oracle on 400 deterministic datasets plus arbitrary-size and whitespace variants.
 - Day 13 matches the official `480 / 875318608908` sample, a signed exact oracle on 300 generated machines, and targeted bounded and degenerate systems.
