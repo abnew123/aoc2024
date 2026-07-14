@@ -88,7 +88,7 @@
 
 The tracked [`FreshJvmBenchmark`](src/FreshJvmBenchmark.java) is the authoritative fresh-JVM benchmark and answer-consistency runner. It checks all 50 independent `solve` results against all 25 `fullSolve` pairs, computes a deterministic length-framed SHA-256 checksum, and launches one excluded cold JVM followed by 10 strictly sequential measured JVMs. It does not contain independent expected answers. [`timing-output.txt`](timing-output.txt) is retained as legacy output and is not a current benchmark source.
 
-On a 2024 MacBook Pro running macOS 15.6 (build 24G84), OpenJDK 23.0.1, `aarch64`, and 14 processors, the latest clean current-source 10-process means are 240.482 ms wall time and 170.590 ms summed solver time. The clean counterbalanced publication-gate comparison against the preceding pushed tip measured solver time improving from 175.361 ms to 170.590 ms; the paired 95% confidence interval for that solver delta is [-7.813, -1.728] ms.
+On a 2024 MacBook Pro running macOS 15.6 (build 24G84), OpenJDK 23.0.1, `aarch64`, and 14 processors, the latest clean current-source 10-process means are 231.052 ms wall time and 162.008 ms summed solver time. The clean counterbalanced publication-gate comparison against the preceding pushed tip measured solver time improving from 174.064 ms to 162.008 ms; the paired 95% confidence interval for that solver delta is [-15.209, -8.903] ms.
 
 Day 16 produces the same answers with one forward Dijkstra followed by a reverse walk over optimal predecessor states, eliminating its second Dijkstra. Correctness evidence combines exact pre/post identity of the 50-record checksum against known-good pristine commit `88e8388`, both official examples, and differential tests against the pristine implementation on generated rectangular mazes. See the [performance notes](PERFORMANCE.md) for raw samples, metric definitions, validation, and the complete comparison.
 
@@ -115,6 +115,8 @@ Day 13 now parses each claw machine once and solves both prize offsets with exac
 Day 10 now parses the height map once and propagates primitive path counts plus peak-reachability bitsets through one descending-height dynamic program. Its isolated fresh-process `fullSolve` mean fell from 6.145 ms to 1.488 ms (-75.8%), with a paired 95% confidence interval of [-4.858, -4.455] ms.
 
 The latest batch adds exact run-level disk compaction for Day 9, shared warehouse preparation for Day 15, earliest-fall indexed path searches for Day 18, and generic stable topological repair for Day 5. Each change passed its own counterbalanced isolated 95% confidence gate before the four-change batch passed the full-suite publication gate above. Day 5's isolated mean fell from 16.172 ms to 10.427 ms (-35.5%), with a paired 95% confidence interval of [-6.073, -5.418] ms.
+
+Day 11 now shares one exact blink memo across both parts, and Day 21 replaces complete command-string enumeration plus hardcoded rewrites with weighted transition dynamic programming over the two keypads. Day 21's isolated mean fell from 14.946 ms to 3.724 ms (-75.1%), with a paired 95% confidence interval of [-11.624, -10.822] ms.
 
 Run from the repository root with the private inputs in `data/`:
 

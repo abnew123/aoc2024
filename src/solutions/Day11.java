@@ -2,6 +2,11 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Day11 extends DayTemplate {
@@ -35,21 +40,85 @@ public class Day11 extends DayTemplate {
     private int memoSize;
     private boolean memoFound;
 
+    @Override
     public String solve(boolean part1, Scanner in) {
-        int blinks = part1 ? 25 : 75;
-        long answer = 0;
-        resetMemo();
-        String line = in.nextLine();
-        long stone = 0;
-        for (int i = 0; i <= line.length(); i++) {
-            if (i == line.length() || line.charAt(i) == ' ') {
-                answer += countStones(stone, blinks);
-                stone = 0;
-            } else {
-                stone = stone * 10 + line.charAt(i) - '0';
+        String[] stones = parse(in);
+        return solveOne(stones, part1 ? 25 : 75);
+    }
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        String[] stones = parse(in);
+        try {
+            long[] values = parseLongs(stones);
+            resetMemo();
+            long first = 0;
+            long second = 0;
+            for (long stone : values) {
+                first = Math.addExact(first, countStones(stone, 25));
+                second = Math.addExact(second, countStones(stone, 75));
+            }
+            return new String[]{Long.toString(first), Long.toString(second)};
+        } catch (ArithmeticException overflow) {
+            return solveExact(stones, true);
+        }
+    }
+
+    private String solveOne(String[] stones, int blinks) {
+        try {
+            long[] values = parseLongs(stones);
+            resetMemo();
+            long answer = 0;
+            for (long stone : values) {
+                answer = Math.addExact(answer, countStones(stone, blinks));
+            }
+            return Long.toString(answer);
+        } catch (ArithmeticException overflow) {
+            return solveExact(stones, blinks == 25)[blinks == 25 ? 0 : 1];
+        }
+    }
+
+    private String[] parse(Scanner in) {
+        List<String> stones = new ArrayList<>();
+        while (in.hasNextLine()) {
+            String line = in.nextLine();
+            int start = 0;
+            while (start < line.length()) {
+                while (start < line.length() && Character.isWhitespace(line.charAt(start))) {
+                    start++;
+                }
+                int end = start;
+                while (end < line.length() && !Character.isWhitespace(line.charAt(end))) {
+                    end++;
+                }
+                if (start < end) {
+                    String stone = line.substring(start, end);
+                    for (int i = 0; i < stone.length(); i++) {
+                        if (stone.charAt(i) < '0' || stone.charAt(i) > '9') {
+                            throw new IllegalArgumentException("Invalid stone: " + stone);
+                        }
+                    }
+                    stones.add(stone);
+                }
+                start = end;
             }
         }
-        return answer + "";
+        if (stones.isEmpty()) {
+            throw new IllegalArgumentException("Missing stones");
+        }
+        return stones.toArray(String[]::new);
+    }
+
+    private long[] parseLongs(String[] stones) {
+        long[] values = new long[stones.length];
+        for (int i = 0; i < stones.length; i++) {
+            try {
+                values[i] = Long.parseLong(stones[i]);
+            } catch (NumberFormatException tooLarge) {
+                throw new ArithmeticException("Stone exceeds long");
+            }
+        }
+        return values;
     }
 
     private long countStones(long stone, int blinksLeft) {
@@ -69,10 +138,10 @@ public class Day11 extends DayTemplate {
             int digits = digits(stone);
             if ((digits & 1) == 0) {
                 long divisor = POW10[digits / 2];
-                result = countStones(stone / divisor, blinksLeft - 1)
-                        + countStones(stone % divisor, blinksLeft - 1);
+                result = Math.addExact(countStones(stone / divisor, blinksLeft - 1),
+                        countStones(stone % divisor, blinksLeft - 1));
             } else {
-                result = countStones(stone * 2024, blinksLeft - 1);
+                result = countStones(Math.multiplyExact(stone, 2024), blinksLeft - 1);
             }
         }
 
@@ -158,4 +227,50 @@ public class Day11 extends DayTemplate {
         }
         return low + 1;
     }
+
+    private String[] solveExact(String[] stones, boolean bothParts) {
+        Map<ExactState, BigInteger> memo = new HashMap<>();
+        BigInteger first = BigInteger.ZERO;
+        BigInteger second = BigInteger.ZERO;
+        for (String token : stones) {
+            BigInteger stone = new BigInteger(token);
+            if (bothParts) {
+                first = first.add(countStonesExact(stone, 25, memo));
+            }
+            second = second.add(countStonesExact(stone, 75, memo));
+        }
+        return new String[]{first.toString(), second.toString()};
+    }
+
+    private BigInteger countStonesExact(BigInteger stone, int blinksLeft,
+                                        Map<ExactState, BigInteger> memo) {
+        if (blinksLeft == 0) {
+            return BigInteger.ONE;
+        }
+        ExactState state = new ExactState(stone, blinksLeft);
+        BigInteger cached = memo.get(state);
+        if (cached != null) {
+            return cached;
+        }
+
+        BigInteger result;
+        if (stone.signum() == 0) {
+            result = countStonesExact(BigInteger.ONE, blinksLeft - 1, memo);
+        } else {
+            int digits = stone.toString().length();
+            if ((digits & 1) == 0) {
+                BigInteger divisor = BigInteger.TEN.pow(digits / 2);
+                BigInteger[] halves = stone.divideAndRemainder(divisor);
+                result = countStonesExact(halves[0], blinksLeft - 1, memo)
+                        .add(countStonesExact(halves[1], blinksLeft - 1, memo));
+            } else {
+                result = countStonesExact(stone.multiply(BigInteger.valueOf(2024)),
+                        blinksLeft - 1, memo);
+            }
+        }
+        memo.put(state, result);
+        return result;
+    }
+
+    private record ExactState(BigInteger stone, int blinksLeft) {}
 }

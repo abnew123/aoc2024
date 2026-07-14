@@ -756,6 +756,72 @@ The pushed tip and combined Day 9, Day 15, Day 18, and Day 5 batch then ran an e
 
 The official sample returned `143 / 123`. Targeted checks covered sparse transitive chains, rules appearing after updates, absent endpoints, duplicate rules, page labels beyond the old fixed range, stable tie handling, cycles, duplicate pages, malformed rules, missing final newline, and repeated reuse of one solver instance with disjoint rule sets. Personal standalone and combined answers remained `4814 / 5448`; all 50 independent answers and all 25 combined solves retained checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
 
+## Day 11 shared exact blink memoization (queued)
+
+The inherited combined path materialized the input, constructed two inner `Scanner`s, parsed the stones twice, allocated and cleared two independent primitive memo tables, and discarded all 25-blink states before the 75-blink solve. The queued implementation parses arbitrary whitespace once and shares one memo across both blink counts. Its primitive fast path now detects multiplication, recursive-count, and total overflow; if necessary it recomputes exactly with `BigInteger`, removing the inherited `long`-only input and result restriction without slowing the personal-input path.
+
+An isolated runner constructed `Day11` and its file-backed `Scanner` before timing `fullSolve`. One excluded cold pair was followed by 10 separate, counterbalanced fresh-JVM pairs against pushed tip `41727c6`:
+
+| Pair | Order | Duplicate memo solve (ms) | Shared exact solve (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 10.792 | 8.493 | -2.299 |
+| 2 | C-B | 10.546 | 8.520 | -2.026 |
+| 3 | B-C | 12.047 | 8.660 | -3.387 |
+| 4 | C-B | 9.854 | 8.570 | -1.284 |
+| 5 | B-C | 10.782 | 8.839 | -1.943 |
+| 6 | C-B | 9.329 | 9.164 | -0.165 |
+| 7 | B-C | 10.777 | 8.637 | -2.139 |
+| 8 | C-B | 10.765 | 8.632 | -2.133 |
+| 9 | B-C | 11.085 | 8.679 | -2.406 |
+| 10 | C-B | 10.729 | 8.415 | -2.314 |
+
+The excluded cold values were 12.135ms baseline and 8.461ms candidate. The measured means were **10.671ms baseline** and **8.661ms candidate**, a **2.010ms (18.8%) reduction**. The paired t(9) 95% confidence interval was **[-2.603ms, -1.416ms]**.
+
+The pushed tip and queued Day 11 candidate then ran an excluded cold pair and 10 counterbalanced full-25-day pairs. Mean solver time improved, but the interval crossed zero, so this verified change remains deliberately uncommitted and unpushed:
+
+| Metric | Pushed-tip mean (ms) | Queued mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 172.250 | 171.238 | -1.012 | [-3.841, +1.816] |
+| Main | 201.455 | 200.543 | -0.912 | [-4.488, +2.663] |
+| Startup | 37.910 | 38.315 | +0.405 | [-2.658, +3.468] |
+| Harness | 29.205 | 29.305 | +0.100 | [-1.051, +1.251] |
+| Wall | 244.632 | 242.540 | -2.091 | [-8.841, +4.658] |
+
+The official `125 17` sample returned `55312 / 65601038650482`. An independent iterative `BigInteger` frequency simulation matched both answers through 75 blinks for zero, digit-boundary values, repeated stones, mixed line and whitespace layouts, and an initial stone larger than `Long.MAX_VALUE`. Empty and malformed input, missing final newline, repeated solver reuse, personal standalone/combined answers `193899 / 229682160383225`, all 50 independent answers, and all 25 combined solves also passed; the checksum remained `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
+## Day 21 weighted keypad transition dynamic program
+
+The inherited solver assumed exactly five codes, accumulated mutable keypad state across calls, materialized sets of complete command strings, and performed up to 24 rounds of boxed string-keyed map rewrites using a hardcoded route table. The accepted implementation parses any number of prompt-valid codes once and computes exact transition costs in primitive matrices. For each controlled-keypad transition, a tiny weighted Dijkstra over `(controlled key, last command key)` considers every valid route around the keypad hole; successive matrices compose all 2 or 25 directional robots. Code values and final complexity totals use `BigInteger`.
+
+An isolated runner constructed `Day21` and its file-backed `Scanner` before timing `fullSolve`. One excluded cold pair was followed by 10 separate, counterbalanced fresh-JVM pairs against the exact pre-Day-21 queue:
+
+| Pair | Order | String-enumeration solve (ms) | Transition-DP solve (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 15.201 | 3.548 | -11.653 |
+| 2 | C-B | 15.463 | 3.717 | -11.746 |
+| 3 | B-C | 15.387 | 3.643 | -11.745 |
+| 4 | C-B | 14.141 | 4.082 | -10.059 |
+| 5 | B-C | 15.283 | 3.364 | -11.919 |
+| 6 | C-B | 14.567 | 3.682 | -10.884 |
+| 7 | B-C | 14.776 | 3.661 | -11.115 |
+| 8 | C-B | 14.839 | 3.784 | -11.054 |
+| 9 | B-C | 14.605 | 3.460 | -11.145 |
+| 10 | C-B | 15.200 | 4.292 | -10.908 |
+
+The excluded cold values were 13.767ms baseline and 4.046ms candidate. The measured means were **14.946ms baseline** and **3.724ms candidate**, an **11.223ms (75.1%) reduction**. The paired t(9) 95% confidence interval was **[-11.624ms, -10.822ms]**.
+
+The pushed tip and combined Day 11 plus Day 21 batch then ran an excluded cold pair and 10 counterbalanced full-25-day pairs. The solver interval was entirely below zero, satisfying the repository publication gate:
+
+| Metric | Pushed-tip mean (ms) | Accepted batch mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 174.064 | 162.008 | -12.056 | [-15.209, -8.903] |
+| Main | 203.592 | 190.812 | -12.780 | [-16.784, -8.775] |
+| Startup | 39.802 | 35.692 | -4.110 | [-7.927, -0.293] |
+| Harness | 29.528 | 28.804 | -0.724 | [-1.851, +0.404] |
+| Wall | 246.760 | 231.052 | -15.708 | [-23.982, -7.434] |
+
+The official five-code sample returned `126384 / 154115708116294`, and `029A` required 68 presses at part-one depth. Targeted checks covered one and more than five codes, empty numeric values, leading zeros, repeated keys, missing final newline, malformed codes, independent/combined entry-point agreement, and repeated solver reuse. Personal answers remained `184718 / 228800606998554`; all 50 independent answers and all 25 combined solves retained checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
 ## Clean cumulative recovery comparison
 
 After the leaked background JVMs were removed, pristine commit `88e8388` and pre-Day-1 source commit `12f75b8` were compiled with the identical current benchmark, solver factory, and `DayTemplate`. The OS process table was checked immediately before measurement, all Java/Javac commands ran in tracked process groups with hard deadlines, and no other AoC JVM ran concurrently. One excluded cold pair preceded 10 counterbalanced pairs of full 25-day child JVMs.
