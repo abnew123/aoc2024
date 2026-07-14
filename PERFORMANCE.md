@@ -558,6 +558,39 @@ The candidate's standard phase run used one excluded cold JVM followed by 10 ind
 
 All 50 independent answers and 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. The official sample returned `480 / 875318608908`; 300 deterministic independent-vector machines matched a signed `BigInteger` Cramer oracle; and targeted cases covered the inclusive 100-press bound, negative unique solutions, gcd misses, both collinear cost slopes, and bound-constrained collinear optima. Separate and combined entry points agreed throughout.
 
+## Day 23 shared graph construction
+
+The inherited combined path previously copied the input into two inner `Scanner`s and rebuilt the computer-name map, name list, adjacency `BitSet`s, and `t` markers once per part. Day 23 now constructs the graph once. Triangle counting only reads the graph through temporary intersections, and the maximum-clique search mutates only its local candidate/excluded sets, so both analyses safely share it.
+
+An isolated runner constructed the solver and file-backed `Scanner` before timing the exact `fullSolve` call. One excluded cold pair was followed by 10 counterbalanced pairs of separate fresh JVM processes:
+
+| Pair | Order | Duplicate graph (ms) | Shared graph (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 14.739 | 10.700 | -4.038 |
+| 2 | C-B | 15.029 | 11.072 | -3.957 |
+| 3 | B-C | 14.433 | 10.477 | -3.956 |
+| 4 | C-B | 15.571 | 11.222 | -4.349 |
+| 5 | B-C | 14.012 | 10.788 | -3.223 |
+| 6 | C-B | 14.195 | 10.949 | -3.246 |
+| 7 | B-C | 14.590 | 10.939 | -3.652 |
+| 8 | C-B | 14.363 | 10.766 | -3.596 |
+| 9 | B-C | 14.646 | 10.774 | -3.873 |
+| 10 | C-B | 14.321 | 11.526 | -2.794 |
+
+The excluded cold values were 13.814ms baseline and 11.090ms candidate. The measured means were **14.590ms baseline** and **10.921ms candidate**, a **3.669ms (25.1%) reduction**. The paired-delta sample standard deviation was 0.466ms and the t(9) 95% confidence interval was **[-4.002ms, -3.335ms]**.
+
+The candidate's canonical phase run used one excluded cold JVM followed by 10 independent fresh JVMs. Its cold wall/main/solver/startup/harness values were 290.382/233.534/199.010/40.085/34.524ms. The measured means were:
+
+| Metric | Mean (ms) | Median (ms) | Sample SD (ms) |
+| --- | ---: | ---: | ---: |
+| Wall | 274.318 | 274.148 | 3.202 |
+| Main | 227.647 | 227.498 | 1.513 |
+| Solver | 194.873 | 194.760 | 1.161 |
+| Startup | 30.415 | 30.655 | 2.250 |
+| Harness | 32.774 | 32.798 | 0.575 |
+
+The aggregate run reflects startup and unrelated-day variation and is retained for the complete phase split rather than used to judge this isolated change. The official sample returned `7 / co,de,ka,ta`; 300 deterministic small graphs matched an exhaustive triangle and maximum-clique oracle, including inputs with and without final newlines. The personal answers remained `1330 / hl,io,ku,pk,ps,qq,sh,tx,ty,wq,xi,xj,yp`, and all 50 independent answers plus all 25 combined solves retained checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
 ## Clean cumulative recovery comparison
 
 After the leaked background JVMs were removed, pristine commit `88e8388` and pre-Day-1 source commit `12f75b8` were compiled with the identical current benchmark, solver factory, and `DayTemplate`. The OS process table was checked immediately before measurement, all Java/Javac commands ran in tracked process groups with hard deadlines, and no other AoC JVM ran concurrently. One excluded cold pair preceded 10 counterbalanced pairs of full 25-day child JVMs.
@@ -612,6 +645,7 @@ This clean cumulative result supersedes the earlier cross-session 2024 headline.
 - Day 19 matches the official `6 / 16` sample, the pre-change implementation, and an independent DP on 300 deterministic pattern/design sets plus an overflow-shaped reachable design.
 - Day 1 matches the official `11 / 31` sample and an independent exact oracle on 400 deterministic datasets plus arbitrary-size and whitespace variants.
 - Day 13 matches the official `480 / 875318608908` sample, a signed exact oracle on 300 generated machines, and targeted bounded and degenerate systems.
+- Day 23 matches the official `7 / co,de,ka,ta` sample and an exhaustive oracle on 300 deterministic small graphs, with separate and combined entry-point agreement.
 
 ## Historical July warm visual examples
 

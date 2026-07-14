@@ -22,6 +22,14 @@ public class Day23 extends DayTemplate {
         return cliqueToString(bestClique);
     }
 
+    @Override
+    public String[] fullSolve(Scanner in) {
+        readConnections(in);
+        long triangles = countTrianglesWithT();
+        findLargestClique();
+        return new String[]{triangles + "", cliqueToString(bestClique)};
+    }
+
     private void readConnections(Scanner in) {
         nameToIndex.clear();
         names.clear();
