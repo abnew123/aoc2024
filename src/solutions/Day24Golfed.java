@@ -4,8 +4,7 @@ class X{
  String s(boolean p,String[]S){
   for(var s:S){
    var A=s.split("\\s+");
-   if(A.length<2)continue;
-   if(A.length<3)m.put(A[0].replace(":",""),new I(new Integer(A[1])));
+   if(A.length>1)if(A.length<3)m.put(A[0].replace(":",""),new I(new Integer(A[1])));
    else m.put(A[4],new I(A[0],A[1],A[2],A[4]));
   }
   if(!p)return s();
@@ -13,7 +12,7 @@ class X{
   for(var k:m.keySet())if(k.charAt(0)==122)r+=1L*v(k)<<new Integer(k.substring(1));
   return r+"";
  }
- int v(String s){I i=m.get(s);if(i.p<2)return i.p;int x=v(i.a),y=v(i.b);return i.p==65?x&y:i.p==79?x|y:x^y;}
+ int v(String s){I i=m.get(s);if(i.p<2)return i.p;int x=v(i.a),y=v(i.b);return i.p<66?x&y:i.p<80?x|y:x^y;}
  String s(){
   var z="";
   for(I i:m.values())if(i.p>1&&i.o.charAt(0)==122&&i.o.compareTo(z)>0)z=i.o;
