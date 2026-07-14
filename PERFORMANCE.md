@@ -624,6 +624,138 @@ The candidate's standard phase run used one excluded cold JVM followed by 10 ind
 
 Whole-suite movement is noisy and is not used to judge the change; the isolated paired interval is the accepted evidence. The official sample returned `36 / 81`, a single-row trail returned `1 / 1`, and 60 deterministic rectangular grids matched the exact pre-change implementation through both standalone and combined entry points. The personal answers remained `566 / 1324`, and all 50 independent answers plus all 25 combined solves retained checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
 
+## Day 9 shared exact run-level compaction (queued)
+
+The inherited combined path previously materialized the input, created two inner `Scanner`s, and parsed all 19,999 disk-map runs twice. Part 1 then expanded 95,101 blocks into both a filesystem array and a second condensed array. The queued implementation parses once, starts from the exact original run checksum, and applies each right-file-to-left-gap movement in arithmetic-series batches without expanding blocks. Part 2 shares the immutable runs, merges gaps separated by zero-length files, retains arbitrary-size gap positions, and promotes checksum arithmetic from `long` to `BigInteger` only if exact primitive operations overflow.
+
+An isolated runner constructed `Day09` and its file-backed `Scanner` before timing the exact `fullSolve` call. One excluded cold pair was followed by 10 counterbalanced pairs of separate fresh JVM processes:
+
+| Pair | Order | Duplicate expanded solve (ms) | Shared run-level solve (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 16.578 | 14.440 | -2.138 |
+| 2 | C-B | 16.455 | 13.584 | -2.871 |
+| 3 | B-C | 15.583 | 13.246 | -2.337 |
+| 4 | C-B | 15.880 | 13.494 | -2.386 |
+| 5 | B-C | 15.553 | 14.314 | -1.240 |
+| 6 | C-B | 15.639 | 13.555 | -2.084 |
+| 7 | B-C | 17.520 | 13.985 | -3.534 |
+| 8 | C-B | 15.590 | 13.613 | -1.976 |
+| 9 | B-C | 15.413 | 13.116 | -2.297 |
+| 10 | C-B | 16.148 | 13.603 | -2.544 |
+
+The excluded cold values were 16.055ms baseline and 14.430ms candidate. The measured means were **16.036ms baseline** and **13.695ms candidate**, a **2.341ms (14.6%) reduction**. The paired-delta sample standard deviation was 0.597ms and the t(9) 95% confidence interval was **[-2.768ms, -1.914ms]**.
+
+The pushed tip and Day-9-only candidate also ran one excluded cold pair plus 10 counterbalanced full-25-day pairs. The solver interval crossed zero, so the verified change was retained in the uncommitted queue:
+
+| Metric | Pushed-tip baseline mean (ms) | Queued candidate mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 176.337 | 176.396 | +0.058 | [-2.763, +2.880] |
+| Main | 205.958 | 205.196 | -0.762 | [-4.063, +2.539] |
+| Startup | 27.913 | 27.903 | -0.009 | [-2.019, +2.000] |
+| Harness | 29.621 | 28.800 | -0.820 | [-1.650, +0.009] |
+| Wall | 251.393 | 251.030 | -0.363 | [-4.543, +3.816] |
+
+The official example returned `1928 / 2858`. An independent literal-block oracle matched both parts for all 87,380 maps of lengths one through eight over run lengths zero through three, covering zero-length files, merged gaps, trailing gaps, split moves, and both cursor-meeting parities. Exact-overflow promotion, malformed input, whitespace and final-newline variants, repeated entry points, all 50 independent answers, and all 25 combined solves also passed; the checksum remained `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
+## Day 15 shared warehouse preparation (queued)
+
+The inherited combined path materialized the 22.6KB input, created two inner `Scanner`s, parsed the 20,000 movement characters twice, and rebuilt both the source map and movement list twice. The queued implementation parses and validates the rectangular map and line-wrapped movement stream once, then builds independent narrow and wide mutable grids directly with primitive cell codes. The existing box-pushing algorithm and independent initial state for each part are unchanged.
+
+An isolated runner constructed `Day15` and its file-backed `Scanner` before timing `fullSolve`. One excluded cold pair was followed by 10 separate, counterbalanced fresh-JVM pairs:
+
+| Pair | Order | Duplicate preparation (ms) | Shared preparation (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 11.737 | 10.557 | -1.180 |
+| 2 | C-B | 12.427 | 10.734 | -1.693 |
+| 3 | B-C | 11.914 | 10.783 | -1.131 |
+| 4 | C-B | 11.926 | 10.578 | -1.348 |
+| 5 | B-C | 12.043 | 10.649 | -1.394 |
+| 6 | C-B | 11.905 | 10.505 | -1.400 |
+| 7 | B-C | 11.877 | 10.676 | -1.201 |
+| 8 | C-B | 11.867 | 10.798 | -1.068 |
+| 9 | B-C | 11.956 | 10.533 | -1.423 |
+| 10 | C-B | 12.058 | 10.840 | -1.219 |
+
+The excluded cold values were 13.012ms baseline and 11.247ms candidate. The measured means were **11.971ms baseline** and **10.665ms candidate**, a **1.306ms (10.9%) reduction**. The paired t(9) 95% confidence interval was **[-1.437ms, -1.174ms]**.
+
+The pushed tip and combined Day 9 plus Day 15 queue then ran an excluded cold pair and 10 counterbalanced full-25-day pairs. Mean solver time improved, but its interval still crossed zero, so neither queued change was committed or pushed:
+
+| Metric | Pushed-tip mean (ms) | Queued mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 175.514 | 174.383 | -1.131 | [-3.005, +0.744] |
+| Main | 205.408 | 203.355 | -2.053 | [-4.020, -0.086] |
+| Startup | 39.797 | 39.830 | +0.033 | [-3.379, +3.445] |
+| Harness | 29.894 | 28.972 | -0.923 | [-2.280, +0.434] |
+| Wall | 263.258 | 247.219 | -16.039 | [-19.243, -12.835] |
+
+The official examples returned `2028` and `10092 / 9021`; a line-wrapped rectangular horizontal-chain case returned `105 / 107`, and a stacked vertical-box case returned `706 / 712`. The personal standalone and combined answers agree at `1446158 / 1446175`. All 50 independent answers and all 25 combined solves passed with checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
+## Day 18 shared indexed byte search (queued)
+
+The inherited combined path materialized the entire input, constructed two inner `Scanner`s, parsed and boxed all 3,450 falling-byte coordinates twice, and discarded both lists after independent searches. Every binary-search probe also rebuilt its blocked, visited, and queue arrays. The queued implementation validates and stores the coordinates once in a compact primitive array, records each cell's earliest fall, and reuses primitive BFS storage across both parts and all probes. Duplicate coordinates retain first-fall semantics. It also removes two unjustified edge restrictions in the inherited search: a blocked start or target is now unreachable, and Part 2 searches through the complete byte sequence so the final byte can be the first blocker.
+
+An isolated runner constructed `Day18` and its file-backed `Scanner` before timing `fullSolve`. One excluded cold pair was followed by 10 separate, counterbalanced fresh-JVM pairs against the exact pre-Day-18 queue:
+
+| Pair | Order | Duplicate boxed search (ms) | Shared indexed search (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 15.281 | 12.053 | -3.228 |
+| 2 | C-B | 15.076 | 12.835 | -2.241 |
+| 3 | B-C | 15.142 | 12.311 | -2.831 |
+| 4 | C-B | 16.681 | 11.724 | -4.956 |
+| 5 | B-C | 15.402 | 11.980 | -3.421 |
+| 6 | C-B | 15.502 | 11.922 | -3.581 |
+| 7 | B-C | 15.278 | 11.803 | -3.475 |
+| 8 | C-B | 16.088 | 12.432 | -3.655 |
+| 9 | B-C | 15.471 | 12.075 | -3.396 |
+| 10 | C-B | 16.519 | 11.778 | -4.741 |
+
+The excluded cold values were 14.940ms baseline and 12.955ms candidate. The measured means were **15.644ms baseline** and **12.092ms candidate**, a **3.552ms (22.7%) reduction**. The paired t(9) 95% confidence interval was **[-4.126ms, -2.979ms]**.
+
+The pushed tip and combined Day 9, Day 15, and Day 18 queue then ran an excluded cold pair and 10 counterbalanced full-25-day pairs. The solver interval crossed zero, so the batch remains deliberately uncommitted and unpushed:
+
+| Metric | Pushed-tip mean (ms) | Queued mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 175.671 | 175.584 | -0.087 | [-2.547, +2.373] |
+| Main | 205.005 | 205.212 | +0.207 | [-3.089, +3.503] |
+| Startup | 36.914 | 40.371 | +3.457 | [+0.294, +6.620] |
+| Harness | 29.334 | 29.628 | +0.294 | [-1.131, +1.718] |
+| Wall | 259.934 | 249.274 | -10.659 | [-17.322, -3.996] |
+
+The parameterized core returned the official `22 / 6,1` sample result. Targeted checks covered a first-byte blocked start, blocked target, a final-byte barrier, duplicate coordinates, asymmetric coordinate output, missing final newline, malformed and out-of-range coordinates, and a sequence that never blocks the exit. Personal standalone and combined answers remained `252 / 5,60`; all 50 independent answers and all 25 combined solves passed with checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
+## Day 5 shared generic update ordering
+
+The inherited combined path materialized the input, constructed two inner `Scanner`s, reparsed every rule and update, scanned applicable rules twice, and boxed invalid updates for a comparator that only recognized direct edges. It also restricted page numbers to 0 through 99 and could violate the comparator contract on sparse transitive rule graphs. The accepted implementation parses arbitrary signed integer page labels once into compact IDs, validates each update once, shares both totals, and uses stable Kahn topological repair over the applicable rule subgraph.
+
+An isolated runner constructed `Day05` and its file-backed `Scanner` before timing `fullSolve`. One excluded cold pair was followed by 10 separate, counterbalanced fresh-JVM pairs against the exact pre-Day-5 queue:
+
+| Pair | Order | Duplicate direct-edge solve (ms) | Shared topological solve (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 15.954 | 10.541 | -5.413 |
+| 2 | C-B | 16.165 | 10.165 | -6.000 |
+| 3 | B-C | 16.690 | 9.984 | -6.707 |
+| 4 | C-B | 16.183 | 10.233 | -5.950 |
+| 5 | B-C | 15.943 | 10.471 | -5.472 |
+| 6 | C-B | 16.031 | 10.751 | -5.280 |
+| 7 | B-C | 15.963 | 10.523 | -5.440 |
+| 8 | C-B | 16.207 | 10.595 | -5.612 |
+| 9 | B-C | 16.475 | 10.275 | -6.200 |
+| 10 | C-B | 16.106 | 10.728 | -5.378 |
+
+The excluded cold values were 15.833ms baseline and 11.024ms candidate. The measured means were **16.172ms baseline** and **10.427ms candidate**, a **5.745ms (35.5%) reduction**. The paired t(9) 95% confidence interval was **[-6.073ms, -5.418ms]**.
+
+The pushed tip and combined Day 9, Day 15, Day 18, and Day 5 batch then ran an excluded cold pair and 10 counterbalanced full-25-day pairs. This time the solver interval was entirely below zero, satisfying the repository publication gate:
+
+| Metric | Pushed-tip mean (ms) | Accepted batch mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 175.361 | 170.590 | -4.771 | [-7.813, -1.728] |
+| Main | 204.436 | 199.045 | -5.392 | [-8.818, -1.965] |
+| Startup | 36.705 | 37.848 | +1.142 | [-0.637, +2.922] |
+| Harness | 29.075 | 28.454 | -0.621 | [-1.370, +0.128] |
+| Wall | 260.023 | 240.482 | -19.541 | [-22.623, -16.459] |
+
+The official sample returned `143 / 123`. Targeted checks covered sparse transitive chains, rules appearing after updates, absent endpoints, duplicate rules, page labels beyond the old fixed range, stable tie handling, cycles, duplicate pages, malformed rules, missing final newline, and repeated reuse of one solver instance with disjoint rule sets. Personal standalone and combined answers remained `4814 / 5448`; all 50 independent answers and all 25 combined solves retained checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
 ## Clean cumulative recovery comparison
 
 After the leaked background JVMs were removed, pristine commit `88e8388` and pre-Day-1 source commit `12f75b8` were compiled with the identical current benchmark, solver factory, and `DayTemplate`. The OS process table was checked immediately before measurement, all Java/Javac commands ran in tracked process groups with hard deadlines, and no other AoC JVM ran concurrently. One excluded cold pair preceded 10 counterbalanced pairs of full 25-day child JVMs.

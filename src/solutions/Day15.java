@@ -7,75 +7,123 @@ import java.util.*;
 
 public class Day15 extends DayTemplate {
 
-    int[]xs = new int[]{1,-1,0,0};
-    int[]ys = new int[]{0,0,1,-1};
+    private static final int[] XS = {1, -1, 0, 0};
+    private static final int[] YS = {0, 0, 1, -1};
 
+    @Override
     public String solve(boolean part1, Scanner in) {
-        long answer = 0;
+        ParsedInput input = parse(in);
+        return run(input, !part1) + "";
+    }
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        ParsedInput input = parse(in);
+        return new String[]{run(input, false) + "", run(input, true) + ""};
+    }
+
+    private ParsedInput parse(Scanner in) {
         List<String> lines = new ArrayList<>();
-        List<String> movements = new ArrayList<>();
+        StringBuilder movements = new StringBuilder();
         boolean movement = false;
-        while (in.hasNext()) {
+        while (in.hasNextLine()) {
             String line = in.nextLine();
-            if(line.isEmpty()){
+            if (line.isEmpty()) {
                 movement = true;
                 continue;
             }
-            if(!movement){
+            if (!movement) {
                 lines.add(line);
-            }
-            else{
-                movements.add(line);
+            } else {
+                movements.append(line);
             }
         }
-        if(!part1){
-            lines = convert(lines);
+        if (lines.isEmpty() || !movement) {
+            throw new IllegalArgumentException("Missing warehouse map or movement separator");
         }
 
-        int[][] grid = new int[lines.size()][lines.get(0).length()];
-        Coordinate robot = new Coordinate(0,0);
-        Map<Character, Integer> mapping = Map.of('#',1000,'.',1,'O',2,'[',3,']',4);
-        for(int i = 0; i < grid.length; i++){
-            for(int j = 0; j < grid[0].length; j++){
-                char c = lines.get(i).charAt(j);
-                if(c == '@'){
-                    robot = new Coordinate(i,j);
-                    grid[i][j] = 1;
-                }
-                else{
-                    grid[i][j] = mapping.get(c);
+        int width = lines.get(0).length();
+        int robots = 0;
+        for (String line : lines) {
+            if (line.length() != width) {
+                throw new IllegalArgumentException("Warehouse map must be rectangular");
+            }
+            for (int column = 0; column < width; column++) {
+                char cell = line.charAt(column);
+                if (cell == '@') {
+                    robots++;
+                } else if (cell != '#' && cell != '.' && cell != 'O') {
+                    throw new IllegalArgumentException("Invalid warehouse cell: " + cell);
                 }
             }
         }
+        if (width == 0 || robots != 1) {
+            throw new IllegalArgumentException("Warehouse must contain exactly one robot");
+        }
+        for (int i = 0; i < movements.length(); i++) {
+            char move = movements.charAt(i);
+            if (move != '^' && move != 'v' && move != '<' && move != '>') {
+                throw new IllegalArgumentException("Invalid movement: " + move);
+            }
+        }
+        return new ParsedInput(lines.toArray(String[]::new), movements.toString().toCharArray());
+    }
 
-        StringBuilder allMovements = new StringBuilder();
-        for(String move: movements){
-            allMovements.append(move);
+    private long run(ParsedInput input, boolean wide) {
+        PreparedWarehouse warehouse = prepare(input.map, wide);
+        for (char move : input.moves) {
+            oneCycle(move, warehouse.robot, warehouse.grid, !wide);
         }
-        for(char c: allMovements.toString().toCharArray()){
-            oneCycle(c, robot, grid, part1);
-        }
-        for(int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[0].length; j++) {
-                if (grid[i][j] == 2 || grid[i][j] == 3) {
+
+        long answer = 0;
+        for (int i = 0; i < warehouse.grid.length; i++) {
+            for (int j = 0; j < warehouse.grid[0].length; j++) {
+                int cell = warehouse.grid[i][j];
+                if (cell == 2 || cell == 3) {
                     answer += 100L * i + j;
                 }
             }
         }
-        return answer + "";
+        return answer;
     }
 
-    private static List<String> convert(List<String> lines) {
-        List<String> newLines = new ArrayList<>();
-        Map<Character, String> mapping = Map.of('#',"##", '.',"..",'O',"[]",'@',"@.");
-        for (String line : lines) {
-            StringBuilder newLine = new StringBuilder();
-            for (char c : line.toCharArray()) {
-                newLine.append(mapping.get(c));
+    private PreparedWarehouse prepare(String[] map, boolean wide) {
+        int scale = wide ? 2 : 1;
+        int[][] grid = new int[map.length][map[0].length() * scale];
+        Coordinate robot = null;
+        for (int row = 0; row < map.length; row++) {
+            for (int column = 0; column < map[row].length(); column++) {
+                char cell = map[row].charAt(column);
+                int output = column * scale;
+                if (!wide) {
+                    grid[row][output] = switch (cell) {
+                        case '#' -> 1000;
+                        case 'O' -> 2;
+                        case '.', '@' -> 1;
+                        default -> throw new IllegalStateException();
+                    };
+                    if (cell == '@') {
+                        robot = new Coordinate(row, output);
+                    }
+                } else {
+                    switch (cell) {
+                        case '#' -> grid[row][output] = grid[row][output + 1] = 1000;
+                        case 'O' -> {
+                            grid[row][output] = 3;
+                            grid[row][output + 1] = 4;
+                        }
+                        case '.', '@' -> {
+                            grid[row][output] = grid[row][output + 1] = 1;
+                            if (cell == '@') {
+                                robot = new Coordinate(row, output);
+                            }
+                        }
+                        default -> throw new IllegalStateException();
+                    }
+                }
             }
-            newLines.add(newLine.toString());
         }
-        return newLines;
+        return new PreparedWarehouse(grid, robot);
     }
 
     private void oneCycle(char c, Coordinate robot, int[][] grid, boolean part1){
@@ -92,7 +140,7 @@ public class Day15 extends DayTemplate {
         if(c == '<'){
             direction = 3;
         }
-        Coordinate goal = new Coordinate(robot.x + xs[direction], robot.y + ys[direction]);
+        Coordinate goal = new Coordinate(robot.x + XS[direction], robot.y + YS[direction]);
         if(grid[goal.x][goal.y] == 1){
             robot.x = goal.x;
             robot.y = goal.y;
@@ -107,7 +155,7 @@ public class Day15 extends DayTemplate {
             int counter = 0;
             while(true){
                 counter++;
-                goal = new Coordinate(goal.x + xs[direction], goal.y + ys[direction]);
+                goal = new Coordinate(goal.x + XS[direction], goal.y + YS[direction]);
                 if(grid[goal.x][goal.y] == 1000){
                     break;
                 }
@@ -119,12 +167,12 @@ public class Day15 extends DayTemplate {
             }
             if(someEmpty){
                 while(counter-- > 0){
-                    grid[firstEmpty.x][firstEmpty.y] = grid[firstEmpty.x - xs[direction]][firstEmpty.y - ys[direction]];
-                    firstEmpty.x -= xs[direction];
-                    firstEmpty.y -= ys[direction];
+                    grid[firstEmpty.x][firstEmpty.y] = grid[firstEmpty.x - XS[direction]][firstEmpty.y - YS[direction]];
+                    firstEmpty.x -= XS[direction];
+                    firstEmpty.y -= YS[direction];
                 }
-                robot.x += xs[direction];
-                robot.y += ys[direction];
+                robot.x += XS[direction];
+                robot.y += YS[direction];
                 grid[robot.x][robot.y] = 1;
             }
         }
@@ -136,7 +184,7 @@ public class Day15 extends DayTemplate {
             int level = robot.x;
             while(!allEmpty) {
                 Set<Integer> nextIndices = new HashSet<>();
-                level += xs[direction];
+                level += XS[direction];
                 allEmpty = true;
                 for (int index : indices.get(indices.size() - 1)) {
                     if (grid[level][index] == 1000) {
@@ -161,12 +209,16 @@ public class Day15 extends DayTemplate {
             for(int i = indices.size() - 1; i > 0; i--) {
                 Set<Integer> indicesLayer = indices.get(i);
                 for(int index: indicesLayer){
-                    grid[robot.x + ((i + 1) * xs[direction])][index] = grid[robot.x + (i * xs[direction])][index];
-                    grid[robot.x + (i * xs[direction])][index] = 1;
+                    grid[robot.x + ((i + 1) * XS[direction])][index] = grid[robot.x + (i * XS[direction])][index];
+                    grid[robot.x + (i * XS[direction])][index] = 1;
                 }
             }
-            robot.x += xs[direction];
-            robot.y += ys[direction];
+            robot.x += XS[direction];
+            robot.y += YS[direction];
         }
     }
+
+    private record ParsedInput(String[] map, char[] moves) {}
+
+    private record PreparedWarehouse(int[][] grid, Coordinate robot) {}
 }
