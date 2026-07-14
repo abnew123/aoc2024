@@ -1,32 +1,23 @@
 import java.util.*;
 class X{
- Map<String,I>m=new HashMap();
+ Map<String,String[]>m=new HashMap();
  String s(boolean p,String[]S){
-  for(var s:S){
-   var A=s.split("\\s+");
-   if(A.length>1)if(A.length<3)m.put(A[0].replace(":",""),new I(new Integer(A[1])));
-   else m.put(A[4],new I(A[0],A[1],A[2],A[4]));
-  }
+  for(var s:S){var A=s.split("\\s+");if(A.length>1)m.put(A.length<3?A[0].replace(":",""):A[4],A);}
   if(!p)return s();
   long r=0;
   for(var k:m.keySet())if(k.charAt(0)>121)r+=1L*v(k)<<new Integer(k.substring(1));
   return r+"";
  }
- int v(String s){I i=m.get(s);if(i.p<2)return i.p;int x=v(i.a),y=v(i.b);return i.p<66?x&y:i.p<80?x|y:x^y;}
+ int v(String s){var i=m.get(s);if(i.length<3)return new Integer(i[1]);int x=v(i[0]),y=v(i[2]),p=i[1].charAt(0);return p<66?x&y:p<80?x|y:x^y;}
  String s(){
   var z="";
-  for(I i:m.values())if(i.p>1&&i.o.charAt(0)>121&&i.o.compareTo(z)>0)z=i.o;
+  for(var k:m.keySet())if(k.charAt(0)>121&&m.get(k).length>2&&k.compareTo(z)>0)z=k;
   var b=new TreeSet();
-  for(I i:m.values())if(i.p>1){
-   boolean f=i.a.endsWith("00"),xy=i.a.charAt(0)>119&i.b.charAt(0)>119,o=i.o.charAt(0)>121;
-   if(o&i.o!=z&i.p<88|i.p>87&!xy&!o|i.p<66&!f&!e(i.o,79)|i.p>87&xy&!f&(!e(i.o,88)|!e(i.o,65)))b.add(i.o);
-  }
+  for(var E:m.entrySet()){var i=E.getValue();if(i.length>2){var o=E.getKey();int p=i[1].charAt(0);
+   boolean f=i[0].endsWith("00"),xy=i[0].charAt(0)>119&i[2].charAt(0)>119,O=o.charAt(0)>121;
+   if(O&o!=z&p<88|p>87&!xy&!O|p<66&!f&!e(o,79)|p>87&xy&!f&(!e(o,88)|!e(o,65)))b.add(o);
+  }}
   return String.join(",",b);
  }
- boolean e(String w,int p){for(I i:m.values())if(i.p==p&&(i.a.equals(w)|i.b.equals(w)))return 1>0;return 1<0;}
- class I{
-  String a,b,o;int p;
-  I(int x){p=x;}
-  I(String x,String q,String y,String z){a=x;p=q.charAt(0);b=y;o=z;}
- }
+ boolean e(String w,int p){for(var i:m.values())if(i.length>2&&i[1].charAt(0)==p&&(i[0].equals(w)|i[2].equals(w)))return 1>0;return 1<0;}
 }
