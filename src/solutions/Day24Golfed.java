@@ -9,17 +9,17 @@ class X{
   }
   if(!p)return s();
   long r=0;
-  for(var k:m.keySet())if(k.charAt(0)==122)r+=1L*v(k)<<new Integer(k.substring(1));
+  for(var k:m.keySet())if(k.charAt(0)>121)r+=1L*v(k)<<new Integer(k.substring(1));
   return r+"";
  }
  int v(String s){I i=m.get(s);if(i.p<2)return i.p;int x=v(i.a),y=v(i.b);return i.p<66?x&y:i.p<80?x|y:x^y;}
  String s(){
   var z="";
-  for(I i:m.values())if(i.p>1&&i.o.charAt(0)==122&&i.o.compareTo(z)>0)z=i.o;
+  for(I i:m.values())if(i.p>1&&i.o.charAt(0)>121&&i.o.compareTo(z)>0)z=i.o;
   var b=new TreeSet();
   for(I i:m.values())if(i.p>1){
-   boolean f=i.a.endsWith("00"),xy=i.a.charAt(0)>119&i.b.charAt(0)>119,o=i.o.charAt(0)==122;
-   if(o&i.o!=z&i.p!=88|i.p==88&!xy&!o|i.p==65&!f&!e(i.o,79)|i.p==88&xy&!f&(!e(i.o,88)|!e(i.o,65)))b.add(i.o);
+   boolean f=i.a.endsWith("00"),xy=i.a.charAt(0)>119&i.b.charAt(0)>119,o=i.o.charAt(0)>121;
+   if(o&i.o!=z&i.p<88|i.p>87&!xy&!o|i.p<66&!f&!e(i.o,79)|i.p>87&xy&!f&(!e(i.o,88)|!e(i.o,65)))b.add(i.o);
   }
   return String.join(",",b);
  }
