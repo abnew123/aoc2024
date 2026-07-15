@@ -21,14 +21,14 @@ public class Day16 extends DayTemplate {
     @Override
     public String[] fullSolve(Scanner in) {
         ParsedInput input = parse(in);
-        int[] fromStart = distancesFromStart(input.start());
+        int[] fromStart = distancesFromStart(input.start(), input.exit());
         int bestScore = bestExitScore(fromStart, input.exit());
         return new String[]{bestScore + "", countBestPathTiles(fromStart, input.exit(), bestScore) + ""};
     }
 
     public String solve(boolean part1, Scanner in) {
         ParsedInput input = parse(in);
-        int[] fromStart = distancesFromStart(input.start());
+        int[] fromStart = distancesFromStart(input.start(), input.exit());
         int bestScore = bestExitScore(fromStart, input.exit());
         if (part1) {
             return bestScore + "";
@@ -64,7 +64,7 @@ public class Day16 extends DayTemplate {
         return new ParsedInput(start, exit);
     }
 
-    private int[] distancesFromStart(int start) {
+    private int[] distancesFromStart(int start, int exit) {
         int[] distances = emptyDistances();
         LongHeap heap = new LongHeap();
         distances[state(start, 0)] = 0;
@@ -75,6 +75,9 @@ public class Day16 extends DayTemplate {
             int state = state(entry);
             if (score != distances[state]) {
                 continue;
+            }
+            if (cell(state) == exit) {
+                break;
             }
             addMove(distances, heap, state, score, true);
             addTurn(distances, heap, state, score, (direction(state) + 1) & 3);

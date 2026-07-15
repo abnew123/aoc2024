@@ -72,7 +72,7 @@ public class Day15 extends DayTemplate {
     private long run(ParsedInput input, boolean wide) {
         PreparedWarehouse warehouse = prepare(input.map, wide);
         for (char move : input.moves) {
-            oneCycle(move, warehouse.robot, warehouse.grid, !wide);
+            oneCycle(move, warehouse, !wide);
         }
 
         long answer = 0;
@@ -123,10 +123,12 @@ public class Day15 extends DayTemplate {
                 }
             }
         }
-        return new PreparedWarehouse(grid, robot);
+        return new PreparedWarehouse(grid, robot, wide);
     }
 
-    private void oneCycle(char c, Coordinate robot, int[][] grid, boolean part1){
+    private void oneCycle(char c, PreparedWarehouse warehouse, boolean part1){
+        Coordinate robot = warehouse.robot;
+        int[][] grid = warehouse.grid;
         int direction = -1;
         if(c == '^'){
             direction = 1;
@@ -140,85 +142,104 @@ public class Day15 extends DayTemplate {
         if(c == '<'){
             direction = 3;
         }
-        Coordinate goal = new Coordinate(robot.x + XS[direction], robot.y + YS[direction]);
-        if(grid[goal.x][goal.y] == 1){
-            robot.x = goal.x;
-            robot.y = goal.y;
+        int goalRow = robot.x + XS[direction];
+        int goalColumn = robot.y + YS[direction];
+        if(grid[goalRow][goalColumn] == 1){
+            robot.x = goalRow;
+            robot.y = goalColumn;
             return;
         }
-        if(grid[goal.x][goal.y] == 1000){
+        if(grid[goalRow][goalColumn] == 1000){
             return;
         }
         if(direction == 2 || direction == 3 || part1){
-            boolean someEmpty = false;
-            Coordinate firstEmpty = new Coordinate(1,-1);
             int counter = 0;
             while(true){
                 counter++;
-                goal = new Coordinate(goal.x + XS[direction], goal.y + YS[direction]);
-                if(grid[goal.x][goal.y] == 1000){
-                    break;
+                goalRow += XS[direction];
+                goalColumn += YS[direction];
+                if(grid[goalRow][goalColumn] == 1000){
+                    return;
                 }
-                if(grid[goal.x][goal.y] == 1){
-                    someEmpty = true;
-                    firstEmpty = new Coordinate(goal.x, goal.y);
+                if(grid[goalRow][goalColumn] == 1){
                     break;
                 }
             }
-            if(someEmpty){
-                while(counter-- > 0){
-                    grid[firstEmpty.x][firstEmpty.y] = grid[firstEmpty.x - XS[direction]][firstEmpty.y - YS[direction]];
-                    firstEmpty.x -= XS[direction];
-                    firstEmpty.y -= YS[direction];
-                }
-                robot.x += XS[direction];
-                robot.y += YS[direction];
-                grid[robot.x][robot.y] = 1;
+            while(counter-- > 0){
+                grid[goalRow][goalColumn] = grid[goalRow - XS[direction]][goalColumn - YS[direction]];
+                goalRow -= XS[direction];
+                goalColumn -= YS[direction];
             }
+            robot.x += XS[direction];
+            robot.y += YS[direction];
+            grid[robot.x][robot.y] = 1;
         }
         else{
-            List<Set<Integer>> indices = new ArrayList<>();
-            indices.add(new HashSet<>());
-            indices.get(0).add(robot.y);
-            boolean allEmpty = false;
-            int level = robot.x;
-            while(!allEmpty) {
-                Set<Integer> nextIndices = new HashSet<>();
-                level += XS[direction];
-                allEmpty = true;
-                for (int index : indices.get(indices.size() - 1)) {
-                    if (grid[level][index] == 1000) {
-                        return;
-                    }
-                    if (grid[level][index] != 1) {
-                        allEmpty = false;
-                    }
-                    if (grid[level][index] == 3) {
-                        nextIndices.add(index + 1);
-                        nextIndices.add(index);
-                    }
-                    if (grid[level][index] == 4) {
-                        nextIndices.add(index - 1);
-                        nextIndices.add(index);
-                    }
+            int stamp = warehouse.nextStamp();
+            int queueSize = enqueueBox(warehouse, goalRow, goalColumn, stamp, 0);
+            int width = grid[0].length;
+            for (int head = 0; head < queueSize; head++) {
+                int box = warehouse.boxQueue[head];
+                int row = box / width;
+                int column = box % width;
+                int nextRow = row + XS[direction];
+                if (grid[nextRow][column] == 1000 || grid[nextRow][column + 1] == 1000) {
+                    return;
                 }
-                if(!allEmpty){
-                    indices.add(nextIndices);
-                }
+                queueSize = enqueueBox(warehouse, nextRow, column, stamp, queueSize);
+                queueSize = enqueueBox(warehouse, nextRow, column + 1, stamp, queueSize);
             }
-            for(int i = indices.size() - 1; i > 0; i--) {
-                Set<Integer> indicesLayer = indices.get(i);
-                for(int index: indicesLayer){
-                    grid[robot.x + ((i + 1) * XS[direction])][index] = grid[robot.x + (i * XS[direction])][index];
-                    grid[robot.x + (i * XS[direction])][index] = 1;
-                }
+            for (int index = queueSize - 1; index >= 0; index--) {
+                int box = warehouse.boxQueue[index];
+                int row = box / width;
+                int column = box % width;
+                int nextRow = row + XS[direction];
+                grid[row][column] = grid[row][column + 1] = 1;
+                grid[nextRow][column] = 3;
+                grid[nextRow][column + 1] = 4;
             }
             robot.x += XS[direction];
             robot.y += YS[direction];
         }
     }
 
+    private int enqueueBox(PreparedWarehouse warehouse, int row, int column, int stamp, int queueSize) {
+        int cell = warehouse.grid[row][column];
+        if (cell != 3 && cell != 4) {
+            return queueSize;
+        }
+        int leftColumn = cell == 3 ? column : column - 1;
+        int box = row * warehouse.grid[0].length + leftColumn;
+        if (warehouse.seenStamp[box] != stamp) {
+            warehouse.seenStamp[box] = stamp;
+            warehouse.boxQueue[queueSize++] = box;
+        }
+        return queueSize;
+    }
+
     private record ParsedInput(String[] map, char[] moves) {}
 
-    private record PreparedWarehouse(int[][] grid, Coordinate robot) {}
+    private static final class PreparedWarehouse {
+        final int[][] grid;
+        final Coordinate robot;
+        final int[] boxQueue;
+        final int[] seenStamp;
+        int stamp;
+
+        PreparedWarehouse(int[][] grid, Coordinate robot, boolean wide) {
+            this.grid = grid;
+            this.robot = robot;
+            int cells = wide ? grid.length * grid[0].length : 0;
+            boxQueue = new int[cells];
+            seenStamp = new int[cells];
+        }
+
+        int nextStamp() {
+            if (++stamp == 0) {
+                Arrays.fill(seenStamp, 0);
+                stamp = 1;
+            }
+            return stamp;
+        }
+    }
 }

@@ -927,6 +927,116 @@ and a `z70` output beyond `long`. Personal answers remained
 25 combined solves retained checksum
 `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
 
+## Day 16 settled-exit cutoff
+
+The forward Dijkstra previously drained every reachable orientation state after it had already settled an exit state. It now stops at the first non-stale exit entry. Every graph edge has strictly positive cost (one for a move and 1,000 for a turn), so all predecessors of every optimal exit path have already been settled, and all equally optimal exit orientations have already been relaxed, before this cutoff. The existing reverse predecessor walk therefore retains the complete union of optimal-path tiles.
+
+An isolated runner constructed `Day16` and its file-backed `Scanner` before timing the exact `fullSolve` call. One excluded cold pair was followed by 10 counterbalanced pairs of separate fresh JVM processes:
+
+| Pair | Order | Drain-all baseline (ms) | Settled-exit candidate (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 10.927 | 10.829 | -0.098 |
+| 2 | C-B | 10.814 | 10.722 | -0.091 |
+| 3 | B-C | 10.836 | 10.743 | -0.093 |
+| 4 | C-B | 10.852 | 10.805 | -0.046 |
+| 5 | B-C | 10.913 | 10.660 | -0.253 |
+| 6 | C-B | 10.981 | 10.794 | -0.187 |
+| 7 | B-C | 10.925 | 10.753 | -0.173 |
+| 8 | C-B | 11.041 | 10.657 | -0.385 |
+| 9 | B-C | 10.967 | 10.736 | -0.231 |
+| 10 | C-B | 10.804 | 10.829 | +0.025 |
+
+The excluded cold values were 10.982ms baseline and 11.122ms candidate. The measured means were **10.906ms baseline** and **10.753ms candidate**, a **0.153ms (1.4%) reduction**. The paired-delta sample standard deviation was 0.118ms and the t(9) 95% confidence interval was **[-0.237ms, -0.069ms]**.
+
+The pushed tip `c4740be` and Day 16 candidate then ran one excluded cold pair and 10 counterbalanced full-25-day pairs. At that point the paired solver interval crossed zero, so Day 16 remained queued pending another independently verified win:
+
+| Pair | Order | Pushed-tip solver (ms) | Queued solver (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 159.282 | 161.327 | +2.044 |
+| 2 | C-B | 156.551 | 160.393 | +3.842 |
+| 3 | B-C | 161.844 | 156.852 | -4.993 |
+| 4 | C-B | 160.341 | 161.658 | +1.318 |
+| 5 | B-C | 163.136 | 158.391 | -4.745 |
+| 6 | C-B | 159.881 | 160.758 | +0.877 |
+| 7 | B-C | 159.293 | 158.292 | -1.001 |
+| 8 | C-B | 166.651 | 159.905 | -6.746 |
+| 9 | B-C | 159.208 | 163.988 | +4.781 |
+| 10 | C-B | 160.916 | 158.870 | -2.047 |
+
+The excluded cold processes were:
+
+| Variant | Wall (ms) | Main (ms) | Solver (ms) | Startup (ms) | Harness (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Pushed tip | 222.485 | 189.304 | 159.297 | 29.388 | 30.006 |
+| Queue | 220.150 | 189.552 | 159.223 | 26.784 | 30.329 |
+
+The 10-pair means and paired intervals were:
+
+| Metric | Pushed-tip mean (ms) | Queue mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 160.710 | 160.043 | -0.667 | [-3.468, +2.134] |
+| Main | 190.532 | 190.206 | -0.326 | [-3.233, +2.581] |
+| Startup | 27.101 | 27.364 | +0.263 | [-1.363, +1.888] |
+| Harness | 29.821 | 30.162 | +0.341 | [-0.380, +1.063] |
+| Wall | 221.408 | 222.863 | +1.455 | [-3.326, +6.236] |
+
+Both classpaths passed all 50 independent answers and all 25 combined solves with checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. Both official examples returned `7036 / 45` and `11048 / 64`; a straight corridor returned `2 / 3`; and a symmetric maze whose two optimal routes approach the exit with different orientations returned `3006 / 12` in both implementations.
+
+## Day 15 primitive wide-box traversal and 2024 batch gate
+
+Wide vertical pushes previously allocated `Coordinate`, `HashSet`, and queue objects while discovering the connected boxes that must move together. The solver now reuses primitive integer queue and visitation-stamp arrays owned by the prepared warehouse, normalizes either half of a contacted wide box to its left cell, checks the complete dependency closure for walls, and then moves that closure in reverse discovery order. Narrow and horizontal moves also use primitive row/column coordinates instead of allocating a goal object.
+
+An isolated runner constructed `Day15` and its file-backed input before timing `fullSolve`. One excluded cold pair (11.362ms baseline, 7.077ms candidate) preceded 10 counterbalanced pairs of separate fresh JVM processes:
+
+| Pair | Order | Baseline (ms) | Candidate (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 11.838 | 7.167 | -4.671 |
+| 2 | C-B | 11.685 | 7.117 | -4.569 |
+| 3 | B-C | 11.687 | 7.179 | -4.507 |
+| 4 | C-B | 11.701 | 7.390 | -4.310 |
+| 5 | B-C | 11.536 | 7.070 | -4.466 |
+| 6 | C-B | 11.196 | 7.079 | -4.118 |
+| 7 | B-C | 11.490 | 7.075 | -4.415 |
+| 8 | C-B | 11.369 | 7.183 | -4.186 |
+| 9 | B-C | 12.063 | 7.004 | -5.059 |
+| 10 | C-B | 12.044 | 6.907 | -5.137 |
+
+The means were **11.661ms baseline** and **7.117ms candidate**, a **4.544ms (39.0%) reduction**. Paired-delta sample standard deviation was 0.337ms and the t(9) 95% confidence interval was **[-4.785ms, -4.303ms]**.
+
+The published-tip baseline `c4740be` and the combined Day 16 plus Day 15 queue then ran one excluded cold pair and 10 counterbalanced full-25-day pairs. The batch publication gate is summed solver time:
+
+| Pair | Order | Published-tip solver (ms) | Queue solver (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 157.180 | 152.411 | -4.768 |
+| 2 | C-B | 155.982 | 152.249 | -3.734 |
+| 3 | B-C | 158.185 | 152.524 | -5.661 |
+| 4 | C-B | 158.082 | 153.674 | -4.408 |
+| 5 | B-C | 157.713 | 150.383 | -7.330 |
+| 6 | C-B | 157.440 | 151.486 | -5.954 |
+| 7 | B-C | 158.106 | 153.497 | -4.609 |
+| 8 | C-B | 156.938 | 157.738 | +0.800 |
+| 9 | B-C | 158.997 | 152.824 | -6.173 |
+| 10 | C-B | 156.604 | 150.620 | -5.984 |
+
+The excluded cold processes were:
+
+| Variant | Wall (ms) | Main (ms) | Solver (ms) | Startup (ms) | Harness (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Published tip | 221.851 | 188.655 | 157.871 | 29.122 | 30.783 |
+| Queue | 215.567 | 183.721 | 153.131 | 28.105 | 30.591 |
+
+The 10-pair means and paired intervals were:
+
+| Metric | Published-tip mean (ms) | Queue mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 157.523 | 152.741 | -4.782 | **[-6.372, -3.192]** |
+| Main | 187.372 | 183.452 | -3.920 | [-5.586, -2.254] |
+| Startup | 27.330 | 28.608 | +1.278 | [+0.053, +2.502] |
+| Harness | 29.849 | 30.712 | +0.863 | [-0.023, +1.748] |
+| Wall | 218.571 | 217.361 | -1.210 | [-6.112, +3.693] |
+
+The solver interval is wholly below zero, so the combined batch passes the aggregate publication gate. The official large Day 15 example returned `10092 / 9021`; 500 deterministic random closed warehouses matched the baseline exactly (result SHA-256 `530d7478d0559401ee749e7a70e37a851719ca345f4cf9136cd575789f32f6f2`); and the personal input retained `1446158 / 1446175`. The final candidate classpath passed all 50 independent answers and all 25 combined solves with checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
 ## Clean cumulative recovery comparison
 
 After the leaked background JVMs were removed, pristine commit `88e8388` and pre-Day-1 source commit `12f75b8` were compiled with the identical current benchmark, solver factory, and `DayTemplate`. The OS process table was checked immediately before measurement, all Java/Javac commands ran in tracked process groups with hard deadlines, and no other AoC JVM ran concurrently. One excluded cold pair preceded 10 counterbalanced pairs of full 25-day child JVMs.
