@@ -822,6 +822,111 @@ The pushed tip and combined Day 11 plus Day 21 batch then ran an excluded cold p
 
 The official five-code sample returned `126384 / 154115708116294`, and `029A` required 68 presses at part-one depth. Targeted checks covered one and more than five codes, empty numeric values, leading zeros, repeated keys, missing final newline, malformed codes, independent/combined entry-point agreement, and repeated solver reuse. Personal answers remained `184718 / 228800606998554`; all 50 independent answers and all 25 combined solves retained checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
 
+## Day 7 shared exact reverse search
+
+The pushed implementation parsed every equation separately for each part and ran two
+independent recursive searches. It also used `int` operands and decimal scales, divided
+by zero for a zero operand, and relied on fixed single-space tokenization. The queued
+implementation parses each equation once, searches both operator sets together, handles
+zero multiplication exactly, preserves lexical widths for concatenation, and promotes
+to `BigInteger` whenever a token, decimal scale, or calibration total exceeds `long`.
+The primitive personal-input path never constructs overflowing forward intermediates.
+
+An isolated runner constructed `Day07` and its file-backed `Scanner` before timing
+`fullSolve`. One excluded cold pair was followed by 10 separate, counterbalanced
+fresh-JVM pairs against pushed tip `2afefec`:
+
+| Pair | Order | Duplicate-search solve (ms) | Shared exact solve (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 20.233 | 16.474 | -3.759 |
+| 2 | C-B | 21.571 | 16.617 | -4.954 |
+| 3 | B-C | 22.238 | 17.158 | -5.081 |
+| 4 | C-B | 22.448 | 17.876 | -4.572 |
+| 5 | B-C | 21.947 | 17.028 | -4.920 |
+| 6 | C-B | 22.097 | 18.233 | -3.864 |
+| 7 | B-C | 21.118 | 16.711 | -4.407 |
+| 8 | C-B | 22.500 | 16.846 | -5.654 |
+| 9 | B-C | 20.828 | 17.580 | -3.248 |
+| 10 | C-B | 22.770 | 18.192 | -4.578 |
+
+The excluded cold values were 20.236ms baseline and 16.625ms candidate. The measured
+means were **21.775ms baseline** and **17.271ms candidate**, a **4.504ms (20.7%)
+reduction**. The paired t(9) 95% confidence interval was
+**[-5.015ms, -3.993ms]**.
+
+The pushed tip and queued Day 7 candidate then ran an excluded cold pair and 10
+counterbalanced full-25-day pairs. The mean solver improvement was larger than the
+isolated result, but one noisy pair left the interval crossing zero, so Day 7 remained
+queued until Day 24 joined it; the passing combined gate is recorded below:
+
+| Metric | Pushed-tip mean (ms) | Queued mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 174.375 | 169.742 | -4.633 | [-10.506, +1.240] |
+| Main | 204.923 | 199.771 | -5.152 | [-11.873, +1.568] |
+| Startup | 27.469 | 27.337 | -0.131 | [-2.969, +2.707] |
+| Harness | 30.548 | 30.029 | -0.519 | [-2.100, +1.062] |
+| Wall | 236.044 | 232.021 | -4.023 | [-11.856, +3.811] |
+
+The official sample returned `3749 / 11387`. Targeted checks covered zero operands and
+prefix resets, one-operand equations, leading-zero concatenation widths, values and
+totals beyond `long`, flexible whitespace and line endings, and missing final newline.
+An independent forward `BigInteger` oracle also matched 1,000 deterministic randomized
+equations. Personal standalone and combined answers remained
+`8401132154762 / 95297119227552`; all 50 independent answers and all 25 combined solves
+retained checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
+## Day 24 shared indexed circuit analysis
+
+Day 24 previously inherited the generic combined path, which copied the complete input,
+constructed two inner `Scanner` instances, parsed every wire and gate twice with regular
+expressions, and destructively removed gates during Part 1. Part 2 also rescanned every
+gate for each consumer check. The replacement parses immutable gate data once, evaluates
+arbitrary gate order through a wire-to-consumer index, and precomputes consumer operation
+masks for constant-time structural checks. Numeric `z` wires are assembled into an exact
+`BigInteger`, removing the inherited `long`-width limit.
+
+An isolated runner constructed `Day24` and its file-backed UTF-8 `Scanner` before timing
+only `fullSolve`. The excluded cold pair was 9.979ms baseline and 9.099ms candidate.
+Ten separate, counterbalanced fresh-JVM pairs against pushed tip `2afefec` followed:
+
+| Pair | Order | Duplicate scan (ms) | Indexed shared solve (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 10.301 | 8.841 | -1.461 |
+| 2 | C-B | 9.914 | 8.295 | -1.619 |
+| 3 | B-C | 9.601 | 9.167 | -0.434 |
+| 4 | C-B | 9.629 | 8.747 | -0.882 |
+| 5 | B-C | 10.330 | 9.122 | -1.208 |
+| 6 | C-B | 9.811 | 8.972 | -0.839 |
+| 7 | B-C | 9.810 | 9.731 | -0.079 |
+| 8 | C-B | 9.977 | 8.962 | -1.015 |
+| 9 | B-C | 9.964 | 8.852 | -1.112 |
+| 10 | C-B | 9.839 | 8.706 | -1.133 |
+
+The measured means were **9.918ms baseline** and **8.939ms candidate**, a **0.978ms
+(9.9%) reduction**. The paired-delta sample standard deviation was 0.456ms and the
+t(9) 95% confidence interval was **[-1.304ms, -0.652ms]**.
+
+The pushed tip and combined Day 7 plus Day 24 queue then ran one excluded cold pair and
+10 clean, serial, counterbalanced full-25-day pairs. The cold baseline/candidate solver
+values were 158.156/154.203ms. Candidate-minus-baseline results were:
+
+| Metric | Pushed-tip mean (ms) | Candidate mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 160.767 | 156.733 | -4.034 | **[-6.356, -1.711]** |
+| Main | 189.603 | 185.668 | -3.935 | **[-6.823, -1.048]** |
+| Startup | 26.764 | 27.418 | +0.654 | [-0.439, +1.747] |
+| Harness | 28.836 | 28.935 | +0.098 | [-0.780, +0.976] |
+| Wall | 219.889 | 219.514 | -0.375 | [-5.866, +5.116] |
+
+The summed solver interval is wholly below zero, so the two-day batch passes the
+repository publication gate. Startup, harness, and wall remain explicitly inconclusive.
+The official small circuit returned `4`; targeted checks covered arbitrary gate order,
+CRLF, a valid two-bit ripple-carry structure, unknown inputs, cycles, duplicate producers,
+and a `z70` output beyond `long`. Personal answers remained
+`51837135476040 / hjf,kdh,kpp,sgj,vss,z14,z31,z35`; all 50 independent answers and all
+25 combined solves retained checksum
+`1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
 ## Clean cumulative recovery comparison
 
 After the leaked background JVMs were removed, pristine commit `88e8388` and pre-Day-1 source commit `12f75b8` were compiled with the identical current benchmark, solver factory, and `DayTemplate`. The OS process table was checked immediately before measurement, all Java/Javac commands ran in tracked process groups with hard deadlines, and no other AoC JVM ran concurrently. One excluded cold pair preceded 10 counterbalanced pairs of full 25-day child JVMs.
