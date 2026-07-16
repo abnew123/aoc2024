@@ -30,7 +30,7 @@ public class Day18 extends DayTemplate {
     String[] fullSolveForGrid(Scanner in, int gridSize, int part1Limit) {
         int[] bytes = parse(in, gridSize);
         Pathfinder pathfinder = new Pathfinder(bytes, gridSize);
-        return new String[]{part1(bytes, pathfinder, part1Limit), part2(bytes, pathfinder)};
+        return new String[]{part1(bytes, pathfinder, part1Limit), reverseBlockingByte(bytes, gridSize)};
     }
 
     private int[] parse(Scanner in, int gridSize) {
@@ -81,6 +81,85 @@ public class Day18 extends DayTemplate {
         }
         int answer = bytes[low - 1];
         return (answer % pathfinder.gridSize) + "," + (answer / pathfinder.gridSize);
+    }
+
+    private String reverseBlockingByte(int[] bytes, int gridSize) {
+        int cells = gridSize * gridSize;
+        int[] blockedCount = new int[cells];
+        for (int cell : bytes) {
+            blockedCount[cell]++;
+        }
+
+        UnionFind open = new UnionFind(cells);
+        for (int cell = 0; cell < cells; cell++) {
+            if (blockedCount[cell] == 0) {
+                open.activate(cell, gridSize);
+            }
+        }
+        if (open.connected(0, cells - 1)) {
+            throw new IllegalArgumentException("No byte blocks the exit");
+        }
+
+        for (int index = bytes.length - 1; index >= 0; index--) {
+            int cell = bytes[index];
+            if (--blockedCount[cell] == 0) {
+                open.activate(cell, gridSize);
+                if (open.connected(0, cells - 1)) {
+                    return (cell % gridSize) + "," + (cell / gridSize);
+                }
+            }
+        }
+        throw new IllegalArgumentException("No byte blocks the exit");
+    }
+
+    private static final class UnionFind {
+        private final int[] parent;
+        private final byte[] rank;
+        private final boolean[] active;
+
+        private UnionFind(int cells) {
+            parent = new int[cells];
+            rank = new byte[cells];
+            active = new boolean[cells];
+        }
+
+        private void activate(int cell, int gridSize) {
+            active[cell] = true;
+            parent[cell] = cell;
+            int row = cell / gridSize;
+            int col = cell % gridSize;
+            if (row > 0 && active[cell - gridSize]) union(cell, cell - gridSize);
+            if (row + 1 < gridSize && active[cell + gridSize]) union(cell, cell + gridSize);
+            if (col > 0 && active[cell - 1]) union(cell, cell - 1);
+            if (col + 1 < gridSize && active[cell + 1]) union(cell, cell + 1);
+        }
+
+        private boolean connected(int first, int second) {
+            return active[first] && active[second] && find(first) == find(second);
+        }
+
+        private int find(int cell) {
+            int root = cell;
+            while (parent[root] != root) root = parent[root];
+            while (parent[cell] != cell) {
+                int next = parent[cell];
+                parent[cell] = root;
+                cell = next;
+            }
+            return root;
+        }
+
+        private void union(int first, int second) {
+            int firstRoot = find(first);
+            int secondRoot = find(second);
+            if (firstRoot == secondRoot) return;
+            if (rank[firstRoot] < rank[secondRoot]) {
+                parent[firstRoot] = secondRoot;
+            } else {
+                parent[secondRoot] = firstRoot;
+                if (rank[firstRoot] == rank[secondRoot]) rank[firstRoot]++;
+            }
+        }
     }
 
     private static final class Pathfinder {

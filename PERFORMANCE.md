@@ -292,6 +292,66 @@ Their 10-process means were:
 
 The accepted evidence is the isolated paired Day 6 interval; the whole-suite paired interval is explicitly inconclusive under the user's nonuniform interactive load, and the complete phase split is retained transparently. All 50 independent answers and 25 combined solves retain checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`. The official `41 / 6` sample, the immediate-exit `1 / 0` edge case, and 500 deterministic exit-guaranteed rectangular grids also matched separate solves, combined solves, and the exact pre-change implementation.
 
+### Queued turn-to-turn functional graph rewrite
+
+Part 2 still stepped through every open cell separately for every candidate obstruction.
+The queued combined path now precomputes, for every open `(cell, direction)` state, the
+last open cell before the next fixed wall or boundary and the state after the resulting
+right turn. Each candidate trial follows only those turn-to-turn transitions, overriding
+a transition when that one candidate lies on its ray. Repeated turning states identify
+a loop exactly. The original route is still walked once to enumerate every distinct
+candidate and Part 1 cell, while the independent Part 2 entry point deliberately keeps
+the scalar cell-by-cell simulation as an oracle. Four row/column sweeps build the graph
+for arbitrary rectangular grids without input-specific dimensions.
+
+An isolated runner constructed `Day06` and its input `Scanner` before timing only
+`fullSolve`. The excluded cold pair was 16.958ms scalar and 6.806ms turn-to-turn. Ten
+counterbalanced pairs of separate fresh JVMs followed against the exact pre-rewrite
+queue:
+
+| Pair | Order | Cell-by-cell (ms) | Turn-to-turn (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 16.632 | 7.007 | -9.625 |
+| 2 | C-B | 16.809 | 6.681 | -10.128 |
+| 3 | B-C | 16.790 | 6.374 | -10.416 |
+| 4 | C-B | 16.868 | 6.943 | -9.925 |
+| 5 | B-C | 16.694 | 6.418 | -10.276 |
+| 6 | C-B | 17.298 | 6.820 | -10.478 |
+| 7 | B-C | 17.114 | 6.870 | -10.243 |
+| 8 | C-B | 16.706 | 6.781 | -9.925 |
+| 9 | B-C | 16.933 | 6.806 | -10.127 |
+| 10 | C-B | 16.883 | 6.315 | -10.569 |
+
+The measured means were **16.873ms baseline** and **6.702ms candidate**, a
+**10.171ms (60.3%) reduction**. The paired-delta sample standard deviation was 0.289ms
+and the t(9) 95% confidence interval was **[-10.378ms, -9.964ms]**, so the per-day
+retention gate passes. The official sample remained `41 / 6`, the immediate-exit case
+remained `1 / 0`, personal answers remained `4939 / 1434`, and 500 deterministic
+exit-guaranteed rectangular grids with varied walls and final-newline forms matched the
+independent scalar entry points. All 50 independent answers and all 25 combined solves
+retained checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
+The pushed `94f0b09` tip and combined Day 18 reverse-connectivity plus Day 6
+turn-to-turn queue then ran one excluded cold pair and 10 clean, serial,
+counterbalanced full-25-day pairs. Cold baseline/candidate values were
+218.252/250.572ms wall, 188.628/212.452ms main, 157.250/164.418ms solver,
+25.587/29.558ms startup, and 31.378/48.033ms harness. Candidate-minus-baseline
+results were:
+
+| Metric | Pushed-tip mean (ms) | Two-rewrite batch mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 158.720 | 145.112 | -13.608 | **[-20.301, -6.915]** |
+| Main | 192.218 | 175.197 | -17.021 | **[-29.808, -4.234]** |
+| Startup | 30.667 | 26.268 | -4.399 | [-14.108, +5.310] |
+| Harness | 33.498 | 30.085 | -3.413 | [-9.592, +2.766] |
+| Wall | 226.425 | 205.186 | -21.239 | [-43.456, +0.979] |
+
+The summed solver interval clears the aggregate publication gate. Main time also
+excludes zero; startup, harness, and process wall remain inconclusive, with one visible
+baseline launch outlier retained rather than filtered. Immediately before publication,
+all 50 independent answers and all 25 combined solves again retained the established
+checksum.
+
 ## Day 2 primitive report checks
 
 Day 2 previously stored split strings for every report, reparsed each retained level for every possible dampener removal, and allocated a copied `String[]` plus a parsed `int[]` per candidate. Its default combined solve repeated the entire process. It now parses each nonblank report once into an `int[]`, checks a removal by skipping its index in the original array, and counts both parts in one input pass. Repeated spaces and tabs are accepted, retained sequences shorter than two levels are handled directly, and differences use `long` arithmetic rather than overflowing at extreme signed levels.
@@ -722,6 +782,55 @@ The pushed tip and combined Day 9, Day 15, and Day 18 queue then ran an excluded
 | Wall | 259.934 | 249.274 | -10.659 | [-17.322, -3.996] |
 
 The parameterized core returned the official `22 / 6,1` sample result. Targeted checks covered a first-byte blocked start, blocked target, a final-byte barrier, duplicate coordinates, asymmetric coordinate output, missing final newline, malformed and out-of-range coordinates, and a sequence that never blocks the exit. Personal standalone and combined answers remained `252 / 5,60`; all 50 independent answers and all 25 combined solves passed with checksum `1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+
+### Queued reverse-time connectivity rewrite
+
+The combined Day 18 path now uses a fundamentally different Part 2 algorithm. It
+builds the final blocked grid, activates all cells that never fall, and walks the byte
+sequence backward with union-find. The first reverse activation that reconnects the
+start and exit identifies exactly the forward byte that first broke connectivity.
+Per-cell multiplicities make duplicate byte coordinates inert until their final reverse
+removal. The independent Part 2 entry point deliberately retains binary-search BFS as
+an oracle.
+
+One excluded cold pair preceded 10 counterbalanced fresh-JVM pairs against pushed tip
+`94f0b09`:
+
+| Pair | Order | Binary-search BFS (ms) | Reverse union-find (ms) | Delta (ms) |
+| ---: | :---: | ---: | ---: | ---: |
+| 1 | B-C | 13.055 | 12.196 | -0.859 |
+| 2 | C-B | 13.841 | 11.632 | -2.208 |
+| 3 | B-C | 13.196 | 12.064 | -1.132 |
+| 4 | C-B | 13.896 | 13.596 | -0.300 |
+| 5 | B-C | 13.275 | 11.964 | -1.311 |
+| 6 | C-B | 13.647 | 11.660 | -1.987 |
+| 7 | B-C | 12.596 | 11.962 | -0.634 |
+| 8 | C-B | 12.431 | 11.858 | -0.573 |
+| 9 | B-C | 12.415 | 12.067 | -0.348 |
+| 10 | C-B | 12.173 | 13.316 | +1.143 |
+
+The excluded cold values were 12.933ms BFS and 12.566ms union-find. Measured means
+were **13.053ms BFS** and **12.232ms union-find**, a **0.821ms (6.3%) reduction**.
+The paired-delta sample standard deviation was 0.947ms and the t(9) 95% confidence
+interval was **[-1.498ms, -0.144ms]**.
+
+The pushed tip and this one-day queue then ran one excluded cold pair and 10 clean,
+serial, counterbalanced full-25-day pairs:
+
+| Metric | Pushed-tip mean (ms) | Queue mean (ms) | Delta (ms) | Paired 95% CI (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| Solver | 154.804 | 154.705 | -0.099 | [-2.474, +2.275] |
+| Main | 185.495 | 185.195 | -0.300 | [-3.219, +2.619] |
+| Startup | 26.823 | 26.704 | -0.119 | [-1.890, +1.652] |
+| Harness | 30.691 | 30.490 | -0.200 | [-1.285, +0.884] |
+| Wall | 216.016 | 215.466 | -0.550 | [-4.628, +3.528] |
+
+The aggregate solver interval crosses zero, so the verified rewrite remains
+uncommitted and unpushed. It retained the official `22 / 6,1`, personal `252 / 5,60`,
+all 50 independent answers, all 25 combined solves, and checksum
+`1e220b27c702727a86e8e599b50487350230b8b33794c16f8f987759a4215e61`.
+Three hundred deterministic grids of sizes 1 through 10, including repeated byte
+coordinates and blockers at either endpoint, matched the independent BFS entry point.
 
 ## Day 5 shared generic update ordering
 

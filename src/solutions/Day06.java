@@ -3,6 +3,7 @@ package src.solutions;
 import src.meta.DayTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,6 +16,8 @@ public class Day06 extends DayTemplate {
     private int cols;
     private int[] loopSeen;
     private int loopStamp = 1;
+    private int[] jumpSeen;
+    private int jumpStamp = 1;
 
     public String solve(boolean part1, Scanner in) {
         Grid grid = parse(in);
@@ -27,7 +30,7 @@ public class Day06 extends DayTemplate {
     @Override
     public String[] fullSolve(Scanner in) {
         Grid grid = parse(in);
-        int[] counts = countVisitedAndLoopObstructions(grid.start, grid.walls);
+        int[] counts = countVisitedAndJumpObstructions(grid.start, grid.walls);
         return new String[]{counts[0] + "", counts[1] + ""};
     }
 
@@ -118,6 +121,147 @@ public class Day06 extends DayTemplate {
         }
     }
 
+    private int[] countVisitedAndJumpObstructions(int start, boolean[] walls) {
+        RayGraph graph = buildRayGraph(walls);
+        boolean[] tested = new boolean[walls.length];
+        jumpSeen = new int[walls.length * 4];
+        int visited = 1;
+        int loops = 0;
+        int row = start / cols;
+        int col = start % cols;
+        int dir = 0;
+
+        while (true) {
+            int nextRow = row + DR[dir];
+            int nextCol = col + DC[dir];
+            if (!inBounds(nextRow, nextCol)) {
+                return new int[]{visited, loops};
+            }
+            int next = nextRow * cols + nextCol;
+            if (walls[next]) {
+                dir = (dir + 1) & 3;
+                continue;
+            }
+            if (next != start && !tested[next]) {
+                tested[next] = true;
+                visited++;
+                if (loopsWithJumpObstacle(row * cols + col, (dir + 1) & 3, next, graph)) {
+                    loops++;
+                }
+            }
+            row = nextRow;
+            col = nextCol;
+        }
+    }
+
+    private RayGraph buildRayGraph(boolean[] walls) {
+        int[] rayEnd = new int[walls.length * 4];
+        int[] baseNext = new int[walls.length * 4];
+        Arrays.fill(baseNext, -1);
+
+        for (int row = 0; row < rows; row++) {
+            int endCol = 0;
+            boolean exits = true;
+            for (int col = 0; col < cols; col++) {
+                int cell = row * cols + col;
+                if (walls[cell]) {
+                    endCol = col + 1;
+                    exits = false;
+                } else {
+                    int end = row * cols + endCol;
+                    int state = (cell << 2) | 3;
+                    rayEnd[state] = end;
+                    if (!exits) baseNext[state] = (end << 2);
+                }
+            }
+
+            endCol = cols - 1;
+            exits = true;
+            for (int col = cols - 1; col >= 0; col--) {
+                int cell = row * cols + col;
+                if (walls[cell]) {
+                    endCol = col - 1;
+                    exits = false;
+                } else {
+                    int end = row * cols + endCol;
+                    int state = (cell << 2) | 1;
+                    rayEnd[state] = end;
+                    if (!exits) baseNext[state] = (end << 2) | 2;
+                }
+            }
+        }
+
+        for (int col = 0; col < cols; col++) {
+            int endRow = 0;
+            boolean exits = true;
+            for (int row = 0; row < rows; row++) {
+                int cell = row * cols + col;
+                if (walls[cell]) {
+                    endRow = row + 1;
+                    exits = false;
+                } else {
+                    int end = endRow * cols + col;
+                    int state = cell << 2;
+                    rayEnd[state] = end;
+                    if (!exits) baseNext[state] = (end << 2) | 1;
+                }
+            }
+
+            endRow = rows - 1;
+            exits = true;
+            for (int row = rows - 1; row >= 0; row--) {
+                int cell = row * cols + col;
+                if (walls[cell]) {
+                    endRow = row - 1;
+                    exits = false;
+                } else {
+                    int end = endRow * cols + col;
+                    int state = (cell << 2) | 2;
+                    rayEnd[state] = end;
+                    if (!exits) baseNext[state] = (end << 2) | 3;
+                }
+            }
+        }
+        return new RayGraph(rayEnd, baseNext);
+    }
+
+    private boolean loopsWithJumpObstacle(int cell, int dir, int blocked, RayGraph graph) {
+        int stamp = nextJumpStamp();
+        int blockedRow = blocked / cols;
+        int blockedCol = blocked % cols;
+        int state = (cell << 2) | dir;
+        while (state >= 0) {
+            if (jumpSeen[state] == stamp) return true;
+            jumpSeen[state] = stamp;
+            cell = state >>> 2;
+            dir = state & 3;
+            int end = graph.rayEnd[state];
+            int row = cell / cols;
+            int col = cell % cols;
+            boolean intercepted = switch (dir) {
+                case 0 -> col == blockedCol && blocked < cell && blocked >= end;
+                case 1 -> row == blockedRow && blocked > cell && blocked <= end;
+                case 2 -> col == blockedCol && blocked > cell && blocked <= end;
+                default -> row == blockedRow && blocked < cell && blocked >= end;
+            };
+            if (intercepted) {
+                int step = dir == 0 ? -cols : dir == 1 ? 1 : dir == 2 ? cols : -1;
+                state = ((blocked - step) << 2) | ((dir + 1) & 3);
+            } else {
+                state = graph.baseNext[state];
+            }
+        }
+        return false;
+    }
+
+    private int nextJumpStamp() {
+        if (jumpStamp == Integer.MAX_VALUE) {
+            jumpSeen = new int[jumpSeen.length];
+            jumpStamp = 1;
+        }
+        return jumpStamp++;
+    }
+
     private boolean loopsWithObstacle(int row, int col, int dir, int blocked, boolean[] walls) {
         int stamp = nextLoopStamp();
         while (true) {
@@ -163,5 +307,8 @@ public class Day06 extends DayTemplate {
             this.walls = walls;
             this.start = start;
         }
+    }
+
+    private record RayGraph(int[] rayEnd, int[] baseNext) {
     }
 }
