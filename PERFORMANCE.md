@@ -13,7 +13,7 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 294.944 | 252.839 | 223.761 | 25.780 | 29.078 |
+| current | 261.966 | 223.529 | 193.464 | 26.019 | 30.065 |
 
 Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
 
@@ -27,11 +27,11 @@ Both columns are parsed once into exact integers and sorted once. A zipped pass 
 
 ## Day 02
 
-Unchanged source. Current solver mean: 6.928 ms.
+Unchanged source. Current solver mean: 8.568 ms.
 
 ## Day 03
 
-Unchanged source. Current solver mean: 3.873 ms.
+Unchanged source. Current solver mean: 5.517 ms.
 
 ## Day 04
 
@@ -59,7 +59,7 @@ The combined solve walks the flattened grid once, then tests obstruction candida
 
 ## Day 07
 
-Unchanged source. Current solver mean: 12.510 ms.
+Unchanged source. Current solver mean: 12.853 ms.
 
 ## Day 08
 
@@ -79,7 +79,7 @@ Both parts operate on parsed file/gap runs. Part 1 uses arithmetic-series checks
 
 ## Day 10
 
-Unchanged source. Current solver mean: 3.539 ms.
+Unchanged source. Current solver mean: 4.643 ms.
 
 ## Day 11
 
@@ -99,11 +99,11 @@ The garden is flattened into primitive arrays and each crop region is flood-fill
 
 ## Day 13
 
-Unchanged source. Current solver mean: 6.891 ms.
+Unchanged source. Current solver mean: 6.164 ms.
 
 ## Day 14
 
-Unchanged source. Current solver mean: 22.306 ms.
+Unchanged source. Current solver mean: 19.848 ms.
 
 ## Day 15
 
@@ -155,7 +155,7 @@ The combined solve computes one distance-to-end field, walks the uniquely decrea
 
 ## Day 21
 
-Unchanged source. Current solver mean: 9.359 ms.
+Unchanged source. Current solver mean: 10.701 ms.
 
 ## Day 22
 
@@ -167,7 +167,11 @@ Each buyer's 2,000-step secret stream is evaluated once for both parts. Four pri
 
 ## Day 23
 
-Unchanged source. Current solver mean: 39.639 ms.
+The network is parsed once into an indexed `BitSet` graph. Triangle intersections and a pivoted, pruned Bron–Kerbosch maximum-clique search share that graph.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 30.680 | 3.989 | -26.690 | [-27.640, -25.740] |
 
 ## Day 24
 
@@ -179,4 +183,4 @@ The circuit is parsed once into indexed immutable gates, evaluated in arbitrary 
 
 ## Day 25
 
-Unchanged source. Current solver mean: 4.861 ms.
+Unchanged source. Current solver mean: 5.147 ms.
