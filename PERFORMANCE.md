@@ -13,7 +13,7 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 240.848 | 196.161 | 165.441 | 29.178 | 30.720 |
+| current | 227.974 | 190.065 | 157.387 | 29.189 | 32.679 |
 
 Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
 
@@ -91,7 +91,11 @@ Both parts operate on parsed file/gap runs. Part 1 uses arithmetic-series checks
 
 ## Day 10
 
-Unchanged source. Current solver mean: 4.315 ms.
+The rectangular height grid is parsed once. A descending dynamic program shares primitive path counts for ratings and per-cell peak-reachability bitsets for scores.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 4.467 | 0.528 | -3.939 | [-4.116, -3.762] |
 
 ## Day 11
 
@@ -175,7 +179,11 @@ The combined solve computes one distance-to-end field, walks the uniquely decrea
 
 ## Day 21
 
-Unchanged source. Current solver mean: 11.053 ms.
+Primitive keypad transition-cost matrices are composed for two and twenty-five robots. A tiny weighted shortest-path search explores every valid route around each keypad hole without materializing command strings.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 11.386 | 3.074 | -8.312 | [-8.687, -7.936] |
 
 ## Day 22
 
@@ -203,4 +211,4 @@ The circuit is parsed once into indexed immutable gates, evaluated in arbitrary 
 
 ## Day 25
 
-Unchanged source. Current solver mean: 5.450 ms.
+Unchanged source. Current solver mean: 5.218 ms.
