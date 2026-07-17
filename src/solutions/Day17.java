@@ -6,6 +6,16 @@ import java.util.*;
 public class Day17 extends DayTemplate {
 
     public String solve(boolean part1, Scanner in) {
+        return solve(part1, parse(in));
+    }
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        Input input = parse(in);
+        return new String[] { solve(true, input), solve(false, input) };
+    }
+
+    private Input parse(Scanner in) {
         long registerA = Long.parseLong(in.nextLine().split(" ")[2]);
         long registerB = Long.parseLong(in.nextLine().split(" ")[2]);
         long registerC = Long.parseLong(in.nextLine().split(" ")[2]);
@@ -15,6 +25,14 @@ public class Day17 extends DayTemplate {
         for(String s: stringProgram.split(",")){
             program.add(Integer.parseInt(s));
         }
+        return new Input(registerA, registerB, registerC, program);
+    }
+
+    private String solve(boolean part1, Input input) {
+        long registerA = input.registerA;
+        long registerB = input.registerB;
+        long registerC = input.registerC;
+        List<Integer> program = input.program;
         if(part1){
             List<Integer> result = run(program, registerA, registerB, registerC);
             return formatOutput(result);
@@ -37,6 +55,9 @@ public class Day17 extends DayTemplate {
             possibilities = newPossibilities;
         }
         return possibilities.stream().min(Long::compareTo).orElseThrow() + "";
+    }
+
+    private record Input(long registerA, long registerB, long registerC, List<Integer> program) {
     }
 
     private String formatOutput(List<Integer> values) {

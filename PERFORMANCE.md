@@ -13,9 +13,19 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 227.974 | 190.065 | 157.387 | 29.189 | 32.679 |
+| current | 199.197 | 169.666 | 141.339 | 25.744 | 28.327 |
 
 Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
+
+Latest aggregate gate against the preceding PR tip (current minus previous, n=10):
+
+| Metric | Previous | Current | Delta | 95% CI |
+| --- | ---: | ---: | ---: | ---: |
+| wall | 201.288 | 199.197 | -2.090 | [-3.639, -0.541] |
+| main | 170.867 | 169.666 | -1.201 | [-2.419, 0.017] |
+| solver | 142.870 | 141.339 | -1.532 | [-2.467, -0.596] |
+| startup | 26.627 | 25.744 | -0.883 | [-1.773, 0.006] |
+| harness | 27.997 | 28.327 | 0.331 | [-0.147, 0.809] |
 
 ## Day 01
 
@@ -139,19 +149,19 @@ The map and moves are parsed once into primitive narrow and wide grids. Wide ver
 
 ## Day 16
 
-A primitive orientation-state Dijkstra computes Part 1; a reverse walk over exact distance-preserving predecessors marks the Part 2 tile union, replacing path-string enumeration.
+A cyclic 1001-bucket Dijkstra exploits the exact 1/1000 edge weights over primitive orientation states. A reverse walk over exact distance-preserving predecessors marks the Part 2 tile union without storing paths.
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 5387.412 | 11.098 | -5376.314 | [-5413.581, -5339.047] |
+| 5315.551 | 6.693 | -5308.857 | [-5339.758, -5277.957] |
 
 ## Day 17
 
-Part 2 builds register A one octal digit at a time while matching output suffixes, and the VM parses the actual initial registers instead of using a hardcoded A and two brute-force chunks.
+Part 2 builds register A one octal digit at a time while matching output suffixes. The combined solver parses the actual registers and program once, then shares that immutable input across both parts.
 
 | Baseline | Current | Delta | Evidence |
 | ---: | ---: | ---: | --- |
-| timeout | 6.266 | censored | Both 180-second full-suite baseline runs stopped in Day 17; both current day runs completed. |
+| timeout | 4.370 | censored | Both 180-second full-suite baseline runs stopped in Day 17; all current runs completed. |
 
 ## Day 18
 

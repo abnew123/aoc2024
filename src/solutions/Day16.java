@@ -66,7 +66,7 @@ public class Day16 extends DayTemplate {
 
     private int[] distancesFromStart(int start, int exit) {
         int[] distances = emptyDistances();
-        LongHeap heap = new LongHeap();
+        BucketQueue heap = new BucketQueue();
         distances[state(start, 0)] = 0;
         heap.add(0, state(start, 0));
         while (!heap.isEmpty()) {
@@ -92,7 +92,7 @@ public class Day16 extends DayTemplate {
         return distances;
     }
 
-    private void addMove(int[] distances, LongHeap heap, int state, int score, boolean forward) {
+    private void addMove(int[] distances, BucketQueue heap, int state, int score, boolean forward) {
         int direction = direction(state);
         int cell = cell(state);
         int row = cell / cols;
@@ -108,11 +108,11 @@ public class Day16 extends DayTemplate {
         }
     }
 
-    private void addTurn(int[] distances, LongHeap heap, int state, int score, int newDirection) {
+    private void addTurn(int[] distances, BucketQueue heap, int state, int score, int newDirection) {
         updateDistance(distances, heap, score + TURN_COST, state(cell(state), newDirection));
     }
 
-    private void updateDistance(int[] distances, LongHeap heap, int score, int state) {
+    private void updateDistance(int[] distances, BucketQueue heap, int score, int state) {
         if (score < distances[state]) {
             distances[state] = score;
             heap.add(score, state);
@@ -208,52 +208,40 @@ public class Day16 extends DayTemplate {
     private record ParsedInput(int start, int exit) {
     }
 
-    private static final class LongHeap {
-        private long[] heap = new long[1024];
-        private int size;
+    private static final class BucketQueue {
+        private static final int BUCKET_COUNT = TURN_COST + 1;
+        private final int[][] buckets = new int[BUCKET_COUNT][];
+        private final int[] sizes = new int[BUCKET_COUNT];
+        private int pending;
+        private int currentScore;
 
         boolean isEmpty() {
-            return size == 0;
+            return pending == 0;
         }
 
         void add(int score, int state) {
-            if (size == heap.length) {
-                heap = Arrays.copyOf(heap, heap.length * 2);
+            int bucket = score % BUCKET_COUNT;
+            int[] states = buckets[bucket];
+            int size = sizes[bucket];
+            if (states == null) {
+                states = buckets[bucket] = new int[8];
+            } else if (size == states.length) {
+                states = buckets[bucket] = Arrays.copyOf(states, size * 2);
             }
-            long entry = ((long) score << 32) | (state & 0xffffffffL);
-            int index = size++;
-            while (index > 0) {
-                int parent = (index - 1) >>> 1;
-                if (heap[parent] <= entry) {
-                    break;
-                }
-                heap[index] = heap[parent];
-                index = parent;
-            }
-            heap[index] = entry;
+            states[size] = state;
+            sizes[bucket] = size + 1;
+            pending++;
         }
 
         long poll() {
-            long result = heap[0];
-            long replacement = heap[--size];
-            int index = 0;
-            while (true) {
-                int child = index * 2 + 1;
-                if (child >= size) {
-                    break;
-                }
-                int right = child + 1;
-                if (right < size && heap[right] < heap[child]) {
-                    child = right;
-                }
-                if (heap[child] >= replacement) {
-                    break;
-                }
-                heap[index] = heap[child];
-                index = child;
+            int bucket = currentScore % BUCKET_COUNT;
+            while (sizes[bucket] == 0) {
+                currentScore++;
+                bucket = currentScore % BUCKET_COUNT;
             }
-            heap[index] = replacement;
-            return result;
+            int state = buckets[bucket][--sizes[bucket]];
+            pending--;
+            return ((long) currentScore << 32) | (state & 0xffffffffL);
         }
     }
 }
