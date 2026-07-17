@@ -5,20 +5,6 @@ import java.util.Scanner;
 public abstract class DayTemplate {
 
     /**
-     * Times execution of the solve method
-     *
-     * @param part1 Param for which day solve() will solve.
-     * @param in    Param for data solve() will read.
-     * @return Time in milliseconds (not nanoseconds) for execution of the method.
-     */
-    public double timer(boolean part1, Scanner in) {
-        Long startTime = System.nanoTime();
-        solve(part1, in);
-        Long endTime = System.nanoTime();
-        return (endTime - startTime) / 1000000.0;
-    }
-
-    /**
      * Main solving method.
      *
      * @param part1 The solver will solve part 1 if param is set to true.
@@ -29,13 +15,33 @@ public abstract class DayTemplate {
     public abstract String solve(boolean part1, Scanner in);
 
     /**
-     * Some classes require additional, non code steps (e.g. judge an image output).
-     * In those cases, we do not want to run the solver.
+     * Solves both parts from one input snapshot.
      *
-     * @return By default, returns false.
-     * Subclasses can override in exceptional cases.
+     * <p>Days may override this method when they can share parsing or other work.
+     * The default preserves the independent {@link #solve(boolean, Scanner)}
+     * semantics.</p>
+     *
+     * @param in The solver input.
+     * @return Part 1 and part 2 answers, in that order.
      */
-    public boolean exclude() {
-        return false;
+    public String[] fullSolve(Scanner in) {
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        try (Scanner part1Input = new Scanner(input);
+             Scanner part2Input = new Scanner(input)) {
+            return new String[]{
+                    freshSolver().solve(true, part1Input),
+                    freshSolver().solve(false, part2Input)
+            };
+        }
     }
+
+    private DayTemplate freshSolver() {
+        try {
+            return getClass().getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException(
+                    "Solver must have an accessible no-argument constructor", exception);
+        }
+    }
+
 }

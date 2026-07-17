@@ -83,3 +83,19 @@
   <img src=".aoc_tiles/tiles/2024/25.png" width="161px">
 </a>
 <!-- AOC TILES END -->
+
+## Performance
+
+Two fresh JVM measurements; current means are milliseconds. See [PERFORMANCE.md](PERFORMANCE.md) for definitions, reproduction, and baseline evidence.
+
+| wall | main | solver | startup | harness |
+| ---: | ---: | ---: | ---: | ---: |
+| 1539.881 | 1489.293 | 1454.367 | 30.073 | 34.926 |
+
+| Day | Solver | Day | Solver | Day | Solver | Day | Solver | Day | Solver |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 01 | 23.159 | 06 | 4.293 | 11 | 36.575 | 16 | 8.059 | 21 | 10.794 |
+| 02 | 6.094 | 07 | 13.582 | 12 | 161.582 | 17 | 4.475 | 22 | 478.535 |
+| 03 | 3.372 | 08 | 5.167 | 13 | 4.316 | 18 | 4.422 | 23 | 26.612 |
+| 04 | 17.300 | 09 | 134.529 | 14 | 17.260 | 19 | 66.111 | 24 | 3.896 |
+| 05 | 30.034 | 10 | 2.641 | 15 | 6.570 | 20 | 380.305 | 25 | 4.684 |

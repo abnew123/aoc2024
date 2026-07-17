@@ -6,8 +6,7 @@ import java.util.*;
 public class Day17 extends DayTemplate {
 
     public String solve(boolean part1, Scanner in) {
-        long registerA = 15401536L;
-        in.nextLine();
+        long registerA = Long.parseLong(in.nextLine().split(" ")[2]);
         long registerB = Long.parseLong(in.nextLine().split(" ")[2]);
         long registerC = Long.parseLong(in.nextLine().split(" ")[2]);
         in.nextLine();
@@ -18,32 +17,37 @@ public class Day17 extends DayTemplate {
         }
         if(part1){
             List<Integer> result = run(program, registerA, registerB, registerC);
-            return (result + "").replace(" ", "");
+            return formatOutput(result);
         }
-        int division = 2; // brute forcing 16 number takes 2^48 cycles roughly, so splitting into two separate 2^24 runs.
-        List<Long> possibilities = new ArrayList<>();
-        List<Integer> programEnd = new ArrayList<>();
-        possibilities.add(0L);
-        for(int i = division - 1; i >= 0; i--){
-            List<Integer> programPart = new ArrayList<>();
-            for(int j = i * 16/division; j < (i + 1) * (16/division); j++){
-                programPart.add(program.get(j));
-            }
-            programEnd.addAll(0, programPart);
+        List<Long> possibilities = new ArrayList<>(List.of(0L));
+        for(int outputStart = program.size() - 1; outputStart >= 0; outputStart--){
+            List<Integer> targetSuffix = program.subList(outputStart, program.size());
             List<Long> newPossibilities = new ArrayList<>();
-            for(Long possibility: possibilities){
-                long potential = 0;
-                while(potential < 1L<<(programPart.size() * 3)){
-                    long potentialValue = potential + possibility * (1L << ((division - i - 1) * 16/division * 3));
-                    if(run(program, potentialValue, 0,0).equals(programEnd)){
+            for(long possibility: possibilities){
+                // This program emits once per base-8 digit of A.  Build A from
+                // the most significant digit down, keeping only candidates that
+                // reproduce the target suffix seen so far.
+                for(int digit = 0; digit < 8; digit++){
+                    long potentialValue = (possibility << 3) + digit;
+                    if(run(program, potentialValue, registerB, registerC).equals(targetSuffix)){
                         newPossibilities.add(potentialValue);
                     }
-                    potential++;
                 }
             }
             possibilities = newPossibilities;
         }
-        return possibilities.get(0) + "";
+        return possibilities.stream().min(Long::compareTo).orElseThrow() + "";
+    }
+
+    private String formatOutput(List<Integer> values) {
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < values.size(); i++) {
+            if (i > 0) {
+                output.append(',');
+            }
+            output.append(values.get(i));
+        }
+        return output.toString();
     }
 
     private List<Integer> run(List<Integer> program, long registerA, long registerB, long registerC){
@@ -66,8 +70,7 @@ public class Day17 extends DayTemplate {
                 combo = registerC;
             }
             if(operator == 0){
-                long denominator = (long)Math.pow(2, combo);
-                registerA /=denominator;
+                registerA = divideByPowerOfTwo(registerA, combo);
             }
             if(operator == 1){
                 registerB ^= operand;
@@ -88,15 +91,20 @@ public class Day17 extends DayTemplate {
                 result.add((int) (combo % 8));
             }
             if(operator == 6){
-                long denominator = (long)Math.pow(2, combo);
-                registerB = registerA /denominator;
+                registerB = divideByPowerOfTwo(registerA, combo);
             }
             if(operator == 7){
-                long denominator = (long)Math.pow(2, combo);
-                registerC = registerA /denominator;
+                registerC = divideByPowerOfTwo(registerA, combo);
             }
             instructionPointer += 2;
         }
         return result;
+    }
+
+    private long divideByPowerOfTwo(long value, long power){
+        if(power >= Long.SIZE){
+            return 0;
+        }
+        return value >> power;
     }
 }

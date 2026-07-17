@@ -1,69 +1,228 @@
 package src.solutions;
 
 import src.meta.DayTemplate;
-import src.objects.Coordinate;
 
-import java.util.*;
-
-import static src.meta.Utils.*;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class Day18 extends DayTemplate {
 
-    public String solve(boolean part1, Scanner in) {
-        int gridSize = 71;
-        int[][] grid = new int[gridSize][gridSize];
-        List<Coordinate> lines = new ArrayList<>();
-        while(in.hasNext()){
-            String[] parts = in.nextLine().split(",");
-            lines.add(new Coordinate(Integer.parseInt(parts[0]), Integer.parseInt(parts[1])));
-        }
-        if(part1){
-            return bfs(1024, lines, grid) + "";
+    private static final int GRID_SIZE = 71;
+    private static final int[] DR = {-1, 1, 0, 0};
+    private static final int[] DC = {0, 0, -1, 1};
 
+    @Override
+    public String solve(boolean part1, Scanner in) {
+        return solveForGrid(part1, in, GRID_SIZE, 1024);
+    }
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        return fullSolveForGrid(in, GRID_SIZE, 1024);
+    }
+
+    String solveForGrid(boolean part1, Scanner in, int gridSize, int part1Limit) {
+        int[] bytes = parse(in, gridSize);
+        Pathfinder pathfinder = new Pathfinder(bytes, gridSize);
+        return part1 ? part1(bytes, pathfinder, part1Limit) : part2(bytes, pathfinder);
+    }
+
+    String[] fullSolveForGrid(Scanner in, int gridSize, int part1Limit) {
+        int[] bytes = parse(in, gridSize);
+        Pathfinder pathfinder = new Pathfinder(bytes, gridSize);
+        return new String[]{part1(bytes, pathfinder, part1Limit), reverseBlockingByte(bytes, gridSize)};
+    }
+
+    private int[] parse(Scanner in, int gridSize) {
+        if (gridSize <= 0) {
+            throw new IllegalArgumentException("Grid size must be positive");
         }
-        else{
-            int high = lines.size() - 1;
-            int low = 0;
-            while(low < high){
-                grid = new int[gridSize][gridSize];
-                int med = (low + high)/2;
-                if(bfs(med, lines, grid) == -1){
-                    high = med;
-                }
-                else{
-                    low = med + 1;
+        int[] bytes = new int[128];
+        int size = 0;
+        while (in.hasNextLine()) {
+            String line = in.nextLine();
+            int comma = line.indexOf(',');
+            if (comma <= 0 || comma == line.length() - 1 || line.indexOf(',', comma + 1) >= 0) {
+                throw new IllegalArgumentException("Invalid byte coordinate: " + line);
+            }
+            int x = Integer.parseInt(line.substring(0, comma));
+            int y = Integer.parseInt(line.substring(comma + 1));
+            if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) {
+                throw new IllegalArgumentException("Byte coordinate outside grid: " + line);
+            }
+            if (size == bytes.length) {
+                bytes = Arrays.copyOf(bytes, size * 2);
+            }
+            bytes[size++] = y * gridSize + x;
+        }
+        return Arrays.copyOf(bytes, size);
+    }
+
+    private String part1(int[] bytes, Pathfinder pathfinder, int limit) {
+        if (limit < 0 || limit > bytes.length) {
+            throw new IllegalArgumentException("Not enough bytes for part 1");
+        }
+        return pathfinder.bfs(limit) + "";
+    }
+
+    private String part2(int[] bytes, Pathfinder pathfinder) {
+        int high = bytes.length;
+        int low = 0;
+        if (pathfinder.bfs(high) != -1) {
+            throw new IllegalArgumentException("No byte blocks the exit");
+        }
+        while (low < high) {
+            int mid = (low + high) >>> 1;
+            if (pathfinder.bfs(mid) == -1) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        int answer = bytes[low - 1];
+        return (answer % pathfinder.gridSize) + "," + (answer / pathfinder.gridSize);
+    }
+
+    private String reverseBlockingByte(int[] bytes, int gridSize) {
+        int cells = gridSize * gridSize;
+        int[] blockedCount = new int[cells];
+        for (int cell : bytes) {
+            blockedCount[cell]++;
+        }
+
+        UnionFind open = new UnionFind(cells);
+        for (int cell = 0; cell < cells; cell++) {
+            if (blockedCount[cell] == 0) {
+                open.activate(cell, gridSize);
+            }
+        }
+        if (open.connected(0, cells - 1)) {
+            throw new IllegalArgumentException("No byte blocks the exit");
+        }
+
+        for (int index = bytes.length - 1; index >= 0; index--) {
+            int cell = bytes[index];
+            if (--blockedCount[cell] == 0) {
+                open.activate(cell, gridSize);
+                if (open.connected(0, cells - 1)) {
+                    return (cell % gridSize) + "," + (cell / gridSize);
                 }
             }
-            return lines.get(low - 1).x + "," + lines.get(low - 1).y;
+        }
+        throw new IllegalArgumentException("No byte blocks the exit");
+    }
+
+    private static final class UnionFind {
+        private final int[] parent;
+        private final byte[] rank;
+        private final boolean[] active;
+
+        private UnionFind(int cells) {
+            parent = new int[cells];
+            rank = new byte[cells];
+            active = new boolean[cells];
+        }
+
+        private void activate(int cell, int gridSize) {
+            active[cell] = true;
+            parent[cell] = cell;
+            int row = cell / gridSize;
+            int col = cell % gridSize;
+            if (row > 0 && active[cell - gridSize]) union(cell, cell - gridSize);
+            if (row + 1 < gridSize && active[cell + gridSize]) union(cell, cell + gridSize);
+            if (col > 0 && active[cell - 1]) union(cell, cell - 1);
+            if (col + 1 < gridSize && active[cell + 1]) union(cell, cell + 1);
+        }
+
+        private boolean connected(int first, int second) {
+            return active[first] && active[second] && find(first) == find(second);
+        }
+
+        private int find(int cell) {
+            int root = cell;
+            while (parent[root] != root) root = parent[root];
+            while (parent[cell] != cell) {
+                int next = parent[cell];
+                parent[cell] = root;
+                cell = next;
+            }
+            return root;
+        }
+
+        private void union(int first, int second) {
+            int firstRoot = find(first);
+            int secondRoot = find(second);
+            if (firstRoot == secondRoot) return;
+            if (rank[firstRoot] < rank[secondRoot]) {
+                parent[firstRoot] = secondRoot;
+            } else {
+                parent[secondRoot] = firstRoot;
+                if (rank[firstRoot] == rank[secondRoot]) rank[firstRoot]++;
+            }
         }
     }
 
-    private int bfs(int limit, List<Coordinate> memoryBlock, int[][] grid){
-        for(int i = 0; i < limit; i++){
-            grid[memoryBlock.get(i).x][memoryBlock.get(i).y] = 1;
-        }
-        Set<Coordinate> lst = new HashSet<>();
-        lst.add(new Coordinate(0,0));
-        int counter = 0;
-        Coordinate end = new Coordinate(grid.length -1, grid.length - 1);
-        Set<Coordinate> allSeen = new HashSet<>();
-        while(!lst.contains(end) && counter < grid.length * grid[0].length * 2){
-            counter++;
-            allSeen.addAll(lst);
-            Set<Coordinate> newList = new HashSet<>();
-            for(Coordinate c: lst){
-                for(Coordinate neighbor: getNeighbors(c.x, c.y, grid)){
-                    if(grid[neighbor.x][neighbor.y] != 1 && !allSeen.contains(neighbor)){
-                        newList.add(neighbor);
-                    }
+    private static final class Pathfinder {
+        private final int gridSize;
+        private final int[] blockedAt;
+        private final int[] seen;
+        private final int[] queue;
+        private int epoch;
+
+        private Pathfinder(int[] bytes, int gridSize) {
+            this.gridSize = gridSize;
+            blockedAt = new int[gridSize * gridSize];
+            Arrays.fill(blockedAt, Integer.MAX_VALUE);
+            for (int i = 0; i < bytes.length; i++) {
+                if (blockedAt[bytes[i]] == Integer.MAX_VALUE) {
+                    blockedAt[bytes[i]] = i + 1;
                 }
             }
-            lst = newList;
+            seen = new int[blockedAt.length];
+            queue = new int[blockedAt.length];
         }
-        if(counter >= grid.length * grid[0].length){
+
+        private int bfs(int limit) {
+            int target = blockedAt.length - 1;
+            if (blockedAt[0] <= limit || blockedAt[target] <= limit) {
+                return -1;
+            }
+            if (++epoch == 0) {
+                Arrays.fill(seen, 0);
+                epoch = 1;
+            }
+            int head = 0;
+            int tail = 0;
+            queue[tail++] = 0;
+            seen[0] = epoch;
+            int steps = 0;
+
+            while (head < tail) {
+                int layerEnd = tail;
+                while (head < layerEnd) {
+                    int current = queue[head++];
+                    if (current == target) {
+                        return steps;
+                    }
+
+                    int row = current / gridSize;
+                    int col = current % gridSize;
+                    for (int dir = 0; dir < 4; dir++) {
+                        int nextRow = row + DR[dir];
+                        int nextCol = col + DC[dir];
+                        if (nextRow < 0 || nextCol < 0 || nextRow >= gridSize || nextCol >= gridSize) {
+                            continue;
+                        }
+                        int next = nextRow * gridSize + nextCol;
+                        if (blockedAt[next] > limit && seen[next] != epoch) {
+                            seen[next] = epoch;
+                            queue[tail++] = next;
+                        }
+                    }
+                }
+                steps++;
+            }
             return -1;
         }
-        return counter;
-
     }
 }
