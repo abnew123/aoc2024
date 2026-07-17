@@ -13,7 +13,7 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 257.710 | 211.191 | 178.814 | 29.792 | 32.377 |
+| current | 253.245 | 207.330 | 174.484 | 30.972 | 32.845 |
 
 Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
 
@@ -27,11 +27,11 @@ Both columns are parsed once into exact integers and sorted once. A zipped pass 
 
 ## Day 02
 
-Unchanged source. Current solver mean: 7.304 ms.
+Unchanged source. Current solver mean: 7.398 ms.
 
 ## Day 03
 
-Unchanged source. Current solver mean: 5.013 ms.
+Unchanged source. Current solver mean: 3.650 ms.
 
 ## Day 04
 
@@ -59,7 +59,11 @@ The combined solve walks the flattened grid once, then tests obstruction candida
 
 ## Day 07
 
-Unchanged source. Current solver mean: 12.009 ms.
+Equations are parsed once and solved backward from the target through inverse addition, multiplication, and concatenation. Checked `long` arithmetic has an exact `BigInteger` fallback.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 12.524 | 3.579 | -8.945 | [-9.383, -8.507] |
 
 ## Day 08
 
@@ -79,7 +83,7 @@ Both parts operate on parsed file/gap runs. Part 1 uses arithmetic-series checks
 
 ## Day 10
 
-Unchanged source. Current solver mean: 3.566 ms.
+Unchanged source. Current solver mean: 3.714 ms.
 
 ## Day 11
 
@@ -99,7 +103,7 @@ The garden is flattened into primitive arrays and each crop region is flood-fill
 
 ## Day 13
 
-Unchanged source. Current solver mean: 6.579 ms.
+Unchanged source. Current solver mean: 6.521 ms.
 
 ## Day 14
 
@@ -159,7 +163,7 @@ The combined solve computes one distance-to-end field, walks the uniquely decrea
 
 ## Day 21
 
-Unchanged source. Current solver mean: 10.292 ms.
+Unchanged source. Current solver mean: 10.493 ms.
 
 ## Day 22
 
@@ -187,4 +191,4 @@ The circuit is parsed once into indexed immutable gates, evaluated in arbitrary 
 
 ## Day 25
 
-Unchanged source. Current solver mean: 4.846 ms.
+Unchanged source. Current solver mean: 4.943 ms.
