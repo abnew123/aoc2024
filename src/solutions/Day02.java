@@ -2,72 +2,94 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
 public class Day02 extends DayTemplate {
 
     public String solve(boolean part1, Scanner in) {
-
         long answer = 0;
-        List<String[]> tmp = new ArrayList<>();
-        while (in.hasNext()) {
+        while (in.hasNextLine()) {
             String line = in.nextLine();
-            tmp.add(line.split(" "));
-        }
-
-        if(part1){
-            for(String[] arr: tmp){
-                if(safe(arr)){
-                    answer++;
-                }
+            if (line.isBlank()) {
+                continue;
             }
-        }
-        else{
-            for(String[] arr: tmp){
-                boolean any = false;
-                for(int i = 0; i < arr.length; i++){
-                    String[] newarr = new String[arr.length - 1];
-                    System.arraycopy(arr, 0, newarr, 0, i);
-                    if (arr.length >= i + 1)
-                        System.arraycopy(arr, i + 1, newarr, i + 1 - 1, arr.length - (i + 1));
-                    if(safe(newarr)){
-                        any = true;
-                    }
-                }
-                if(any){
-                    answer++;
-                }
+            int[] levels = parse(line);
+            if (part1 ? isSafe(levels, -1) : isSafeWithDampener(levels)) {
+                answer++;
             }
         }
         return answer + "";
     }
 
-    private boolean safe(String[] steps){
-        int[] nums = new int[steps.length];
-        for(int i = 0; i < nums.length; i++){
-            nums[i] = Integer.parseInt(steps[i]);
+    @Override
+    public String[] fullSolve(Scanner in) {
+        long part1 = 0;
+        long part2 = 0;
+        while (in.hasNextLine()) {
+            String line = in.nextLine();
+            if (line.isBlank()) {
+                continue;
+            }
+            int[] levels = parse(line);
+            boolean safe = isSafe(levels, -1);
+            if (safe) {
+                part1++;
+            }
+            if (safe || isSafeAfterRemovingOne(levels)) {
+                part2++;
+            }
         }
-        boolean decreasing = nums[0] > nums[1];
-        if(nums[0] == nums[1]){
-            return false;
+        return new String[]{part1 + "", part2 + ""};
+    }
+
+    private int[] parse(String line) {
+        StringTokenizer tokens = new StringTokenizer(line);
+        int[] levels = new int[tokens.countTokens()];
+        for (int i = 0; i < levels.length; i++) {
+            levels[i] = Integer.parseInt(tokens.nextToken());
         }
-        for(int i = 1; i < nums.length; i++){
-            if(Math.abs(nums[i] - nums[i-1]) > 3){
+        return levels;
+    }
+
+    private boolean isSafeWithDampener(int[] levels) {
+        return isSafe(levels, -1) || isSafeAfterRemovingOne(levels);
+    }
+
+    private boolean isSafeAfterRemovingOne(int[] levels) {
+        for (int skipped = 0; skipped < levels.length; skipped++) {
+            if (isSafe(levels, skipped)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isSafe(int[] levels, int skipped) {
+        int previous = 0;
+        int direction = 0;
+        boolean hasPrevious = false;
+        for (int i = 0; i < levels.length; i++) {
+            if (i == skipped) {
+                continue;
+            }
+            int current = levels[i];
+            if (!hasPrevious) {
+                previous = current;
+                hasPrevious = true;
+                continue;
+            }
+            long difference = (long) current - previous;
+            if (difference == 0 || difference < -3 || difference > 3) {
                 return false;
             }
-            if(nums[i] > nums[i - 1] && decreasing){
+            int currentDirection = difference > 0 ? 1 : -1;
+            if (direction != 0 && direction != currentDirection) {
                 return false;
             }
-            if(nums[i] < nums[i - 1] && !decreasing){
-                return false;
-            }
-            if(nums[i] == nums[i-1]){
-                return false;
-            }
+            direction = currentDirection;
+            previous = current;
         }
         return true;
-
     }
 }

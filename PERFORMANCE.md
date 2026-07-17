@@ -13,7 +13,7 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 253.245 | 207.330 | 174.484 | 30.972 | 32.845 |
+| current | 240.848 | 196.161 | 165.441 | 29.178 | 30.720 |
 
 Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
 
@@ -27,11 +27,19 @@ Both columns are parsed once into exact integers and sorted once. A zipped pass 
 
 ## Day 02
 
-Unchanged source. Current solver mean: 7.398 ms.
+Reports are parsed once into primitive arrays. An allocation-free monotonic scan validates either the full report or a logical single-index removal for the dampener.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 7.224 | 3.248 | -3.976 | [-4.208, -3.744] |
 
 ## Day 03
 
-Unchanged source. Current solver mean: 3.650 ms.
+A single character scan recognizes `do`, `don't`, and strictly formed one-to-three-digit `mul` instructions while accumulating both enabled and unconditional totals without regex rescans.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 3.616 | 2.296 | -1.320 | [-1.545, -1.094] |
 
 ## Day 04
 
@@ -83,7 +91,7 @@ Both parts operate on parsed file/gap runs. Part 1 uses arithmetic-series checks
 
 ## Day 10
 
-Unchanged source. Current solver mean: 3.714 ms.
+Unchanged source. Current solver mean: 4.315 ms.
 
 ## Day 11
 
@@ -103,7 +111,11 @@ The garden is flattened into primitive arrays and each crop region is flood-fill
 
 ## Day 13
 
-Unchanged source. Current solver mean: 6.521 ms.
+Each machine is parsed once and solved exactly for both prize offsets. Signed `BigInteger` Cramer arithmetic handles regular systems, with a bounded Diophantine solution for collinear machines.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 6.630 | 3.595 | -3.035 | [-3.387, -2.684] |
 
 ## Day 14
 
@@ -163,7 +175,7 @@ The combined solve computes one distance-to-end field, walks the uniquely decrea
 
 ## Day 21
 
-Unchanged source. Current solver mean: 10.493 ms.
+Unchanged source. Current solver mean: 11.053 ms.
 
 ## Day 22
 
@@ -191,4 +203,4 @@ The circuit is parsed once into indexed immutable gates, evaluated in arbitrary 
 
 ## Day 25
 
-Unchanged source. Current solver mean: 4.943 ms.
+Unchanged source. Current solver mean: 5.450 ms.
