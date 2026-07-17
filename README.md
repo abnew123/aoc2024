@@ -90,7 +90,7 @@ Ten fresh JVM measurements; current means are milliseconds. See [PERFORMANCE.md]
 
 | wall | main | solver | startup | harness |
 | ---: | ---: | ---: | ---: | ---: |
-| 199.197 | 169.666 | 141.339 | 25.744 | 28.327 |
+| 193.180 | 164.140 | 136.807 | 25.340 | 27.332 |
 
 | Day | Solver | Day | Solver | Day | Solver | Day | Solver | Day | Solver |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -98,4 +98,4 @@ Ten fresh JVM measurements; current means are milliseconds. See [PERFORMANCE.md]
 | 02 | 3.369 | 07 | 3.678 | 12 | 4.101 | 17 | 4.370 | 22 | 26.021 |
 | 03 | 2.332 | 08 | 1.352 | 13 | 3.722 | 18 | 5.770 | 23 | 5.703 |
 | 04 | 1.874 | 09 | 9.026 | 14 | 14.985 | 19 | 3.476 | 24 | 4.044 |
-| 05 | 5.499 | 10 | 0.528 | 15 | 3.480 | 20 | 15.330 | 25 | 5.218 |
+| 05 | 5.499 | 10 | 0.528 | 15 | 3.480 | 20 | 15.330 | 25 | 1.494 |

@@ -13,7 +13,7 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 199.197 | 169.666 | 141.339 | 25.744 | 28.327 |
+| current | 193.180 | 164.140 | 136.807 | 25.340 | 27.332 |
 
 Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
 
@@ -21,11 +21,11 @@ Latest aggregate gate against the preceding PR tip (current minus previous, n=10
 
 | Metric | Previous | Current | Delta | 95% CI |
 | --- | ---: | ---: | ---: | ---: |
-| wall | 201.288 | 199.197 | -2.090 | [-3.639, -0.541] |
-| main | 170.867 | 169.666 | -1.201 | [-2.419, 0.017] |
-| solver | 142.870 | 141.339 | -1.532 | [-2.467, -0.596] |
-| startup | 26.627 | 25.744 | -0.883 | [-1.773, 0.006] |
-| harness | 27.997 | 28.327 | 0.331 | [-0.147, 0.809] |
+| wall | 197.775 | 193.180 | -4.595 | [-7.007, -2.182] |
+| main | 168.668 | 164.140 | -4.528 | [-6.220, -2.837] |
+| solver | 140.179 | 136.807 | -3.372 | [-5.004, -1.739] |
+| startup | 25.431 | 25.340 | -0.091 | [-1.676, 1.493] |
+| harness | 28.489 | 27.332 | -1.157 | [-2.295, -0.018] |
 
 ## Day 01
 
@@ -221,4 +221,8 @@ The circuit is parsed once into indexed immutable gates, evaluated in arbitrary 
 
 ## Day 25
 
-Unchanged source. Current solver mean: 5.218 ms.
+Schematics stream directly into base-6 lock and key profile frequencies. A five-dimensional prefix sum counts every componentwise-compatible key profile without materializing grids or checking every lock/key pair.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 4.834 | 1.494 | -3.340 | [-3.379, -3.302] |
