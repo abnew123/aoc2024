@@ -13,21 +13,21 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 1161.289 | 1115.302 | 1083.345 | 27.839 | 31.957 |
+| current | 726.600 | 684.002 | 652.537 | 27.853 | 31.465 |
 
 Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
 
 ## Day 01
 
-Unchanged source. Current solver mean: 23.307 ms.
+Unchanged source. Current solver mean: 24.472 ms.
 
 ## Day 02
 
-Unchanged source. Current solver mean: 6.068 ms.
+Unchanged source. Current solver mean: 5.910 ms.
 
 ## Day 03
 
-Unchanged source. Current solver mean: 3.610 ms.
+Unchanged source. Current solver mean: 3.669 ms.
 
 ## Day 04
 
@@ -55,7 +55,7 @@ The combined solve walks the flattened grid once, then tests obstruction candida
 
 ## Day 07
 
-Unchanged source. Current solver mean: 13.784 ms.
+Unchanged source. Current solver mean: 12.664 ms.
 
 ## Day 08
 
@@ -75,11 +75,11 @@ Both parts operate on parsed file/gap runs. Part 1 uses arithmetic-series checks
 
 ## Day 10
 
-Unchanged source. Current solver mean: 3.638 ms.
+Unchanged source. Current solver mean: 3.841 ms.
 
 ## Day 11
 
-Unchanged source. Current solver mean: 45.368 ms.
+Unchanged source. Current solver mean: 48.626 ms.
 
 ## Day 12
 
@@ -91,11 +91,11 @@ The garden is flattened into primitive arrays and each crop region is flood-fill
 
 ## Day 13
 
-Unchanged source. Current solver mean: 4.143 ms.
+Unchanged source. Current solver mean: 4.702 ms.
 
 ## Day 14
 
-Unchanged source. Current solver mean: 19.509 ms.
+Unchanged source. Current solver mean: 18.968 ms.
 
 ## Day 15
 
@@ -139,19 +139,23 @@ Patterns are stored in a fixed five-color trie; reverse reachability and countin
 
 ## Day 20
 
-Unchanged source. Current solver mean: 389.154 ms.
+Unchanged source. Current solver mean: 396.933 ms.
 
 ## Day 21
 
-Unchanged source. Current solver mean: 10.757 ms.
+Unchanged source. Current solver mean: 11.460 ms.
 
 ## Day 22
 
-Unchanged source. Current solver mean: 477.419 ms.
+Each buyer's 2,000-step secret stream is evaluated once for both parts. Four price changes use a dense base-19 key with per-buyer stamps, replacing sparse boxed sequence maps.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 495.191 | 30.461 | -464.729 | [-485.439, -444.020] |
 
 ## Day 23
 
-Unchanged source. Current solver mean: 30.012 ms.
+Unchanged source. Current solver mean: 33.285 ms.
 
 ## Day 24
 
@@ -163,4 +167,4 @@ The circuit is parsed once into indexed immutable gates, evaluated in arbitrary 
 
 ## Day 25
 
-Unchanged source. Current solver mean: 4.525 ms.
+Unchanged source. Current solver mean: 4.785 ms.
