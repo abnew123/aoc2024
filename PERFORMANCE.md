@@ -13,21 +13,21 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 1345.530 | 1297.073 | 1264.124 | 29.041 | 32.949 |
+| current | 1161.289 | 1115.302 | 1083.345 | 27.839 | 31.957 |
 
-Both baseline processes timed out; the cold and both measured candidate processes completed with stable answers.
+Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
 
 ## Day 01
 
-Unchanged source. Current solver mean: 23.003 ms.
+Unchanged source. Current solver mean: 23.307 ms.
 
 ## Day 02
 
-Unchanged source. Current solver mean: 6.056 ms.
+Unchanged source. Current solver mean: 6.068 ms.
 
 ## Day 03
 
-Unchanged source. Current solver mean: 3.654 ms.
+Unchanged source. Current solver mean: 3.610 ms.
 
 ## Day 04
 
@@ -55,7 +55,7 @@ The combined solve walks the flattened grid once, then tests obstruction candida
 
 ## Day 07
 
-Unchanged source. Current solver mean: 14.435 ms.
+Unchanged source. Current solver mean: 13.784 ms.
 
 ## Day 08
 
@@ -75,23 +75,27 @@ Both parts operate on parsed file/gap runs. Part 1 uses arithmetic-series checks
 
 ## Day 10
 
-Unchanged source. Current solver mean: 3.808 ms.
+Unchanged source. Current solver mean: 3.638 ms.
 
 ## Day 11
 
-Unchanged source. Current solver mean: 39.943 ms.
+Unchanged source. Current solver mean: 45.368 ms.
 
 ## Day 12
 
-Unchanged source. Current solver mean: 167.302 ms.
+The garden is flattened into primitive arrays and each crop region is flood-filled once. Area, perimeter, and corner-derived side count are accumulated together for the combined solve.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 179.314 | 3.840 | -175.474 | [-188.296, -162.652] |
 
 ## Day 13
 
-Unchanged source. Current solver mean: 3.783 ms.
+Unchanged source. Current solver mean: 4.143 ms.
 
 ## Day 14
 
-Unchanged source. Current solver mean: 18.827 ms.
+Unchanged source. Current solver mean: 19.509 ms.
 
 ## Day 15
 
@@ -135,19 +139,19 @@ Patterns are stored in a fixed five-color trie; reverse reachability and countin
 
 ## Day 20
 
-Unchanged source. Current solver mean: 380.253 ms.
+Unchanged source. Current solver mean: 389.154 ms.
 
 ## Day 21
 
-Unchanged source. Current solver mean: 11.091 ms.
+Unchanged source. Current solver mean: 10.757 ms.
 
 ## Day 22
 
-Unchanged source. Current solver mean: 508.685 ms.
+Unchanged source. Current solver mean: 477.419 ms.
 
 ## Day 23
 
-Unchanged source. Current solver mean: 28.284 ms.
+Unchanged source. Current solver mean: 30.012 ms.
 
 ## Day 24
 
@@ -159,4 +163,4 @@ The circuit is parsed once into indexed immutable gates, evaluated in arbitrary 
 
 ## Day 25
 
-Unchanged source. Current solver mean: 4.585 ms.
+Unchanged source. Current solver mean: 4.525 ms.
