@@ -13,7 +13,7 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 261.966 | 223.529 | 193.464 | 26.019 | 30.065 |
+| current | 257.710 | 211.191 | 178.814 | 29.792 | 32.377 |
 
 Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
 
@@ -27,11 +27,11 @@ Both columns are parsed once into exact integers and sorted once. A zipped pass 
 
 ## Day 02
 
-Unchanged source. Current solver mean: 8.568 ms.
+Unchanged source. Current solver mean: 7.304 ms.
 
 ## Day 03
 
-Unchanged source. Current solver mean: 5.517 ms.
+Unchanged source. Current solver mean: 5.013 ms.
 
 ## Day 04
 
@@ -59,7 +59,7 @@ The combined solve walks the flattened grid once, then tests obstruction candida
 
 ## Day 07
 
-Unchanged source. Current solver mean: 12.853 ms.
+Unchanged source. Current solver mean: 12.009 ms.
 
 ## Day 08
 
@@ -79,7 +79,7 @@ Both parts operate on parsed file/gap runs. Part 1 uses arithmetic-series checks
 
 ## Day 10
 
-Unchanged source. Current solver mean: 4.643 ms.
+Unchanged source. Current solver mean: 3.566 ms.
 
 ## Day 11
 
@@ -99,11 +99,15 @@ The garden is flattened into primitive arrays and each crop region is flood-fill
 
 ## Day 13
 
-Unchanged source. Current solver mean: 6.164 ms.
+Unchanged source. Current solver mean: 6.579 ms.
 
 ## Day 14
 
-Unchanged source. Current solver mean: 19.848 ms.
+The toroidal clustering search reuses primitive x/y frequency arrays and stops counting as soon as a dense axis is found, replacing per-step boxed maps and duplicate scans.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 19.643 | 9.616 | -10.027 | [-11.271, -8.784] |
 
 ## Day 15
 
@@ -155,7 +159,7 @@ The combined solve computes one distance-to-end field, walks the uniquely decrea
 
 ## Day 21
 
-Unchanged source. Current solver mean: 10.701 ms.
+Unchanged source. Current solver mean: 10.292 ms.
 
 ## Day 22
 
@@ -183,4 +187,4 @@ The circuit is parsed once into indexed immutable gates, evaluated in arbitrary 
 
 ## Day 25
 
-Unchanged source. Current solver mean: 5.147 ms.
+Unchanged source. Current solver mean: 4.846 ms.
