@@ -4,38 +4,46 @@
 
 - Baseline: normal Java solvers at pre-speed commit `ff4e78e190876e460dc289329d118aa1d5616fe5`.
 - Harness: `src.FreshJvmBenchmark`, with separate JVM processes and an unmeasured true-cold launch before measured runs.
-- This enabling batch uses two measured candidate JVMs. Two independent baseline JVMs each reached the 180-second hard deadline before completing Day 17, so the baseline is right-censored and no numeric full-suite CI is claimed.
-- Current values are two-run means in milliseconds. `solver` sums the 25 `fullSolve` calls; `startup` ends at the child marker; `harness = main - solver`; `wall` is parent-observed process time.
+- Two independent baseline JVMs each reached the 180-second hard deadline before completing Day 17, so the pre-speed baseline is right-censored and no numeric end-to-end CI is claimed.
+- Current values are ten-run means in milliseconds. `solver` sums the 25 `fullSolve` calls; `startup` ends at the child marker; `harness = main - solver`; `wall` is parent-observed process time.
 - Correctness: all 50 independent solves equal all 25 combined solves; personal outputs match the previously verified speed branch, and alternate-account outputs match frozen independent references.
 - Environment: OpenJDK 23.0.1, macOS arm64, 14 available processors.
-- Reproduce current timing with `java -Daoc.data.dir=data -Daoc.benchmark.runs=2 -cp <classes> src.FreshJvmBenchmark` on an idle machine.
+- Reproduce current timing with `java -Daoc.data.dir=data -Daoc.benchmark.runs=10 -cp <classes> src.FreshJvmBenchmark` on an idle machine.
 
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 1539.881 | 1489.293 | 1454.367 | 30.073 | 34.926 |
+| current | 1345.530 | 1297.073 | 1264.124 | 29.041 | 32.949 |
 
 Both baseline processes timed out; the cold and both measured candidate processes completed with stable answers.
 
 ## Day 01
 
-Unchanged source. Current solver mean: 23.159 ms.
+Unchanged source. Current solver mean: 23.003 ms.
 
 ## Day 02
 
-Unchanged source. Current solver mean: 6.094 ms.
+Unchanged source. Current solver mean: 6.056 ms.
 
 ## Day 03
 
-Unchanged source. Current solver mean: 3.372 ms.
+Unchanged source. Current solver mean: 3.654 ms.
 
 ## Day 04
 
-Unchanged source. Current solver mean: 17.300 ms.
+The combined solve parses once and scans the grid once, counting `XMAS`/`SAMX` in four undirected orientations and `MAS` crosses without constructing directional strings.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 17.743 | 1.840 | -15.903 | [-16.248, -15.559] |
 
 ## Day 05
 
-Unchanged source. Current solver mean: 30.034 ms.
+Signed page labels are mapped to compact IDs once; updates are validated directly and repaired with a stable Kahn topological ordering over only their applicable rules.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 29.352 | 5.757 | -23.595 | [-23.980, -23.211] |
 
 ## Day 06
 
@@ -47,39 +55,51 @@ The combined solve walks the flattened grid once, then tests obstruction candida
 
 ## Day 07
 
-Unchanged source. Current solver mean: 13.582 ms.
+Unchanged source. Current solver mean: 14.435 ms.
 
 ## Day 08
 
-Unchanged source. Current solver mean: 5.167 ms.
+The grid is parsed once into antenna coordinates; primitive boolean arrays record antinodes while GCD-reduced line steps cover rectangular bounds without repeated set allocation.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 5.156 | 1.373 | -3.784 | [-4.071, -3.496] |
 
 ## Day 09
 
-Unchanged source. Current solver mean: 134.529 ms.
+Both parts operate on parsed file/gap runs. Part 1 uses arithmetic-series checksum updates, while Part 2 relocates whole files through normalized free runs without expanding the disk.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 133.504 | 8.827 | -124.678 | [-126.275, -123.080] |
 
 ## Day 10
 
-Unchanged source. Current solver mean: 2.641 ms.
+Unchanged source. Current solver mean: 3.808 ms.
 
 ## Day 11
 
-Unchanged source. Current solver mean: 36.575 ms.
+Unchanged source. Current solver mean: 39.943 ms.
 
 ## Day 12
 
-Unchanged source. Current solver mean: 161.582 ms.
+Unchanged source. Current solver mean: 167.302 ms.
 
 ## Day 13
 
-Unchanged source. Current solver mean: 4.316 ms.
+Unchanged source. Current solver mean: 3.783 ms.
 
 ## Day 14
 
-Unchanged source. Current solver mean: 17.260 ms.
+Unchanged source. Current solver mean: 18.827 ms.
 
 ## Day 15
 
-Unchanged source. Current solver mean: 6.570 ms.
+The map and moves are parsed once into primitive narrow and wide grids. Wide vertical pushes discover the complete box dependency closure with a stamped queue before moving it atomically.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 6.435 | 3.231 | -3.203 | [-3.553, -2.854] |
 
 ## Day 16
 
@@ -107,23 +127,27 @@ The input is parsed once into primitive earliest-fall cells for reusable BFS; co
 
 ## Day 19
 
-Unchanged source. Current solver mean: 66.111 ms.
+Patterns are stored in a fixed five-color trie; reverse reachability and counting DPs share the parsed designs, with checked `long` arithmetic promoting to `BigInteger` when needed.
+
+| Baseline | Current | Delta | 95% CI |
+| ---: | ---: | ---: | ---: |
+| 66.926 | 3.842 | -63.084 | [-63.838, -62.329] |
 
 ## Day 20
 
-Unchanged source. Current solver mean: 380.305 ms.
+Unchanged source. Current solver mean: 380.253 ms.
 
 ## Day 21
 
-Unchanged source. Current solver mean: 10.794 ms.
+Unchanged source. Current solver mean: 11.091 ms.
 
 ## Day 22
 
-Unchanged source. Current solver mean: 478.535 ms.
+Unchanged source. Current solver mean: 508.685 ms.
 
 ## Day 23
 
-Unchanged source. Current solver mean: 26.612 ms.
+Unchanged source. Current solver mean: 28.284 ms.
 
 ## Day 24
 
@@ -135,4 +159,4 @@ The circuit is parsed once into indexed immutable gates, evaluated in arbitrary 
 
 ## Day 25
 
-Unchanged source. Current solver mean: 4.684 ms.
+Unchanged source. Current solver mean: 4.585 ms.

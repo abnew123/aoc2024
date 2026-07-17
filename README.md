@@ -86,16 +86,16 @@
 
 ## Performance
 
-Two fresh JVM measurements; current means are milliseconds. See [PERFORMANCE.md](PERFORMANCE.md) for definitions, reproduction, and baseline evidence.
+Ten fresh JVM measurements; current means are milliseconds. See [PERFORMANCE.md](PERFORMANCE.md) for definitions, reproduction, and baseline evidence.
 
 | wall | main | solver | startup | harness |
 | ---: | ---: | ---: | ---: | ---: |
-| 1539.881 | 1489.293 | 1454.367 | 30.073 | 34.926 |
+| 1345.530 | 1297.073 | 1264.124 | 29.041 | 32.949 |
 
 | Day | Solver | Day | Solver | Day | Solver | Day | Solver | Day | Solver |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 01 | 23.159 | 06 | 4.293 | 11 | 36.575 | 16 | 8.059 | 21 | 10.794 |
-| 02 | 6.094 | 07 | 13.582 | 12 | 161.582 | 17 | 4.475 | 22 | 478.535 |
-| 03 | 3.372 | 08 | 5.167 | 13 | 4.316 | 18 | 4.422 | 23 | 26.612 |
-| 04 | 17.300 | 09 | 134.529 | 14 | 17.260 | 19 | 66.111 | 24 | 3.896 |
-| 05 | 30.034 | 10 | 2.641 | 15 | 6.570 | 20 | 380.305 | 25 | 4.684 |
+| 01 | 23.003 | 06 | 3.951 | 11 | 39.943 | 16 | 7.963 | 21 | 11.091 |
+| 02 | 6.056 | 07 | 14.435 | 12 | 167.302 | 17 | 4.463 | 22 | 508.685 |
+| 03 | 3.654 | 08 | 1.373 | 13 | 3.783 | 18 | 5.579 | 23 | 28.284 |
+| 04 | 1.840 | 09 | 8.827 | 14 | 18.827 | 19 | 3.842 | 24 | 3.591 |
+| 05 | 5.757 | 10 | 3.808 | 15 | 3.231 | 20 | 380.253 | 25 | 4.585 |
