@@ -13,7 +13,7 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 193.180 | 164.140 | 136.807 | 25.340 | 27.332 |
+| current | 195.585 | 162.535 | 132.112 | 29.220 | 30.423 |
 
 Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
 
@@ -21,11 +21,11 @@ Latest aggregate gate against the preceding PR tip (current minus previous, n=10
 
 | Metric | Previous | Current | Delta | 95% CI |
 | --- | ---: | ---: | ---: | ---: |
-| wall | 197.775 | 193.180 | -4.595 | [-7.007, -2.182] |
-| main | 168.668 | 164.140 | -4.528 | [-6.220, -2.837] |
-| solver | 140.179 | 136.807 | -3.372 | [-5.004, -1.739] |
-| startup | 25.431 | 25.340 | -0.091 | [-1.676, 1.493] |
-| harness | 28.489 | 27.332 | -1.157 | [-2.295, -0.018] |
+| wall | 203.631 | 195.585 | -8.046 | [-11.463, -4.630] |
+| main | 171.217 | 162.535 | -8.682 | [-11.700, -5.664] |
+| solver | 141.482 | 132.112 | -9.370 | [-11.954, -6.786] |
+| startup | 28.377 | 29.220 | 0.843 | [-0.945, 2.630] |
+| harness | 29.735 | 30.423 | 0.688 | [-0.397, 1.772] |
 
 ## Day 01
 
@@ -133,11 +133,11 @@ Each machine is parsed once and solved exactly for both prize offsets. Signed `B
 
 ## Day 14
 
-The toroidal clustering search reuses primitive x/y frequency arrays and stops counting as soon as a dense axis is found, replacing per-step boxed maps and duplicate scans.
+The combined solve parses once, computes Part 1 directly, and replaces time stepping with independent dense-axis residue scans joined by the Chinese remainder theorem.
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 19.643 | 9.616 | -10.027 | [-11.271, -8.784] |
+| 25.013 | 2.810 | -22.203 | [-22.978, -21.429] |
 
 ## Day 15
 
