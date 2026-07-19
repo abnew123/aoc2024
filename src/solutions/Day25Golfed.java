@@ -1,1 +1,1 @@
-class Y{String s(boolean p,String[]S){var a=new long[S.length+7>>3];int j=0,r=0,i;for(;j<S.length;j+=8){long h=0;for(r=-8;++r<0;)for(i=5;i-->0;)h+=h+(S[j+~r].charAt(i)&1);a[j/8]=h%2>0?~h:h;}for(var x:a)for(var y:a)if(x<y&(~x&y)<1)r++;return r+"";}}
+class Y{String s(boolean p,String[]S){int r=0,i,j,k;for(j=0;j<S.length;j+=8)for(k=j+8;k<S.length;k+=8,r+=i<0?1:0)for(i=35;i-->0&&(S[j+i/5].charAt(i%5)&S[k+i/5].charAt(i%5)&1)<1;);return r+"";}}
