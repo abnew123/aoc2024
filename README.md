@@ -106,7 +106,7 @@ The table below counts non-whitespace characters in each normal solution file an
 | 11 | [Source](src/solutions/Day11.java) | [Golfed](src/solutions/Day11Golfed.java) | 1,132 | 382 |
 | 12 | [Source](src/solutions/Day12.java) | [Golfed](src/solutions/Day12Golfed.java) | 2,438 | 457 |
 | 13 | [Source](src/solutions/Day13.java) | [Golfed](src/solutions/Day13Golfed.java) | 1,303 | 280 |
-| 14 | [Source](src/solutions/Day14.java) | [Golfed](src/solutions/Day14Golfed.java) | 2,408 | 522 |
+| 14 | [Source](src/solutions/Day14.java) | [Golfed](src/solutions/Day14Golfed.java) | 2,408 | 495 |
 | 15 | [Source](src/solutions/Day15.java) | [Golfed](src/solutions/Day15Golfed.java) | 3,268 | 593 |
 | 16 | [Source](src/solutions/Day16.java) | [Golfed](src/solutions/Day16Golfed.java) | 6,143 | 556 |
 | 17 | [Source](src/solutions/Day17.java) | [Golfed](src/solutions/Day17Golfed.java) | 2,291 | 603 |
@@ -118,6 +118,6 @@ The table below counts non-whitespace characters in each normal solution file an
 | 23 | [Source](src/solutions/Day23.java) | [Golfed](src/solutions/Day23Golfed.java) | 2,271 | 629 |
 | 24 | [Source](src/solutions/Day24.java) | [Golfed](src/solutions/Day24Golfed.java) | 5,786 | 768 |
 | 25 | [Source](src/solutions/Day25.java) | [Golfed](src/solutions/Day25Golfed.java) | 1,111 | 186 |
-| Total |  |  | 56,429 | 10,401 |
+| Total |  |  | 56,429 | 10,374 |
 
 <!-- CHAR COUNTS END -->
