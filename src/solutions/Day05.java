@@ -7,6 +7,28 @@ import java.util.*;
 public class Day05 extends DayTemplate {
     List<String[]> rules;
 
+    public String[] fullSolve(Scanner in) {
+        long answer1 = 0;
+        long answer2 = 0;
+        rules = new ArrayList<>();
+        List<String[]> updates = new ArrayList<>();
+        while (in.hasNext()) {
+            String line = in.nextLine();
+            if (line.contains("|")) {
+                rules.add(line.split("\\|"));
+            }
+            if (line.contains(",")) {
+                updates.add(line.split(","));
+            }
+        }
+        // Neither part1() nor part2() mutates `rules` or the update arrays, so one parse serves both.
+        for (String[] update : updates) {
+            answer1 += part1(update);
+            answer2 += part2(update);
+        }
+        return new String[]{answer1 + "", answer2 + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
         rules = new ArrayList<>();

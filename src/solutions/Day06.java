@@ -12,16 +12,36 @@ public class Day06 extends DayTemplate {
     int[] xs = new int[]{0,1,0,-1};
     int[] ys = new int[]{-1,0,1,0};
 
+    public String[] fullSolve(Scanner in) {
+        int[][] grid = parseGrid(in);
+        GuardLocation start = findStart(grid);
+        // part1() only reads the grid. part2() temporarily writes obstacles into it (and restores
+        // them), so it gets its own copy - a mid-run abort would otherwise leave the grid dirty.
+        String answer1 = part1(start, grid);
+        String answer2 = part2(start, 0, copyGrid(grid));
+        return new String[]{answer1, answer2};
+    }
+
     public String solve(boolean part1, Scanner in) {
-        long answer = 0;
+        int[][] grid = parseGrid(in);
+        GuardLocation start = findStart(grid);
+        int direction = 0; //0 up, 1 right, 2 down, 3 left
+        if(part1){
+            return part1(start, grid);
+        }
+        return part2(start, direction, grid);
+    }
+
+    private int[][] parseGrid(Scanner in){
         List<String> lines = new ArrayList<>();
         while (in.hasNext()) {
             lines.add(in.nextLine());
         }
-        GuardLocation start = new GuardLocation(0,0, 0);
-        int direction = 0; //0 up, 1 right, 2 down, 3 left
-        int[][] grid = buildGrid(lines, c -> c == '.' ? 1 : (c == '#' ? 2 : 3));
+        return buildGrid(lines, c -> c == '.' ? 1 : (c == '#' ? 2 : 3));
+    }
 
+    private GuardLocation findStart(int[][] grid){
+        GuardLocation start = new GuardLocation(0,0, 0);
         for(int i = 0; i < grid.length; i++){
             for(int j = 0; j < grid[0].length; j++){
                if(grid[i][j] == 3){
@@ -30,29 +50,36 @@ public class Day06 extends DayTemplate {
                }
             }
         }
+        return start;
+    }
 
-        if(part1){
-            Set<Coordinate> locations = new HashSet<>();
-            locations.add(new Coordinate(start.x(), start.y()));
-            GuardLocation guard = start;
-            while(safe(guard.x(), guard.y(), grid)){
-                int x = guard.x() + xs[direction%4];
-                int y = guard.y() + ys[direction%4];
-                if(!safe(x,y,grid)){
-                    return locations.size() + "";
-                }
-                if(grid[x][y] == 2){
-                    direction++;
-                }
-                else{
-                    locations.add(new Coordinate(x,y));
-                    guard = new GuardLocation(x,y, direction);
-                }
-            }
+    private int[][] copyGrid(int[][] grid){
+        int[][] copy = new int[grid.length][];
+        for(int i = 0; i < grid.length; i++){
+            copy[i] = grid[i].clone();
         }
-        else{
-            return part2(start, direction, grid);
+        return copy;
+    }
 
+    private String part1(GuardLocation start, int[][] grid){
+        long answer = 0;
+        int direction = 0; //0 up, 1 right, 2 down, 3 left
+        Set<Coordinate> locations = new HashSet<>();
+        locations.add(new Coordinate(start.x(), start.y()));
+        GuardLocation guard = start;
+        while(safe(guard.x(), guard.y(), grid)){
+            int x = guard.x() + xs[direction%4];
+            int y = guard.y() + ys[direction%4];
+            if(!safe(x,y,grid)){
+                return locations.size() + "";
+            }
+            if(grid[x][y] == 2){
+                direction++;
+            }
+            else{
+                locations.add(new Coordinate(x,y));
+                guard = new GuardLocation(x,y, direction);
+            }
         }
         return answer + "";
     }

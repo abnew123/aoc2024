@@ -6,6 +6,35 @@ import java.util.*;
 
 public class Day11 extends DayTemplate{
 
+    public String[] fullSolve(Scanner in) {
+        Map<Long, Long> map = new HashMap<>();
+        String[] line = in.nextLine().split(" ");
+        for(String s: line){
+            Long num = map.getOrDefault(Long.parseLong(s), 0L);
+            map.put(Long.parseLong(s), num + 1);
+        }
+        // Part 2 is part 1 continued: the first 25 blinks are literally the same states, so read
+        // the part-1 answer off the map at blink 25 and keep going to 75. oneCycle() returns a
+        // fresh map each time and never mutates its argument.
+        int counter = 25;
+        while(counter-- > 0){
+            map = oneCycle(map);
+        }
+        long answer1 = 0;
+        for(Long val: map.values()){
+            answer1 += val;
+        }
+        counter = 50;
+        while(counter-- > 0){
+            map = oneCycle(map);
+        }
+        long answer2 = 0;
+        for(Long val: map.values()){
+            answer2 += val;
+        }
+        return new String[]{answer1 + "", answer2 + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
         Map<Long, Long> map = new HashMap<>();
         long answer = 0;

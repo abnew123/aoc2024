@@ -12,6 +12,25 @@ public class Day16 extends DayTemplate {
     int[] xs = new int[]{0, 1, 0, -1};
     int[] ys = new int[]{1, 0, -1, 0};
 
+    /**
+     * Single pass solver. Parsing and grid construction are shared; the searches themselves
+     * never write to the grid, so both parts can safely run against the same one.
+     *
+     * @param in The solver will read data from this Scanner.
+     * @return Returns answer as a string array, with part 1 as index 0 and part 2 as index 1
+     */
+    public String[] fullSolve(Scanner in) {
+        List<String> lines = new ArrayList<>();
+        while (in.hasNext()) {
+            String line = in.nextLine();
+            lines.add(line);
+        }
+        Coordinate reindeer = new Coordinate(-1,-1);
+        Coordinate exit = new Coordinate(-1,-1);
+        int[][] grid = buildGrid(lines, reindeer, exit);
+        return new String[]{solvePart1(grid, reindeer, exit) + "", solvePart2(grid, reindeer, exit) + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
         List<String> lines = new ArrayList<>();
@@ -19,19 +38,31 @@ public class Day16 extends DayTemplate {
             String line = in.nextLine();
             lines.add(line);
         }
-        int[][] grid = new int[lines.size()][lines.get(0).length()];
         Coordinate reindeer = new Coordinate(-1,-1);
         Coordinate exit = new Coordinate(-1,-1);
+        int[][] grid = buildGrid(lines, reindeer, exit);
 
+        if(part1){
+            answer = solvePart1(grid, reindeer, exit);
+        }
+        else{
+            answer = solvePart2(grid, reindeer, exit);
+        }
+
+        return answer + "";
+    }
+
+    private int[][] buildGrid(List<String> lines, Coordinate reindeer, Coordinate exit){
+        int[][] grid = new int[lines.size()][lines.get(0).length()];
         for(int i = 0 ; i < grid.length; i++){
             for(int j = 0; j < grid[0].length; j++){
                 char c = lines.get(i).charAt(j);
                 if(c == 'S'){
-                    reindeer = new Coordinate(i,j);
+                    reindeer.set(i,j);
                     grid[i][j] = 1;
                 }
                 if(c == 'E'){
-                    exit = new Coordinate(i,j);
+                    exit.set(i,j);
                     grid[i][j] = 1;
                 }
                 if(c == '#'){
@@ -42,26 +73,28 @@ public class Day16 extends DayTemplate {
                 }
             }
         }
+        return grid;
+    }
 
-        if(part1){
-            answer = bfs(grid, reindeer, exit);
-        }
-        else{
-            int[][] bestSeats = new int[grid.length][grid[0].length];
-            String path = bestPath(grid, reindeer, exit);
-            mark(bestSeats, path, reindeer);
-            List<String> otherBests = findOthers(grid, reindeer, exit, path);
-            for(String other: otherBests){
-                mark(bestSeats, other, reindeer);
-            }
-            for(int i = 0; i < bestSeats.length; i++){
-                for(int j = 0; j < bestSeats.length; j++){
-                    answer+= bestSeats[i][j];
-                }
-            }
-        }
+    private long solvePart1(int[][] grid, Coordinate reindeer, Coordinate exit){
+        return bfs(grid, reindeer, exit);
+    }
 
-        return answer + "";
+    private long solvePart2(int[][] grid, Coordinate reindeer, Coordinate exit){
+        long answer = 0;
+        int[][] bestSeats = new int[grid.length][grid[0].length];
+        String path = bestPath(grid, reindeer, exit);
+        mark(bestSeats, path, reindeer);
+        List<String> otherBests = findOthers(grid, reindeer, exit, path);
+        for(String other: otherBests){
+            mark(bestSeats, other, reindeer);
+        }
+        for(int i = 0; i < bestSeats.length; i++){
+            for(int j = 0; j < bestSeats.length; j++){
+                answer+= bestSeats[i][j];
+            }
+        }
+        return answer;
     }
 
     private void mark(int[][] bestSeats, String path, Coordinate reindeer){

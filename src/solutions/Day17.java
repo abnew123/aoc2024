@@ -5,6 +5,27 @@ import java.util.*;
 
 public class Day17 extends DayTemplate {
 
+    /**
+     * Single pass solver. Parsing is shared. run() never mutates the program list, so both
+     * parts can run against the same parsed program.
+     *
+     * @param in The solver will read data from this Scanner.
+     * @return Returns answer as a string array, with part 1 as index 0 and part 2 as index 1
+     */
+    public String[] fullSolve(Scanner in) {
+        long registerA = 15401536L;
+        in.nextLine();
+        long registerB = Long.parseLong(in.nextLine().split(" ")[2]);
+        long registerC = Long.parseLong(in.nextLine().split(" ")[2]);
+        in.nextLine();
+        String stringProgram = in.nextLine().split(" ")[1];
+        List<Integer> program = new ArrayList<>();
+        for(String s: stringProgram.split(",")){
+            program.add(Integer.parseInt(s));
+        }
+        return new String[]{solvePart1(program, registerA, registerB, registerC), solvePart2(program)};
+    }
+
     public String solve(boolean part1, Scanner in) {
         long registerA = 15401536L;
         in.nextLine();
@@ -17,9 +38,17 @@ public class Day17 extends DayTemplate {
             program.add(Integer.parseInt(s));
         }
         if(part1){
-            List<Integer> result = run(program, registerA, registerB, registerC);
-            return (result + "").replace(" ", "");
+            return solvePart1(program, registerA, registerB, registerC);
         }
+        return solvePart2(program);
+    }
+
+    private String solvePart1(List<Integer> program, long registerA, long registerB, long registerC){
+        List<Integer> result = run(program, registerA, registerB, registerC);
+        return (result + "").replace(" ", "");
+    }
+
+    private String solvePart2(List<Integer> program){
         int division = 2; // brute forcing 16 number takes 2^48 cycles roughly, so splitting into two separate 2^24 runs.
         List<Long> possibilities = new ArrayList<>();
         List<Integer> programEnd = new ArrayList<>();

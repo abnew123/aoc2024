@@ -5,6 +5,21 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day09 extends DayTemplate {
+
+    public String[] fullSolve(Scanner in) {
+        String line = in.nextLine();
+        int[] parts = new int[line.length()];
+        int length = 0;
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = Integer.parseInt(line.substring(i, i + 1));
+            length += parts[i];
+        }
+        // Neither part1() nor part2() writes to `parts`; they build their own working structures.
+        long answer1 = part1(length, parts);
+        long answer2 = part2(parts);
+        return new String[]{answer1 + "", answer2 + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
         long answer;
         String line = in.nextLine();

@@ -8,6 +8,17 @@ import java.util.Scanner;
 
 public class Day25 extends DayTemplate {
 
+    /**
+     * Single pass solver. Day 25 has no part 2 in Advent of Code, so all the work is part 1's
+     * and index 1 carries the same constant solve(false, in) returns.
+     *
+     * @param in The solver will read data from this Scanner.
+     * @return Returns answer as a string array, with part 1 as index 0 and part 2 as index 1
+     */
+    public String[] fullSolve(Scanner in){
+        return new String[]{solve(true, in), "Merry Christmas!"};
+    }
+
     public String solve(boolean part1, Scanner in){
         if(!part1) { //part 2 doesn't exist for this day
             return "Merry Christmas!";

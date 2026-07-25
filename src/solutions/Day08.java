@@ -8,6 +8,47 @@ import java.util.*;
 import static src.meta.Utils.*;
 
 public class Day08 extends DayTemplate {
+
+    public String[] fullSolve(Scanner in) {
+        long answer1 = 0;
+        long answer2 = 0;
+        Map<Character, List<Coordinate>> freqs = new HashMap<>();
+        char[][] grid = getGrid(in);
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] != '.') {
+                    freqs.computeIfAbsent(grid[i][j], k -> new ArrayList<>());
+                    freqs.get(grid[i][j]).add(new Coordinate(i, j));
+                }
+            }
+        }
+        // Each part accumulates into its own antinode set; addAntiNodes only reads the coordinates.
+        Set<Coordinate> antinodes1 = new HashSet<>();
+        Set<Coordinate> antinodes2 = new HashSet<>();
+        for (Character c : freqs.keySet()) {
+            List<Coordinate> lst = freqs.get(c);
+            for (int i = 0; i < lst.size(); i++) {
+                for (int j = i + 1; j < lst.size(); j++) {
+                    Coordinate a = lst.get(i);
+                    Coordinate b = lst.get(j);
+                    addAntiNodes(a, b, antinodes1, true);
+                    addAntiNodes(a, b, antinodes2, false);
+                }
+            }
+        }
+        for (Coordinate c : antinodes1) {
+            if (safe(c.x, c.y, grid)) {
+                answer1++;
+            }
+        }
+        for (Coordinate c : antinodes2) {
+            if (safe(c.x, c.y, grid)) {
+                answer2++;
+            }
+        }
+        return new String[]{answer1 + "", answer2 + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
         Map<Character, List<Coordinate>> freqs = new HashMap<>();

@@ -4,63 +4,95 @@ import src.meta.DayTemplate;
 import java.util.*;
 
 public class Day14 extends DayTemplate {
-    public String solve(boolean part1, Scanner in) {
-        long answer = 0;
-        List<Robot> robots = new ArrayList<>();
+
+    /**
+     * Single pass solver. Parsing is shared; each part gets its own freshly built robot list
+     * because both parts simulate the robots from their initial positions and updateBatch()
+     * mutates the Robot objects in place.
+     *
+     * @param in The solver will read data from this Scanner.
+     * @return Returns answer as a string array, with part 1 as index 0 and part 2 as index 1
+     */
+    public String[] fullSolve(Scanner in) {
+        List<int[]> specs = new ArrayList<>();
         while(in.hasNext()){
             String line = in.nextLine();
             String[] parts = line.split(" |,|=");
-            robots.add(new Robot(Integer.parseInt(parts[1]),Integer.parseInt(parts[2]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5])));
+            specs.add(new int[]{Integer.parseInt(parts[1]),Integer.parseInt(parts[2]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5])});
+        }
+        return new String[]{solvePart1(build(specs)), solvePart2(build(specs))};
+    }
+
+    public String solve(boolean part1, Scanner in) {
+        List<int[]> specs = new ArrayList<>();
+        while(in.hasNext()){
+            String line = in.nextLine();
+            String[] parts = line.split(" |,|=");
+            specs.add(new int[]{Integer.parseInt(parts[1]),Integer.parseInt(parts[2]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5])});
+        }
+        List<Robot> robots = build(specs);
+        return part1 ? solvePart1(robots) : solvePart2(robots);
+    }
+
+    private List<Robot> build(List<int[]> specs){
+        List<Robot> robots = new ArrayList<>();
+        for(int[] spec: specs){
+            robots.add(new Robot(spec[0], spec[1], spec[2], spec[3]));
+        }
+        return robots;
+    }
+
+    private String solvePart1(List<Robot> robots){
+        long answer;
+        int xlimit = 101;
+        int ylimit = 103;
+        for(Robot robot: robots){
+            robot.updateBatch(xlimit, ylimit, 100);
         }
 
-        if(part1){
-            int xlimit = 101;
-            int ylimit = 103;
-            for(Robot robot: robots){
-                robot.updateBatch(xlimit, ylimit, 100);
-            }
-
-            int[] quadrants = new int[]{0,0,0,0};
-            for(Robot robot: robots){
-                if(robot.x%xlimit > (xlimit - 1)/2){
-                    if(robot.y%ylimit > (ylimit - 1)/2){
-                        quadrants[0]++;
-                    }
-                    if(robot.y%ylimit < (ylimit - 1)/2){
-                        quadrants[1]++;
-                    }
+        int[] quadrants = new int[]{0,0,0,0};
+        for(Robot robot: robots){
+            if(robot.x%xlimit > (xlimit - 1)/2){
+                if(robot.y%ylimit > (ylimit - 1)/2){
+                    quadrants[0]++;
                 }
-                if(robot.x%xlimit < (xlimit - 1)/2){
-                    if(robot.y%ylimit > (ylimit - 1)/2){
-                        quadrants[2]++;
-                    }
-                    if(robot.y%ylimit < (ylimit - 1)/2){
-                        quadrants[3]++;
-                    }
+                if(robot.y%ylimit < (ylimit - 1)/2){
+                    quadrants[1]++;
                 }
             }
-            answer = (long)quadrants[0] * quadrants[1]* quadrants[2] * quadrants[3];
+            if(robot.x%xlimit < (xlimit - 1)/2){
+                if(robot.y%ylimit > (ylimit - 1)/2){
+                    quadrants[2]++;
+                }
+                if(robot.y%ylimit < (ylimit - 1)/2){
+                    quadrants[3]++;
+                }
+            }
         }
-        else{
-            int xlimit = 101;
-            int ylimit = 103;
-            int counter = 1;
-            int increment = 1;
-            while(counter < 103 * 101){
-                for(Robot robot: robots){
-                    robot.updateBatch(xlimit, ylimit, increment);
-                }
-                boolean boxX = boxX(robots);
-                boolean boxY = boxY(robots);
-                if(boxX && boxY){
-                    return counter + "";
-                }
-                if(boxX(robots)){
-                    increment = 101;
-                }
-                counter += increment;
+        answer = (long)quadrants[0] * quadrants[1]* quadrants[2] * quadrants[3];
+        return answer + "";
+    }
 
+    private String solvePart2(List<Robot> robots){
+        long answer = 0;
+        int xlimit = 101;
+        int ylimit = 103;
+        int counter = 1;
+        int increment = 1;
+        while(counter < 103 * 101){
+            for(Robot robot: robots){
+                robot.updateBatch(xlimit, ylimit, increment);
             }
+            boolean boxX = boxX(robots);
+            boolean boxY = boxY(robots);
+            if(boxX && boxY){
+                return counter + "";
+            }
+            if(boxX(robots)){
+                increment = 101;
+            }
+            counter += increment;
+
         }
         return answer + "";
     }

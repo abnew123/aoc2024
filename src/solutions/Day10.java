@@ -10,6 +10,31 @@ import java.util.*;
 import static src.meta.Utils.*;
 
 public class Day10 extends DayTemplate {
+
+    public String[] fullSolve(Scanner in) {
+        long answer1 = 0;
+        List<String> lines = new ArrayList<>();
+        while (in.hasNext()) {
+            String line = in.nextLine();
+            lines.add(line);
+        }
+        int[][] grid = buildGrid(lines, a -> a - '0');
+        List<Coordinate> trailheads = new ArrayList<>();
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] == 0) {
+                    trailheads.add(new Coordinate(i, j));
+                }
+            }
+        }
+        // reachable() and rating() both only read `grid` (rating keeps its own paths[] scratch).
+        for (Coordinate c : trailheads) {
+            answer1 += reachable(grid, c);
+        }
+        long answer2 = rating(grid);
+        return new String[]{answer1 + "", answer2 + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
         List<String> lines = new ArrayList<>();

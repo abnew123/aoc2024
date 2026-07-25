@@ -10,8 +10,63 @@ public class Day23 extends DayTemplate {
     Map<String, Set<String>> connections = new HashMap<>();
     Set<Set<String>> maximalCliques = new HashSet<>();
 
+    /**
+     * Single pass solver. Parsing and the adjacency map build are shared. Part 1 only reads the
+     * graph, so it is run first; BronKerbosch destructively empties the set it is handed as P,
+     * which is the shared "computers" set, so part 2 must go last.
+     *
+     * @param in The solver will read data from this Scanner.
+     * @return Returns answer as a string array, with part 1 as index 0 and part 2 as index 1
+     */
+    public String[] fullSolve(Scanner in) {
+        build(in);
+        List<String> forIndices = new ArrayList<>(computers);
+        String answer1 = triangles(forIndices) + "";
+        String answer2 = largestClique();
+        return new String[]{answer1, answer2};
+    }
+
     public String solve(boolean part1, Scanner in) {
+        build(in);
+        List<String> forIndices = new ArrayList<>(computers);
+
+        if(part1){
+            return triangles(forIndices) + "";
+        }
+        else{
+            return largestClique();
+        }
+    }
+
+    private long triangles(List<String> forIndices){
         long answer = 0;
+        for(String first: forIndices){
+            for(String second: connections.get(first)){
+                for(String third: connections.get(second)){
+                    if(connections.get(third).contains(first)){
+                        if(first.startsWith("t") || second.startsWith("t") || third.startsWith("t")){
+                            answer++;
+                        }
+                    }
+                }
+            }
+        }
+        answer/=6;
+        return answer;
+    }
+
+    private String largestClique(){
+        BronKerbosch(new HashSet<>(), computers, new HashSet<>());
+        Set<String> biggest = new HashSet<>();
+        for(Set<String> candidate: maximalCliques){
+            if(candidate.size() > biggest.size()){
+                biggest = candidate;
+            }
+        }
+        return listToString(new ArrayList<>(biggest));
+    }
+
+    private void build(Scanner in){
         List<String> lines = new ArrayList<>();
         while (in.hasNext()) {
             String line = in.nextLine();
@@ -30,34 +85,6 @@ public class Day23 extends DayTemplate {
             computers.add(first);
             computers.add(second);
         }
-
-        List<String> forIndices = new ArrayList<>(computers);
-
-        if(part1){
-            for(String first: forIndices){
-                for(String second: connections.get(first)){
-                    for(String third: connections.get(second)){
-                        if(connections.get(third).contains(first)){
-                            if(first.startsWith("t") || second.startsWith("t") || third.startsWith("t")){
-                                answer++;
-                            }
-                        }
-                    }
-                }
-            }
-            answer/=6;
-        }
-        else{
-            BronKerbosch(new HashSet<>(), computers, new HashSet<>());
-            Set<String> biggest = new HashSet<>();
-            for(Set<String> candidate: maximalCliques){
-                if(candidate.size() > biggest.size()){
-                    biggest = candidate;
-                }
-            }
-            return listToString(new ArrayList<>(biggest));
-        }
-        return answer+"";
     }
 
     private void BronKerbosch(Set<String> R, Set<String> P, Set<String> X){
