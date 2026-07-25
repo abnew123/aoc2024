@@ -1,15 +1,9 @@
 .idea/
 data/
-/out/*
-!out/production
-/out/production/*
-!out/production/aoc2024
-/out/production/aoc2024/*
-!out/production/aoc2024/src
-
-/src/meta/MasterSolver.java
+out/
 
 # for https://github.com/LiquidFun/aoc_tiles
 .aoc_tiles/*
 !.aoc_tiles/tiles/
 session.cookie
+.DS_Store
