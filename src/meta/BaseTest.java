@@ -28,4 +28,8 @@ public abstract class BaseTest {
     protected boolean isUnimplementedSolve(String result) {
         return result == null;
     }
+
+    protected boolean isUnimplementedFullSolve(String[] result) {
+        return result != null && result.length == 2 && result[0] == null && result[1] == null;
+    }
 }

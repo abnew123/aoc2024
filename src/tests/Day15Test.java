@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import src.meta.BaseTest;
@@ -38,6 +39,20 @@ class Day15Test extends BaseTest {
             fail("Part 2 solve() is not implemented");
         } else {
             assertEquals(expectedPart2, result, "Part 2 solution is incorrect");
+        }
+    }
+
+    @Test
+    void testDay15TestFullSolve() throws FileNotFoundException {
+        Day15 day15 = new Day15();
+        Scanner input = getInputScanner(DAY);
+        String[] expectedSolutions = getExpectedSolutions(15);
+
+        String[] result = day15.fullSolve(input);
+        if (isUnimplementedFullSolve(result)) {
+            fail("fullSolve() is not implemented");
+        } else {
+            assertArrayEquals(expectedSolutions, result, "Full solve solution is incorrect");
         }
     }
 
