@@ -1,1 +1,1 @@
-class S{String s(boolean p,String[]l){long a=-1;int j;for(var s:l){var m=new long[j=s.length()+1];for(m[--j]++;j-->0;)for(var x:l[0].split(", "))if(s.startsWith(x,j))m[j]+=m[j+x.length()];a+=p&m[0]>0?1:m[0];}return a+"";}}
+class S{String s(boolean p,String[]l){long a=-1;int j;for(var s:l){var m=new long[j=s.length()+1];for(m[--j]++;j-->0;)for(var x:l[0].split(", "))m[j]+=s.startsWith(x,j)?m[j+x.length()]:0;a+=p&m[0]>0?1:m[0];}return""+a;}}

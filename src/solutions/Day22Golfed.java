@@ -1,1 +1,1 @@
-class V{String s(boolean P,String[]L){long A=0;int M=-1>>>8,N=130321,B=0,v[]=new int[N*2];for(var S:L){B++;int H=0,p=new Integer(S),q=p%10;for(int j=0;j++<2000;){p^=p<<6&M;p^=p>>5;p^=p<<11&M;H=(H*19-q+9+(q=p%10))%N;if(!P&j>3&v[H+N]<B){A=A>(v[H]+=q)?A:v[H];v[H+N]=B;}}A+=P?p:0;}return A+"";}}
+class V{long A;int M=-1>>>8,N=130321,B,H,p,q,j,v[]=new int[N*2];String s(boolean P,String[]L){for(var S:L){B++;p=new Integer(S);q=p%10;for(j=0;j++<2000;){p^=p<<6&M;p^=p>>5;p^=p<<11&M;H=(H*19-q+9+(q=p%10))%N;if(!P&j>3&v[H+N]<B){A=A>(v[H]+=q)?A:v[H];v[H+N]=B;}}A+=P?p:0;}return""+A;}}

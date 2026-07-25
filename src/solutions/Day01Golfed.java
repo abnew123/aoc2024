@@ -1,1 +1,1 @@
-class A{String s(boolean P,String[]I){int[]a=new int[1<<20],b=a.clone();for(var t:I){var q=t.split(" ");a[new Integer(q[0])]++;b[new Integer(q[3])]++;}long r=0,d=0;for(int v=1<<20;v-->0;){d+=a[v]-b[v];r+=P?d<0?-d:d:1L*v*a[v]*b[v];}return r+"";}}
+class A{int v,m[][]=new int[2][1<<20];long r,d;String s(boolean P,String[]I){for(var t:I)for(var q:t.split(" +"))m[v^=1][new Integer(q)]++;for(v=1<<20;v-->0;r+=P?d<0?-d:d:v*m[0][v]*m[1][v])d+=m[0][v]-m[1][v];return""+r;}}
