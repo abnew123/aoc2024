@@ -1,1 +1,1 @@
-class E{int A,m;String b;String s(boolean P,String[]S){for(var l:S){var v=l.split(",");b+=l;m=v.length/2;java.util.Arrays.sort(v,(x,y)->b.indexOf(y+"|"+x));A+=m>0&P==String.join(",",v).equals(l)?new Long(v[m]):0;}return""+A;}}
+class E{int A,m;String b;String s(boolean P,String[]S){for(var l:S){var v=l.split(",");b+=l;m=v.length/2;java.util.Arrays.sort(v,(x,y)->b.indexOf(y+"|"+x));A+=m>0&P=="".join(",",v).equals(l)?new Long(v[m]):0;}return""+A;}}
