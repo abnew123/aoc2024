@@ -1,1 +1,1 @@
-import java.util.*;class A{String s(boolean P,String[]I){int n=I.length,a[]=new int[n],b[]=a.clone();for(int i=n;i-->0;){var S=new Scanner(I[i]);a[i]=S.nextInt();b[i]=S.nextInt();}long r=0;if(P){Arrays.sort(a);Arrays.sort(b);for(;n-->0;)r+=Math.abs(a[n]-b[n]);}else for(int x:a)for(int y:b)r+=x==y?x:0;return r+"";}}
+class A{String s(boolean P,String[]I){int[]a=new int[1<<20],b=a.clone();for(var t:I){var q=t.split(" ");a[new Integer(q[0])]++;b[new Integer(q[3])]++;}long r=0,d=0;for(int v=1<<20;v-->0;){d+=a[v]-b[v];r+=P?d<0?-d:d:1L*v*a[v]*b[v];}return r+"";}}
