@@ -10,6 +10,35 @@ public class Day21 extends DayTemplate {
     List<Coordinate> numPad = new ArrayList<>();
     List<Coordinate> dirPad = new ArrayList<>();
     Map<Character, Integer> dirMap;
+    /**
+     * Single pass solver. Parsing, the keypad setup and, per input code, the expensive
+     * shortestNumeric/shortestDirectional expansion are shared. The two parts differ only in how
+     * many times the frequency map is iterated (1 versus 24), so part 1's map is reused as the
+     * starting point for the remaining 23 iterations that part 2 needs.
+     *
+     * @param in The solver will read data from this Scanner.
+     * @return Returns answer as a string array, with part 1 as index 0 and part 2 as index 1
+     */
+    public String[] fullSolve(Scanner in) {
+        long answer1 = 0;
+        long answer2 = 0;
+        String[] inputs = new String[5];
+        inputs[0] = in.nextLine();
+        inputs[1] = in.nextLine();
+        inputs[2] = in.nextLine();
+        inputs[3] = in.nextLine();
+        inputs[4] = in.nextLine();
+        setupPads();
+
+        for(String input: inputs){
+            long[] a = shortestBoth(input);
+            long b = Integer.parseInt(input.substring(0, input.length() - 1));
+            answer1 += a[0] * b;
+            answer2 += a[1] * b;
+        }
+        return new String[]{answer1 + "", answer2 + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
         String[] inputs = new String[5];
@@ -18,6 +47,17 @@ public class Day21 extends DayTemplate {
         inputs[2] = in.nextLine();
         inputs[3] = in.nextLine();
         inputs[4] = in.nextLine();
+        setupPads();
+
+        for(String input: inputs){
+            long a = shortest(input, part1);
+            long b = Integer.parseInt(input.substring(0, input.length() - 1));
+            answer +=  a * b;
+        }
+        return answer + "";
+    }
+
+    private void setupPads(){
         numPad.add(new Coordinate(3,1));
         numPad.add(new Coordinate(2,0));
         numPad.add(new Coordinate(2,1));
@@ -35,13 +75,46 @@ public class Day21 extends DayTemplate {
         dirPad.add(new Coordinate(1,2));
         dirPad.add(new Coordinate(0,1));
         dirPad.add(new Coordinate(0,2));
+    }
 
-        for(String input: inputs){
-            long a = shortest(input, part1);
-            long b = Integer.parseInt(input.substring(0, input.length() - 1));
-            answer +=  a * b;
+    /**
+     * Same as shortest(), but returns both parts' lengths. Index 0 is the part 1 length
+     * (1 map iteration) and index 1 is the part 2 length (24 map iterations).
+     */
+    private long[] shortestBoth(String input){
+        Set<String> currentLayer = shortestNumeric(input);
+        for(int i = 0; i < 1; i++){
+            Set<String> newLayer = new HashSet<>();
+            for(String s: currentLayer){
+                newLayer.addAll(shortestDirectional(s));
+            }
+            currentLayer = newLayer;
         }
-        return answer + "";
+        long result1 = -1;
+        long result2 = -1;
+        for(String s: currentLayer){
+            Map<String, Long> parts = iterate(s, 1);
+            long interimResult1 = length(parts);
+            if(result1 == -1 || result1 > interimResult1){
+                result1 = interimResult1;
+            }
+            for(int i = 0; i < 23; i++){
+                parts = iterateOne(parts);
+            }
+            long interimResult2 = length(parts);
+            if(result2 == -1 || result2 > interimResult2){
+                result2 = interimResult2;
+            }
+        }
+        return new long[]{result1, result2};
+    }
+
+    private long length(Map<String, Long> parts){
+        long interimResult = 0;
+        for(String key: parts.keySet()){
+            interimResult += parts.get(key) * (key.length() + 1);
+        }
+        return interimResult;
     }
 
     private long shortest(String input, boolean part1){

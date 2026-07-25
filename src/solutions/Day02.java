@@ -8,6 +8,36 @@ import java.util.Scanner;
 
 public class Day02 extends DayTemplate {
 
+    public String[] fullSolve(Scanner in) {
+        long answer1 = 0;
+        long answer2 = 0;
+        List<String[]> tmp = new ArrayList<>();
+        while (in.hasNext()) {
+            String line = in.nextLine();
+            tmp.add(line.split(" "));
+        }
+
+        for (String[] arr : tmp) {
+            if (safe(arr)) {
+                answer1++;
+            }
+            boolean any = false;
+            for (int i = 0; i < arr.length; i++) {
+                String[] newarr = new String[arr.length - 1];
+                System.arraycopy(arr, 0, newarr, 0, i);
+                if (arr.length >= i + 1)
+                    System.arraycopy(arr, i + 1, newarr, i + 1 - 1, arr.length - (i + 1));
+                if (safe(newarr)) {
+                    any = true;
+                }
+            }
+            if (any) {
+                answer2++;
+            }
+        }
+        return new String[]{answer1 + "", answer2 + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
 
         long answer = 0;

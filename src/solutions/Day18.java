@@ -9,6 +9,38 @@ import static src.meta.Utils.*;
 
 public class Day18 extends DayTemplate {
 
+    /**
+     * Single pass solver. Parsing is shared. bfs() writes the fallen bytes into the grid it is
+     * given, so every call gets a freshly allocated grid; the parsed coordinate list is only read.
+     *
+     * @param in The solver will read data from this Scanner.
+     * @return Returns answer as a string array, with part 1 as index 0 and part 2 as index 1
+     */
+    public String[] fullSolve(Scanner in) {
+        int gridSize = 71;
+        List<Coordinate> lines = new ArrayList<>();
+        while(in.hasNext()){
+            String[] parts = in.nextLine().split(",");
+            lines.add(new Coordinate(Integer.parseInt(parts[0]), Integer.parseInt(parts[1])));
+        }
+        String answer1 = bfs(1024, lines, new int[gridSize][gridSize]) + "";
+
+        int high = lines.size() - 1;
+        int low = 0;
+        while(low < high){
+            int[][] grid = new int[gridSize][gridSize];
+            int med = (low + high)/2;
+            if(bfs(med, lines, grid) == -1){
+                high = med;
+            }
+            else{
+                low = med + 1;
+            }
+        }
+        String answer2 = lines.get(low - 1).x + "," + lines.get(low - 1).y;
+        return new String[]{answer1, answer2};
+    }
+
     public String solve(boolean part1, Scanner in) {
         int gridSize = 71;
         int[][] grid = new int[gridSize][gridSize];

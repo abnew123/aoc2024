@@ -8,6 +8,49 @@ import java.util.*;
 import static src.meta.Utils.*;
 public class Day12 extends DayTemplate {
 
+    public String[] fullSolve(Scanner in) {
+        List<String> lines = new ArrayList<>();
+        while(in.hasNext()){
+            String line = in.nextLine();
+            lines.add(line);
+        }
+        int[][] grid = buildGrid( lines, a -> a - 'A');
+        // getGarden() consumes the grid destructively: every visited plot ends up as -1 and the
+        // flood loop runs until nothing is left. Each part therefore needs its own pristine copy;
+        // sharing one grid would make the second part see an already-emptied map and return 0.
+        long answer1 = 0;
+        int[][] grid1 = copyGrid(grid);
+        while(true){
+            long val = flood(grid1);
+            if(val == -1){
+                break;
+            }
+            else{
+                answer1 += val;
+            }
+        }
+        long answer2 = 0;
+        int[][] grid2 = copyGrid(grid);
+        while(true){
+            long val = flood2(grid2);
+            if(val == -1){
+                break;
+            }
+            else{
+                answer2 += val;
+            }
+        }
+        return new String[]{answer1 + "", answer2 + ""};
+    }
+
+    private int[][] copyGrid(int[][] grid){
+        int[][] copy = new int[grid.length][];
+        for(int i = 0; i < grid.length; i++){
+            copy[i] = grid[i].clone();
+        }
+        return copy;
+    }
+
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
         List<String> lines = new ArrayList<>();

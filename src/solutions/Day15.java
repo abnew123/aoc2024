@@ -10,10 +10,30 @@ public class Day15 extends DayTemplate {
     int[]xs = new int[]{1,-1,0,0};
     int[]ys = new int[]{0,0,1,-1};
 
-    public String solve(boolean part1, Scanner in) {
-        long answer = 0;
+    /**
+     * Single pass solver. The scanner read and the movement string concatenation are shared.
+     * The two parts need different grids (part 2 widens the map), and the simulation mutates
+     * the grid in place, so each part builds and mutates its own grid from the shared raw lines.
+     *
+     * @param in The solver will read data from this Scanner.
+     * @return Returns answer as a string array, with part 1 as index 0 and part 2 as index 1
+     */
+    public String[] fullSolve(Scanner in) {
         List<String> lines = new ArrayList<>();
         List<String> movements = new ArrayList<>();
+        read(in, lines, movements);
+        String allMovements = join(movements);
+        return new String[]{simulate(lines, allMovements, true) + "", simulate(lines, allMovements, false) + ""};
+    }
+
+    public String solve(boolean part1, Scanner in) {
+        List<String> lines = new ArrayList<>();
+        List<String> movements = new ArrayList<>();
+        read(in, lines, movements);
+        return simulate(lines, join(movements), part1) + "";
+    }
+
+    private void read(Scanner in, List<String> lines, List<String> movements){
         boolean movement = false;
         while (in.hasNext()) {
             String line = in.nextLine();
@@ -28,6 +48,19 @@ public class Day15 extends DayTemplate {
                 movements.add(line);
             }
         }
+    }
+
+    private String join(List<String> movements){
+        StringBuilder allMovements = new StringBuilder();
+        for(String move: movements){
+            allMovements.append(move);
+        }
+        return allMovements.toString();
+    }
+
+    private long simulate(List<String> rawLines, String allMovements, boolean part1) {
+        long answer = 0;
+        List<String> lines = rawLines;
         if(!part1){
             lines = convert(lines);
         }
@@ -48,11 +81,7 @@ public class Day15 extends DayTemplate {
             }
         }
 
-        StringBuilder allMovements = new StringBuilder();
-        for(String move: movements){
-            allMovements.append(move);
-        }
-        for(char c: allMovements.toString().toCharArray()){
+        for(char c: allMovements.toCharArray()){
             oneCycle(c, robot, grid, part1);
         }
         for(int i = 0; i < grid.length; i++) {
@@ -62,7 +91,7 @@ public class Day15 extends DayTemplate {
                 }
             }
         }
-        return answer + "";
+        return answer;
     }
 
     private static List<String> convert(List<String> lines) {

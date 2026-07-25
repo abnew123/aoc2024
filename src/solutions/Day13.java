@@ -7,6 +7,25 @@ import static src.meta.Utils.*;
 
 public class Day13 extends DayTemplate {
 
+    public String[] fullSolve(Scanner in) {
+        long answer1 = 0;
+        long answer2 = 0;
+        while (in.hasNext()) {
+            String[] tmp = new String[3];
+            for(int i = 0; i < 3; i++){
+                tmp[i] = in.nextLine();
+            }
+            // Parse the machine once; the two parts differ only by the 1e13 prize offset.
+            long[] m = parseMachine(tmp);
+            answer1 += oneCycle(m[0], m[1], m[2], m[3], m[4], m[5]);
+            answer2 += oneCycle(m[0], m[1], m[2], m[3], m[4] + 10000000000000L, m[5] + 10000000000000L);
+            if(in.hasNext()){
+                in.nextLine();
+            }
+        }
+        return new String[]{answer1 + "", answer2 + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
         while (in.hasNext()) {
@@ -20,6 +39,20 @@ public class Day13 extends DayTemplate {
             }
         }
         return answer+"";
+    }
+
+    private long[] parseMachine(String[] lines){
+        String[] first =  lines[0].split("[,+]");
+        String[] second = lines[1].split("[,+]");
+        String[] third = lines[2].split("[,=]");
+        return new long[]{
+                Integer.parseInt(first[1]),
+                Integer.parseInt(first[3]),
+                Integer.parseInt(second[1]),
+                Integer.parseInt(second[3]),
+                Integer.parseInt(third[1]),
+                Integer.parseInt(third[3])
+        };
     }
 
     private long oneCycle(long x1, long y1, long x2, long y2, long x3, long y3){

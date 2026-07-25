@@ -14,8 +14,34 @@ public class Day24 extends DayTemplate {
 
     boolean hitEmpty = false;
 
+    /**
+     * Single pass solver. Parsing is shared. Both parts destructively remove entries from the
+     * instruction list, so each part is handed its own copy of it (the Instruction objects
+     * themselves are never mutated, so a shallow copy is enough). Part 1 additionally writes the
+     * gate outputs into the register map, which part 2 never reads.
+     *
+     * Note that part 2 of this day is answered by reading the printed candidate gates, so, exactly
+     * as in solve(), the returned part 2 string is empty.
+     *
+     * @param in The solver will read data from this Scanner.
+     * @return Returns answer as a string array, with part 1 as index 0 and part 2 as index 1
+     */
+    public String[] fullSolve(Scanner in) {
+        parse(in);
+        String answer1 = solvePart1(new ArrayList<>(instructions), map);
+        String answer2 = solvePart2(new ArrayList<>(instructions));
+        return new String[]{answer1, answer2};
+    }
+
     public String solve(boolean part1, Scanner in) {
-        StringBuilder answer = new StringBuilder();
+        parse(in);
+        if(part1){
+            return solvePart1(instructions, map);
+        }
+        return solvePart2(instructions);
+    }
+
+    private void parse(Scanner in){
         while (in.hasNext()) {
             String line = in.nextLine();
             if(line.equals("")){
@@ -31,8 +57,11 @@ public class Day24 extends DayTemplate {
                 instructions.add(new Instruction(line));
             }
         }
+    }
 
-        if(part1){
+    private String solvePart1(List<Instruction> instructions, Map<String, Integer> map){
+        StringBuilder answer = new StringBuilder();
+        {
             int counter = 0;
             while(!instructions.isEmpty() && counter++<100){
                 for(int i = instructions.size() - 1; i >= 0; i--){
@@ -58,7 +87,12 @@ public class Day24 extends DayTemplate {
             }
             answer = new StringBuilder(String.valueOf(Long.parseLong(answer.toString(), 2)));
         }
-        else{
+        return answer + "";
+    }
+
+    private String solvePart2(List<Instruction> instructions){
+        StringBuilder answer = new StringBuilder();
+        {
             Map<String, Integer> generateBits = new HashMap<>(); //determines whether the current x and y bits will generate a carry
             Map<String, Integer> propagateBits = new HashMap<>(); //determines whether the current carry will propagate up
             Map<String, Integer> intermediateOrs = new HashMap<>(); //don't really know conceptually what it does, but only type of operation with OR

@@ -6,6 +6,37 @@ import java.util.*;
 
 public class Day07 extends DayTemplate {
 
+    public String[] fullSolve(Scanner in) {
+        long answer1 = 0;
+        long answer2 = 0;
+        List<List<Integer>> equations = new ArrayList<>();
+        List<Long> targets = new ArrayList<>();
+        while (in.hasNext()) {
+            String line = in.nextLine();
+            String[] parts1 = line.split(":");
+            String[] parts2 = parts1[1].trim().split(" ");
+            targets.add(Long.parseLong(parts1[0]));
+            List<Integer> equation = new ArrayList<>();
+            for (String p : parts2) {
+                equation.add(Integer.parseInt(p));
+            }
+            equations.add(equation);
+        }
+
+        // possible() copies the equation before recursing, so it never mutates the parsed lists.
+        for (int i = 0; i < targets.size(); i++) {
+            long target = targets.get(i);
+            if (possible(target, equations.get(i), true)) {
+                answer1 += target;
+            }
+            if (possible(target, equations.get(i), false)) {
+                answer2 += target;
+            }
+        }
+
+        return new String[]{answer1 + "", answer2 + ""};
+    }
+
     public String solve(boolean part1, Scanner in) {
         long answer = 0;
         List<List<Integer>> equations = new ArrayList<>();
