@@ -87,15 +87,9 @@ public class MasterSolver {
     private static String solve(Class<?> cls, boolean part1, File file) throws Exception {
         Object solver = cls.getDeclaredConstructor().newInstance();
         if (useGolfed) {
-            try {
-                Method m = cls.getDeclaredMethod("s", boolean.class, String.class);
-                m.setAccessible(true);
-                return (String) m.invoke(solver, part1, Files.readString(file.toPath()));
-            } catch (NoSuchMethodException e) {
-                Method m = cls.getDeclaredMethod("s", boolean.class, Scanner.class);
-                m.setAccessible(true);
-                return (String) m.invoke(solver, part1, new Scanner(file));
-            }
+            Method m = cls.getDeclaredMethod("s", boolean.class, String[].class);
+            m.setAccessible(true);
+            return (String) m.invoke(solver, part1, Files.readAllLines(file.toPath()).toArray(String[]::new));
         }
         try (Scanner in = new Scanner(file)) {
             Method m = cls.getDeclaredMethod("solve", boolean.class, Scanner.class);
