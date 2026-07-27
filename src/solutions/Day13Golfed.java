@@ -1,1 +1,1 @@
-class M{String[]S;int i;int n(){return new Integer(S[--i]);}String s(boolean P,String[]I){long r=0,o=P?0:(long)1e13;S=String.join("",I).split("\\D+");for(i=S.length;i>1;){long y=n()+o,x=n()+o,d=n(),c=n(),b=n(),a=n(),D=a*d-b*c,A=x*d-y*c,B=a*y-b*x;if((A%D|B%D)==0)r+=3*A/D+B/D;}return r+"";}}
+class M{String[]S;int i;long n(){return new Long(S[++i]);}Object s(boolean P,String[]I){long r=0,o=P?0:(long)1e13;for(S="".join("",I).split("\\D+");i<1920;){long a=n(),b=n(),c=n(),d=n(),x=n()+o,y=n()+o,D=a*d-b*c,A=x*d-y*c,B=a*y-b*x;r+=(A%D|B%D)==0?3*A/D+B/D:0;}return r;}}
