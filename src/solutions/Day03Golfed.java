@@ -1,1 +1,1 @@
-class C{long A;int i;String s(boolean P,String[]I){var q="".join("",I).replaceAll(P?"":"don't\\(\\).*?(do\\(\\)|$)","").replaceAll(".*?mul\\((\\d+,\\d+)\\)|.","$1,").split(",");for(;i<q.length;)A+=new Long(q[i++])*new Long(q[i++]);return""+A;}}
+class C{long A;int i;Object s(boolean P,String[]I){var q="".join("",I).replaceAll(P?"":"don't\\(\\).*?(do\\(\\)|$)","").replaceAll(".*?mul\\((\\d+,\\d+)\\)|.","$1,").split(",");for(;i<q.length;)A+=new Long(q[i++])*new Long(q[i++]);return A;}}

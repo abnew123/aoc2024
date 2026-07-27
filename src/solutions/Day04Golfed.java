@@ -1,1 +1,1 @@
-class D{int A,i,q,d;String s(boolean p,String[]S){var z="!".repeat(426);var g=(z+"".join("!",S)+z).getBytes();for(i=20165;i-->426;)if(p)for(q=9;q-->0;)A+=g[i]+g[i+(d=q/3*141+q%3-142)]*2+g[i+d*2]*3+g[i+d*3]*4==769?1:0;else if(g[i]+g[i-142]*g[i+142]+g[i-140]*g[i+140]==12847)A++;return""+A;}}
+class D{int A,i,q,d;Object s(boolean p,String[]S){var z="!".repeat(426);var g=(z+"".join("!",S)+z).getBytes();for(i=20165;i-->426;)if(p)for(q=9;q-->0;)A+=g[i]+g[i+(d=q/3*141+q%3-142)]*2+g[i+d*2]*3+g[i+d*3]*4==769?1:0;else if(g[i]+g[i-142]*g[i+142]+g[i-140]*g[i+140]==12847)A++;return A;}}

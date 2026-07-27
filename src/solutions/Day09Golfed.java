@@ -1,1 +1,1 @@
-class I{int p[]=new int[19999],i,j;long A,d,t;String s(boolean P,String[]S){var a=S[0].getBytes();for(;i<19999;i++){p[i]=j;j+=d=a[i]-=48;A+=(~i&1)*i*d*(2*j-d-1)/4;}for(i=19998;i>0;i-=2)for(d=a[i],j=1;j<i;j+=2){t=a[j]<d?P?a[j]:0:d;A+=i/2*t*((p[j]+=t)-p[i]-d);a[j]-=t;d-=t;}return""+A;}}
+class I{int p[]=new int[19999],i,j;long A,d,t;Object s(boolean P,String[]S){var a=S[0].getBytes();for(;i<19999;i++){p[i]=j;j+=d=a[i]-=48;A+=(~i&1)*i*d*(2*j-d-1)/4;}for(i=19998;i>0;i-=2)for(d=a[i],j=1;j<i;j+=2){t=a[j]<d?P?a[j]:0:d;A+=i/2*t*((p[j]+=t)-p[i]-d);a[j]-=t;d-=t;}return A;}}

@@ -1,1 +1,1 @@
-class B{int A,k,n,x,d,i,f;String s(boolean P,String[]S){for(var l:S){var r=l.split(" ");n=r.length;for(k=P?0:n;k-->-1;k=i<0?~A++:k)for(x=d=0,i=n;i-->0;)if(i!=k&&(x+=f=new Short(r[i])-x)>f){if(f==0|f*f>9|d*f<0)break;d=f;}}return""+A;}}
+class B{int A,k,n,x,d,i,f;Object s(boolean P,String[]S){for(var l:S){var r=l.split(" ");n=r.length;for(k=P?0:n;k-->-1;k=i<0?~A++:k)for(x=d=0,i=n;i-->0;)if(i!=k&&(x+=f=new Short(r[i])-x)>f){if(f==0|f*f>9|d*f<0)break;d=f;}}return A;}}

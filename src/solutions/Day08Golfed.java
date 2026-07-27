@@ -1,1 +1,1 @@
-class H{int C=50,N=C*C,n,a,b,q,c,v[]=new int[N];String s(boolean p,String[]L){for(a=N;a-->0;)if((q=L[a/C].charAt(a%C))>46)for(b=a;b-->0;)if(L[b/C].charAt(b%C)==q)for(c=N;c-->0;)if((c/C-a/C)*(b%C-a%C)==(c%C-a%C)*(b/C-a/C)&&!p|c==2*a-b|c==2*b-a&&v[c]++<1)n++;return""+n;}}
+class H{int C=50,N=C*C,n,a,b,q,c,v[]=new int[N];Object s(boolean p,String[]L){for(a=N;a-->0;)if((q=L[a/C].charAt(a%C))>46)for(b=a;b-->0;)if(L[b/C].charAt(b%C)==q)for(c=N;c-->0;)if((c/C-a/C)*(b%C-a%C)==(c%C-a%C)*(b/C-a/C)&&!p|c==2*a-b|c==2*b-a&&v[c]++<1)n++;return n;}}

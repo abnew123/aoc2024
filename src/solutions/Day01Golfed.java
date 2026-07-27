@@ -1,1 +1,1 @@
-class A{int v,m[][]=new int[2][1<<20];long r,d;String s(boolean P,String[]I){for(var t:I)for(var q:t.split(" +"))m[v^=1][new Integer(q)]++;for(v=1<<20;v-->0;r+=P?d<0?-d:d:v*m[0][v]*m[1][v])d+=m[0][v]-m[1][v];return""+r;}}
+class A{int v,m[][]=new int[2][1<<20];long r,d;Object s(boolean P,String[]I){for(var t:I)for(var q:t.split(" +"))m[v^=1][new Integer(q)]++;for(v=1<<20;v-->0;r+=P?d<0?-d:d:v*m[0][v]*m[1][v])d+=m[0][v]-m[1][v];return r;}}
