@@ -1,1 +1,1 @@
-class M{String s(boolean P,java.util.Scanner S){long r=0,o=P?0:(long)1e13;S.useDelimiter("\\D+");while(S.hasNext()){long a=S.nextInt(),b=S.nextInt(),c=S.nextInt(),d=S.nextInt(),x=S.nextInt()+o,y=S.nextInt()+o,D=a*d-b*c,A=x*d-y*c,B=a*y-b*x;if((A%D|B%D)==0)r+=3*A/D+B/D;}return r+"";}}
+class M{String[]S;int i;int n(){return new Integer(S[--i]);}String s(boolean P,String[]I){long r=0,o=P?0:(long)1e13;S=String.join("",I).split("\\D+");for(i=S.length;i>1;){long y=n()+o,x=n()+o,d=n(),c=n(),b=n(),a=n(),D=a*d-b*c,A=x*d-y*c,B=a*y-b*x;if((A%D|B%D)==0)r+=3*A/D+B/D;}return r+"";}}
