@@ -44,4 +44,15 @@ public abstract class DayTemplate {
         }
     }
 
+    /**
+     * Some classes require additional, non code steps (e.g. judge an image
+     * output). In those cases, we do not want to run the solver.
+     *
+     * @return By default, returns false.
+     * Subclasses can override in exceptional cases.
+     */
+    public boolean exclude() {
+        return false;
+    }
+
 }

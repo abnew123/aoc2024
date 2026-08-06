@@ -31,9 +31,11 @@ Latest aggregate gate against the preceding PR tip (current minus previous, n=10
 
 One slurped buffer and a sign-aware digit scan fill two primitive arrays, sorted with the intrinsic int sort; a zipped pass computes distance and a two-pointer group pass computes similarity, with no per-token objects or arbitrary-precision arithmetic anywhere.
 
-| Previous | Current | Delta | 95% CI |
+| Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 9.275 | 3.802 | -5.474 | [-5.541, -5.406] |
+| 24.543 | 3.802 | -20.741 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the n=100 confirming run. The measured step versus the preceding replay tip (n=100) was -5.474 [-5.541, -5.406].*
 
 ## Day 02
 
@@ -111,9 +113,11 @@ The rectangular height grid is parsed once. A descending dynamic program shares 
 
 The finite blink universe is closed once into dense integer ids with primitive open addressing, then both blink totals run as dense count-vector updates over precomputed successor pairs — no hashing, boxing, or recursion in the hot phase, with the exact overflow fallback preserved.
 
-| Previous | Current | Delta | 95% CI |
+| Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 8.229 | 3.499 | -4.730 | [-4.839, -4.620] |
+| 39.342 | 3.499 | -35.843 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the n=100 confirming run. The measured step versus the preceding replay tip (n=100) was -4.730 [-4.839, -4.620].*
 
 ## Day 12
 
