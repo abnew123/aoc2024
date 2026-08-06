@@ -5,7 +5,7 @@
 - Baseline: normal Java solvers at pre-speed commit `ff4e78e190876e460dc289329d118aa1d5616fe5`.
 - Harness: `src.FreshJvmBenchmark`, with separate JVM processes and an unmeasured true-cold launch before measured runs.
 - Two independent baseline JVMs each reached the 180-second hard deadline before completing Day 17, so the pre-speed baseline is right-censored and no numeric end-to-end CI is claimed.
-- Current values are ten-run means in milliseconds. `solver` sums the 25 `fullSolve` calls; `startup` ends at the child marker; `harness = main - solver`; `wall` is parent-observed process time.
+- Current values are means of 100 paired fresh-JVM runs with seeded random within-pair order and the cold pair excluded (the checked-in n=10 counterbalanced mode remains the quick reproduction default). `solver` sums the 25 `fullSolve` calls; `startup` ends at the child marker; `harness = main - solver`; `wall` is parent-observed process time.
 - Correctness: all 50 independent solves equal all 25 combined solves; personal outputs match the previously verified speed branch, and alternate-account outputs match frozen independent references.
 - Environment: OpenJDK 23.0.1, macOS arm64, 14 available processors.
 - Reproduce current timing with `java -Daoc.data.dir=data -Daoc.benchmark.runs=10 -cp <classes> src.FreshJvmBenchmark` on an idle machine.
@@ -13,27 +13,27 @@
 | Revision | wall | main | solver | startup | harness |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | pre-speed baseline | >180000 | — | — | — | — |
-| current | 195.585 | 162.535 | 132.112 | 29.220 | 30.423 |
+| current | 186.264 | 160.671 | 129.385 | 22.281 | 31.286 |
 
-Both pre-speed baseline processes timed out; the current cold process and all ten measured processes completed with stable answers.
+Both pre-speed baseline processes timed out; the current cold process and all measured processes completed with stable answers.
 
-Latest aggregate gate against the preceding PR tip (current minus previous, n=10):
+Latest aggregate gate against the preceding PR tip (current minus previous, n=100):
 
 | Metric | Previous | Current | Delta | 95% CI |
 | --- | ---: | ---: | ---: | ---: |
-| wall | 203.631 | 195.585 | -8.046 | [-11.463, -4.630] |
-| main | 171.217 | 162.535 | -8.682 | [-11.700, -5.664] |
-| solver | 141.482 | 132.112 | -9.370 | [-11.954, -6.786] |
-| startup | 28.377 | 29.220 | 0.843 | [-0.945, 2.630] |
-| harness | 29.735 | 30.423 | 0.688 | [-0.397, 1.772] |
+| wall | 189.522 | 186.264 | -3.258 | [-4.562, -1.955] |
+| main | 164.025 | 160.671 | -3.354 | [-4.511, -2.197] |
+| solver | 131.956 | 129.385 | -2.572 | [-3.580, -1.564] |
+| startup | 22.064 | 22.281 | 0.217 | [-0.126, 0.560] |
+| harness | 32.068 | 31.286 | -0.782 | [-1.083, -0.482] |
 
 ## Day 01
 
-Both columns are parsed once into exact integers and sorted once. A zipped pass computes distance while a grouped two-pointer pass computes similarity, sharing the same data for both parts.
+One slurped buffer and a sign-aware digit scan fill two primitive arrays, sorted with the intrinsic int sort; a zipped pass computes distance and a two-pointer group pass computes similarity, with no per-token objects or arbitrary-precision arithmetic anywhere.
 
-| Baseline | Current | Delta | 95% CI |
+| Previous | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 24.543 | 8.805 | -15.738 | [-17.173, -14.302] |
+| 9.275 | 3.802 | -5.474 | [-5.541, -5.406] |
 
 ## Day 02
 
@@ -109,11 +109,11 @@ The rectangular height grid is parsed once. A descending dynamic program shares 
 
 ## Day 11
 
-The 25- and 75-blink totals share a top-down numeric-split memo. A primitive checked-`long` fast path promotes to exact `BigInteger` arithmetic only when required.
+The finite blink universe is closed once into dense integer ids with primitive open addressing, then both blink totals run as dense count-vector updates over precomputed successor pairs — no hashing, boxing, or recursion in the hot phase, with the exact overflow fallback preserved.
 
-| Baseline | Current | Delta | 95% CI |
+| Previous | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 39.342 | 9.991 | -29.351 | [-30.579, -28.124] |
+| 8.229 | 3.499 | -4.730 | [-4.839, -4.620] |
 
 ## Day 12
 

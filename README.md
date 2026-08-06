@@ -3,6 +3,22 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=abnew123_aoc2024&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=abnew123_aoc2024)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=abnew123_aoc2024&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=abnew123_aoc2024)
 
+## Performance
+
+Current 25-day timing from 100 randomized-order fresh-JVM pairs; values are arithmetic means in milliseconds. See [PERFORMANCE.md](PERFORMANCE.md) for definitions and A/B evidence.
+
+| Wall | Main | Solver | Startup | Harness |
+|---:|---:|---:|---:|---:|
+| 186.264 | 160.671 | 129.385 | 22.281 | 31.286 |
+
+| Days | 01 | 02 | 03 | 04 | 05 |
+|---|---:|---:|---:|---:|---:|
+| 01–05 | 3.801704 | 6.833590 | 2.497482 | 1.878483 | 5.609558 |
+| 06–10 | 3.943061 | 3.953156 | 1.345174 | 8.506280 | 0.557370 |
+| 11–15 | 3.499359 | 4.002770 | 4.989056 | 2.747191 | 3.237243 |
+| 16–20 | 6.888510 | 4.865123 | 5.349984 | 3.494611 | 16.098447 |
+| 21–25 | 3.093746 | 20.939164 | 4.820223 | 4.808660 | 1.624565 |
+
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
   2024 - 50 ⭐ - Java

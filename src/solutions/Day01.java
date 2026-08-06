@@ -2,106 +2,126 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class Day01 extends DayTemplate {
 
+    /** Largest magnitude a location ID may reach while still fitting an int. */
+    private static final long MAX_MAGNITUDE = 1L << 31;
+
     @Override
     public String solve(boolean part1, Scanner in) {
-        BigInteger[] answers = solveBoth(in);
-        return answers[part1 ? 0 : 1].toString();
+        long[] answers = solveBoth(slurp(in));
+        return Long.toString(answers[part1 ? 0 : 1]);
     }
 
     @Override
     public String[] fullSolve(Scanner in) {
-        BigInteger[] answers = solveBoth(in);
-        return new String[]{answers[0].toString(), answers[1].toString()};
+        long[] answers = solveBoth(slurp(in));
+        return new String[]{Long.toString(answers[0]), Long.toString(answers[1])};
     }
 
-    private BigInteger[] solveBoth(Scanner in) {
-        Pairs pairs = parse(in);
-        Arrays.sort(pairs.left);
-        Arrays.sort(pairs.right);
+    private static String slurp(Scanner in) {
+        return in.useDelimiter("\\A").hasNext() ? in.next() : "";
+    }
 
-        BigInteger distance = BigInteger.ZERO;
-        for (int i = 0; i < pairs.left.length; i++) {
-            distance = distance.add(pairs.left[i].subtract(pairs.right[i]).abs());
+    private long[] solveBoth(String input) {
+        Pairs pairs = parse(input);
+        int size = pairs.size;
+        int[] left = Arrays.copyOf(pairs.left, size);
+        int[] right = Arrays.copyOf(pairs.right, size);
+        Arrays.sort(left);
+        Arrays.sort(right);
+
+        long distance = 0;
+        for (int i = 0; i < size; i++) {
+            distance += Math.abs((long) left[i] - right[i]);
         }
 
-        BigInteger similarity = BigInteger.ZERO;
+        long similarity = 0;
         int leftIndex = 0;
         int rightIndex = 0;
-        while (leftIndex < pairs.left.length && rightIndex < pairs.right.length) {
-            int comparison = pairs.left[leftIndex].compareTo(pairs.right[rightIndex]);
-            if (comparison < 0) {
+        while (leftIndex < size && rightIndex < size) {
+            int leftValue = left[leftIndex];
+            int rightValue = right[rightIndex];
+            if (leftValue < rightValue) {
                 leftIndex++;
-            } else if (comparison > 0) {
+            } else if (leftValue > rightValue) {
                 rightIndex++;
             } else {
-                BigInteger value = pairs.left[leftIndex];
                 int leftEnd = leftIndex + 1;
-                while (leftEnd < pairs.left.length && pairs.left[leftEnd].equals(value)) {
+                while (leftEnd < size && left[leftEnd] == leftValue) {
                     leftEnd++;
                 }
                 int rightEnd = rightIndex + 1;
-                while (rightEnd < pairs.right.length && pairs.right[rightEnd].equals(value)) {
+                while (rightEnd < size && right[rightEnd] == leftValue) {
                     rightEnd++;
                 }
                 long pairCount = (long) (leftEnd - leftIndex) * (rightEnd - rightIndex);
-                similarity = similarity.add(value.multiply(BigInteger.valueOf(pairCount)));
+                similarity += leftValue * pairCount;
                 leftIndex = leftEnd;
                 rightIndex = rightEnd;
             }
         }
-        return new BigInteger[]{distance, similarity};
+        return new long[]{distance, similarity};
     }
 
-    private Pairs parse(Scanner in) {
-        BigInteger[] left = new BigInteger[128];
-        BigInteger[] right = new BigInteger[128];
+    /**
+     * Single linear scan over the raw input. Integer tokens are assigned to the
+     * left and right columns alternately in reading order; every non-numeric
+     * character is a separator. An optional leading minus sign is honored.
+     */
+    private Pairs parse(String input) {
+        int[] left = new int[1024];
+        int[] right = new int[1024];
         int size = 0;
-        while (in.hasNextLine()) {
-            String line = in.nextLine();
-            int index = skipWhitespace(line, 0);
-            if (index == line.length()) {
+        boolean expectLeft = true;
+        int length = input.length();
+        int i = 0;
+        while (i < length) {
+            char c = input.charAt(i);
+            boolean negative = false;
+            if (c == '-' && i + 1 < length
+                    && input.charAt(i + 1) >= '0' && input.charAt(i + 1) <= '9') {
+                negative = true;
+                i++;
+                c = input.charAt(i);
+            }
+            if (c < '0' || c > '9') {
+                i++;
                 continue;
             }
-            int leftStart = index;
-            index = skipToken(line, index);
-            int leftEnd = index;
-            index = skipWhitespace(line, index);
-            int rightStart = index;
-            index = skipToken(line, index);
-            int rightEnd = index;
-            if (rightStart == rightEnd || skipWhitespace(line, index) != line.length()) {
-                throw new IllegalArgumentException("Expected two location IDs: " + line);
+            long magnitude = 0;
+            while (i < length && (c = input.charAt(i)) >= '0' && c <= '9') {
+                magnitude = magnitude * 10 + (c - '0');
+                if (magnitude > MAX_MAGNITUDE) {
+                    throw new IllegalArgumentException("Location ID exceeds int range");
+                }
+                i++;
             }
-            if (size == left.length) {
-                left = Arrays.copyOf(left, size * 2);
-                right = Arrays.copyOf(right, size * 2);
+            long value = negative ? -magnitude : magnitude;
+            if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("Location ID exceeds int range");
             }
-            left[size] = new BigInteger(line.substring(leftStart, leftEnd));
-            right[size] = new BigInteger(line.substring(rightStart, rightEnd));
-            size++;
+            if (expectLeft) {
+                if (size == left.length) {
+                    left = Arrays.copyOf(left, size * 2);
+                    right = Arrays.copyOf(right, size * 2);
+                }
+                left[size] = (int) value;
+                expectLeft = false;
+            } else {
+                right[size] = (int) value;
+                size++;
+                expectLeft = true;
+            }
         }
-        return new Pairs(Arrays.copyOf(left, size), Arrays.copyOf(right, size));
+        if (!expectLeft) {
+            throw new IllegalArgumentException("Expected location IDs in pairs");
+        }
+        return new Pairs(left, right, size);
     }
 
-    private int skipWhitespace(String line, int index) {
-        while (index < line.length() && Character.isWhitespace(line.charAt(index))) {
-            index++;
-        }
-        return index;
-    }
-
-    private int skipToken(String line, int index) {
-        while (index < line.length() && !Character.isWhitespace(line.charAt(index))) {
-            index++;
-        }
-        return index;
-    }
-
-    private record Pairs(BigInteger[] left, BigInteger[] right) {}
+    private record Pairs(int[] left, int[] right, int size) {}
 }

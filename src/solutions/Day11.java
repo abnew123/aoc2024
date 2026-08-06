@@ -4,6 +4,7 @@ import src.meta.DayTemplate;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,49 +34,175 @@ public class Day11 extends DayTemplate {
             1_000_000_000_000_000_000L
     };
 
-    private long[] memoStones;
-    private int[] memoBlinks;
-    private long[] memoValues;
-    private boolean[] memoUsed;
-    private int memoSize;
-    private boolean memoFound;
+    private long[] tableKeys;
+    private int[] tableIds;
+    private int tableSize;
+    private long[] stoneValues;
+    private int[] firstSuccessor;
+    private int[] secondSuccessor;
+    private int stoneCount;
 
     @Override
     public String solve(boolean part1, Scanner in) {
         String[] stones = parse(in);
-        return solveOne(stones, part1 ? 25 : 75);
+        try {
+            long[] totals = blinkTotals(parseLongs(stones), part1 ? 25 : 75);
+            return Long.toString(totals[part1 ? 0 : 1]);
+        } catch (ArithmeticException overflow) {
+            return solveExact(stones, part1)[part1 ? 0 : 1];
+        }
     }
 
     @Override
     public String[] fullSolve(Scanner in) {
         String[] stones = parse(in);
         try {
-            long[] values = parseLongs(stones);
-            resetMemo();
-            long first = 0;
-            long second = 0;
-            for (long stone : values) {
-                first = Math.addExact(first, countStones(stone, 25));
-                second = Math.addExact(second, countStones(stone, 75));
-            }
-            return new String[]{Long.toString(first), Long.toString(second)};
+            long[] totals = blinkTotals(parseLongs(stones), 75);
+            return new String[]{Long.toString(totals[0]), Long.toString(totals[1])};
         } catch (ArithmeticException overflow) {
             return solveExact(stones, true);
         }
     }
 
-    private String solveOne(String[] stones, int blinks) {
-        try {
-            long[] values = parseLongs(stones);
-            resetMemo();
-            long answer = 0;
-            for (long stone : values) {
-                answer = Math.addExact(answer, countStones(stone, blinks));
-            }
-            return Long.toString(answer);
-        } catch (ArithmeticException overflow) {
-            return solveExact(stones, blinks == 25)[blinks == 25 ? 0 : 1];
+    /**
+     * Counts stones after 25 and after {@code totalBlinks} blinks.
+     *
+     * <p>The set of distinct stone values reachable by blinking is finite and
+     * small, so it is expanded once to closure: every stone gets a dense int
+     * id and precomputed successor ids (one or two per stone). The blinks are
+     * then dense count-vector updates over the id space, with no hashing, no
+     * boxing and no per-blink allocation.</p>
+     */
+    private long[] blinkTotals(long[] values, int totalBlinks) {
+        buildUniverse(values);
+        int count = stoneCount;
+        long[] current = new long[count];
+        long[] next = new long[count];
+        for (long value : values) {
+            int id = idFor(value);
+            current[id] = Math.addExact(current[id], 1L);
         }
+        long first = 0;
+        for (int blink = 1; blink <= totalBlinks; blink++) {
+            Arrays.fill(next, 0, count, 0L);
+            for (int id = 0; id < count; id++) {
+                long amount = current[id];
+                if (amount == 0) {
+                    continue;
+                }
+                int left = firstSuccessor[id];
+                next[left] = Math.addExact(next[left], amount);
+                int right = secondSuccessor[id];
+                if (right >= 0) {
+                    next[right] = Math.addExact(next[right], amount);
+                }
+            }
+            long[] swap = current;
+            current = next;
+            next = swap;
+            if (blink == 25) {
+                first = sum(current, count);
+            }
+        }
+        return new long[]{first, sum(current, count)};
+    }
+
+    private void buildUniverse(long[] seeds) {
+        tableKeys = new long[1 << 12];
+        tableIds = new int[tableKeys.length];
+        Arrays.fill(tableIds, -1);
+        tableSize = 0;
+        stoneValues = new long[1 << 10];
+        firstSuccessor = new int[stoneValues.length];
+        secondSuccessor = new int[stoneValues.length];
+        stoneCount = 0;
+        for (long seed : seeds) {
+            idFor(seed);
+        }
+        for (int id = 0; id < stoneCount; id++) {
+            long stone = stoneValues[id];
+            int left;
+            int right = -1;
+            if (stone == 0) {
+                left = idFor(1);
+            } else {
+                int digits = digits(stone);
+                if ((digits & 1) == 0) {
+                    long divisor = POW10[digits / 2];
+                    left = idFor(stone / divisor);
+                    right = idFor(stone % divisor);
+                } else {
+                    left = idFor(Math.multiplyExact(stone, 2024));
+                }
+            }
+            firstSuccessor[id] = left;
+            secondSuccessor[id] = right;
+        }
+    }
+
+    private int idFor(long stone) {
+        int mask = tableKeys.length - 1;
+        int index = hashIndex(stone, mask);
+        while (tableIds[index] >= 0) {
+            if (tableKeys[index] == stone) {
+                return tableIds[index];
+            }
+            index = (index + 1) & mask;
+        }
+        int id = stoneCount;
+        if (id == stoneValues.length) {
+            growStones();
+        }
+        stoneValues[id] = stone;
+        stoneCount = id + 1;
+        tableKeys[index] = stone;
+        tableIds[index] = id;
+        tableSize++;
+        if (tableSize * 2 >= tableKeys.length) {
+            growTable();
+        }
+        return id;
+    }
+
+    private void growStones() {
+        stoneValues = Arrays.copyOf(stoneValues, stoneValues.length * 2);
+        firstSuccessor = Arrays.copyOf(firstSuccessor, stoneValues.length);
+        secondSuccessor = Arrays.copyOf(secondSuccessor, stoneValues.length);
+    }
+
+    private void growTable() {
+        long[] oldKeys = tableKeys;
+        int[] oldIds = tableIds;
+        tableKeys = new long[oldKeys.length * 2];
+        tableIds = new int[tableKeys.length];
+        Arrays.fill(tableIds, -1);
+        int mask = tableKeys.length - 1;
+        for (int i = 0; i < oldKeys.length; i++) {
+            if (oldIds[i] >= 0) {
+                int index = hashIndex(oldKeys[i], mask);
+                while (tableIds[index] >= 0) {
+                    index = (index + 1) & mask;
+                }
+                tableKeys[index] = oldKeys[i];
+                tableIds[index] = oldIds[i];
+            }
+        }
+    }
+
+    private int hashIndex(long stone, int mask) {
+        long hash = stone;
+        hash ^= hash >>> 33;
+        hash *= 0xff51afd7ed558ccdL;
+        hash ^= hash >>> 33;
+        return (int) hash & mask;
+    }
+
+    private long sum(long[] counts, int count) {
+        long total = 0;
+        for (int id = 0; id < count; id++) {
+            total = Math.addExact(total, counts[id]);
+        }
+        return total;
     }
 
     private String[] parse(Scanner in) {
@@ -119,99 +246,6 @@ public class Day11 extends DayTemplate {
             }
         }
         return values;
-    }
-
-    private long countStones(long stone, int blinksLeft) {
-        if (blinksLeft == 0) {
-            return 1;
-        }
-
-        long cached = memoGet(stone, blinksLeft);
-        if (memoFound) {
-            return cached;
-        }
-
-        long result;
-        if (stone == 0) {
-            result = countStones(1, blinksLeft - 1);
-        } else {
-            int digits = digits(stone);
-            if ((digits & 1) == 0) {
-                long divisor = POW10[digits / 2];
-                result = Math.addExact(countStones(stone / divisor, blinksLeft - 1),
-                        countStones(stone % divisor, blinksLeft - 1));
-            } else {
-                result = countStones(Math.multiplyExact(stone, 2024), blinksLeft - 1);
-            }
-        }
-
-        memoPut(stone, blinksLeft, result);
-        return result;
-    }
-
-    private void resetMemo() {
-        memoStones = new long[1 << 15];
-        memoBlinks = new int[memoStones.length];
-        memoValues = new long[memoStones.length];
-        memoUsed = new boolean[memoStones.length];
-        memoSize = 0;
-    }
-
-    private long memoGet(long stone, int blinksLeft) {
-        int index = memoIndex(stone, blinksLeft, memoStones.length);
-        while (memoUsed[index]) {
-            if (memoStones[index] == stone && memoBlinks[index] == blinksLeft) {
-                memoFound = true;
-                return memoValues[index];
-            }
-            index = (index + 1) & (memoStones.length - 1);
-        }
-        memoFound = false;
-        return 0;
-    }
-
-    private void memoPut(long stone, int blinksLeft, long value) {
-        if (memoSize * 2 >= memoStones.length) {
-            growMemo();
-        }
-        int index = memoIndex(stone, blinksLeft, memoStones.length);
-        while (memoUsed[index]) {
-            if (memoStones[index] == stone && memoBlinks[index] == blinksLeft) {
-                memoValues[index] = value;
-                return;
-            }
-            index = (index + 1) & (memoStones.length - 1);
-        }
-        memoUsed[index] = true;
-        memoStones[index] = stone;
-        memoBlinks[index] = blinksLeft;
-        memoValues[index] = value;
-        memoSize++;
-    }
-
-    private void growMemo() {
-        long[] oldStones = memoStones;
-        int[] oldBlinks = memoBlinks;
-        long[] oldValues = memoValues;
-        boolean[] oldUsed = memoUsed;
-        memoStones = new long[oldStones.length * 2];
-        memoBlinks = new int[memoStones.length];
-        memoValues = new long[memoStones.length];
-        memoUsed = new boolean[memoStones.length];
-        memoSize = 0;
-        for (int i = 0; i < oldStones.length; i++) {
-            if (oldUsed[i]) {
-                memoPut(oldStones[i], oldBlinks[i], oldValues[i]);
-            }
-        }
-    }
-
-    private int memoIndex(long stone, int blinksLeft, int length) {
-        long hash = stone ^ (stone >>> 32) ^ ((long) blinksLeft * 0x9E3779B97F4A7C15L);
-        hash ^= hash >>> 33;
-        hash *= 0xff51afd7ed558ccdL;
-        hash ^= hash >>> 33;
-        return (int) hash & (length - 1);
     }
 
     private int digits(long stone) {
