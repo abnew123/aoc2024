@@ -62,15 +62,9 @@ public class MasterSolver {
                         .invoke(cls.getDeclaredConstructor().newInstance())) {
                     continue;
                 }
-                Double time;
-                if (useGolfed) {
-                    long start = System.nanoTime();
-                    solve(cls, part == 1, file);
-                    time = (System.nanoTime() - start) / 1000000.0;
-                } else {
-                    time = (Double) cls.getMethod("timer", boolean.class, Scanner.class)
-                            .invoke(cls.getDeclaredConstructor().newInstance(), part == 1, new Scanner(file));
-                }
+                long start = System.nanoTime();
+                solve(cls, part == 1, file);
+                Double time = (System.nanoTime() - start) / 1000000.0;
                 if (!total) {
                     System.out.println("Day " + zeroFilledDay + " part " + part + " execution time: " + time);
                 }

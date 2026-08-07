@@ -1,57 +1,213 @@
 package src.solutions;
 
 import src.meta.DayTemplate;
-import java.util.*;
+
+import java.util.Arrays;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 public class Day17 extends DayTemplate {
 
+    private int position;
+
     public String solve(boolean part1, Scanner in) {
-        long registerA = 15401536L;
-        in.nextLine();
-        long registerB = Long.parseLong(in.nextLine().split(" ")[2]);
-        long registerC = Long.parseLong(in.nextLine().split(" ")[2]);
-        in.nextLine();
-        String stringProgram = in.nextLine().split(" ")[1];
-        List<Integer> program = new ArrayList<>();
-        for(String s: stringProgram.split(",")){
-            program.add(Integer.parseInt(s));
+        return solve(part1, parse(in));
+    }
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        Input input = parse(in);
+        return new String[] { solve(true, input), solve(false, input) };
+    }
+
+    private static String slurp(Scanner in) {
+        return in.useDelimiter("\\A").hasNext() ? in.next() : "";
+    }
+
+    private Input parse(Scanner in) {
+        String input = slurp(in);
+        position = 0;
+        long registerA = registerValue(input);
+        long registerB = registerValue(input);
+        long registerC = registerValue(input);
+        skipLine(input);
+        if (position >= input.length()) {
+            throw new NoSuchElementException("No line found");
         }
-        if(part1){
-            List<Integer> result = run(program, registerA, registerB, registerC);
-            return (result + "").replace(" ", "");
-        }
-        int division = 2; // brute forcing 16 number takes 2^48 cycles roughly, so splitting into two separate 2^24 runs.
-        List<Long> possibilities = new ArrayList<>();
-        List<Integer> programEnd = new ArrayList<>();
-        possibilities.add(0L);
-        for(int i = division - 1; i >= 0; i--){
-            List<Integer> programPart = new ArrayList<>();
-            for(int j = i * 16/division; j < (i + 1) * (16/division); j++){
-                programPart.add(program.get(j));
-            }
-            programEnd.addAll(0, programPart);
-            List<Long> newPossibilities = new ArrayList<>();
-            for(Long possibility: possibilities){
-                long potential = 0;
-                while(potential < 1L<<(programPart.size() * 3)){
-                    long potentialValue = potential + possibility * (1L << ((division - i - 1) * 16/division * 3));
-                    if(run(program, potentialValue, 0,0).equals(programEnd)){
-                        newPossibilities.add(potentialValue);
+        int start = position;
+        int end = lineEnd(input, start);
+        position = advance(input, end);
+        int[] program = new int[16];
+        int programCount = 0;
+        for (int i = start; i < end;) {
+            char c = input.charAt(i);
+            if (c >= '0' && c <= '9') {
+                int value = 0;
+                while (i < end) {
+                    char digit = input.charAt(i);
+                    if (digit < '0' || digit > '9') {
+                        break;
                     }
-                    potential++;
+                    int amount = digit - '0';
+                    if (value > (Integer.MAX_VALUE - amount) / 10) {
+                        throw new NumberFormatException("Program value exceeds int");
+                    }
+                    value = value * 10 + amount;
+                    i++;
+                }
+                if (programCount == program.length) {
+                    program = Arrays.copyOf(program, programCount * 2);
+                }
+                program[programCount++] = value;
+            } else {
+                i++;
+            }
+        }
+        return new Input(registerA, registerB, registerC, Arrays.copyOf(program, programCount));
+    }
+
+    private long registerValue(String input) {
+        if (position >= input.length()) {
+            throw new NoSuchElementException("No line found");
+        }
+        int start = position;
+        int end = lineEnd(input, start);
+        position = advance(input, end);
+        for (int i = start; i < end; i++) {
+            char c = input.charAt(i);
+            boolean negative = c == '-' && i + 1 < end
+                    && input.charAt(i + 1) >= '0' && input.charAt(i + 1) <= '9';
+            if (negative) {
+                i++;
+                c = input.charAt(i);
+            }
+            if (c >= '0' && c <= '9') {
+                long value = 0;
+                while (i < end) {
+                    char digit = input.charAt(i);
+                    if (digit < '0' || digit > '9') {
+                        break;
+                    }
+                    int amount = digit - '0';
+                    if (value > (Long.MAX_VALUE - amount) / 10) {
+                        throw new NumberFormatException("Register value exceeds long");
+                    }
+                    value = value * 10 + amount;
+                    i++;
+                }
+                return negative ? -value : value;
+            }
+        }
+        throw new NumberFormatException("Missing register value");
+    }
+
+    private void skipLine(String input) {
+        if (position >= input.length()) {
+            throw new NoSuchElementException("No line found");
+        }
+        position = advance(input, lineEnd(input, position));
+    }
+
+    private static int lineEnd(String input, int start) {
+        int length = input.length();
+        int end = start;
+        while (end < length) {
+            char c = input.charAt(end);
+            if (c == '\n' || c == '\r') {
+                break;
+            }
+            end++;
+        }
+        return end;
+    }
+
+    private static int advance(String input, int end) {
+        int length = input.length();
+        if (end >= length) {
+            return length;
+        }
+        return input.charAt(end) == '\r' && end + 1 < length && input.charAt(end + 1) == '\n'
+                ? end + 2 : end + 1;
+    }
+
+    private String solve(boolean part1, Input input) {
+        long registerA = input.registerA;
+        long registerB = input.registerB;
+        long registerC = input.registerC;
+        int[] program = input.program;
+        if(part1){
+            int[] result = run(program, registerA, registerB, registerC);
+            return formatOutput(result);
+        }
+        long[] possibilities = {0L};
+        int possibilityCount = 1;
+        for(int outputStart = program.length - 1; outputStart >= 0; outputStart--){
+            long[] newPossibilities = new long[8];
+            int newCount = 0;
+            for(int index = 0; index < possibilityCount; index++){
+                long possibility = possibilities[index];
+                // This program emits once per base-8 digit of A.  Build A from
+                // the most significant digit down, keeping only candidates that
+                // reproduce the target suffix seen so far.
+                for(int digit = 0; digit < 8; digit++){
+                    long potentialValue = (possibility << 3) + digit;
+                    if(matchesSuffix(run(program, potentialValue, registerB, registerC),
+                            program, outputStart)){
+                        if (newCount == newPossibilities.length) {
+                            newPossibilities = Arrays.copyOf(newPossibilities, newCount * 2);
+                        }
+                        newPossibilities[newCount++] = potentialValue;
+                    }
                 }
             }
             possibilities = newPossibilities;
+            possibilityCount = newCount;
         }
-        return possibilities.get(0) + "";
+        if (possibilityCount == 0) {
+            throw new NoSuchElementException("No value present");
+        }
+        long minimum = possibilities[0];
+        for (int index = 1; index < possibilityCount; index++) {
+            if (possibilities[index] < minimum) {
+                minimum = possibilities[index];
+            }
+        }
+        return minimum + "";
     }
 
-    private List<Integer> run(List<Integer> program, long registerA, long registerB, long registerC){
+    private boolean matchesSuffix(int[] output, int[] program, int from) {
+        if (output.length != program.length - from) {
+            return false;
+        }
+        for (int i = 0; i < output.length; i++) {
+            if (output[i] != program[from + i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private record Input(long registerA, long registerB, long registerC, int[] program) {
+    }
+
+    private String formatOutput(int[] values) {
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < values.length; i++) {
+            if (i > 0) {
+                output.append(',');
+            }
+            output.append(values[i]);
+        }
+        return output.toString();
+    }
+
+    private int[] run(int[] program, long registerA, long registerB, long registerC){
         int instructionPointer = 0;
-        List<Integer> result = new ArrayList<>();
-        while(instructionPointer < program.size()){
-            int operator = program.get(instructionPointer);
-            int operand = program.get(instructionPointer + 1); //literal
+        int[] result = new int[16];
+        int resultCount = 0;
+        while(instructionPointer < program.length){
+            int operator = program[instructionPointer];
+            int operand = program[instructionPointer + 1]; //literal
             long combo = 0;
             if(operand < 4){
                 combo = operand;
@@ -66,8 +222,7 @@ public class Day17 extends DayTemplate {
                 combo = registerC;
             }
             if(operator == 0){
-                long denominator = (long)Math.pow(2, combo);
-                registerA /=denominator;
+                registerA = divideByPowerOfTwo(registerA, combo);
             }
             if(operator == 1){
                 registerB ^= operand;
@@ -85,18 +240,26 @@ public class Day17 extends DayTemplate {
                 registerB ^= registerC;
             }
             if(operator == 5){
-                result.add((int) (combo % 8));
+                if (resultCount == result.length) {
+                    result = Arrays.copyOf(result, resultCount * 2);
+                }
+                result[resultCount++] = (int) (combo % 8);
             }
             if(operator == 6){
-                long denominator = (long)Math.pow(2, combo);
-                registerB = registerA /denominator;
+                registerB = divideByPowerOfTwo(registerA, combo);
             }
             if(operator == 7){
-                long denominator = (long)Math.pow(2, combo);
-                registerC = registerA /denominator;
+                registerC = divideByPowerOfTwo(registerA, combo);
             }
             instructionPointer += 2;
         }
-        return result;
+        return Arrays.copyOf(result, resultCount);
+    }
+
+    private long divideByPowerOfTwo(long value, long power){
+        if(power >= Long.SIZE){
+            return 0;
+        }
+        return value >> power;
     }
 }

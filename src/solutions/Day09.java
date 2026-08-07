@@ -2,94 +2,273 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.*;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class Day09 extends DayTemplate {
+    @Override
     public String solve(boolean part1, Scanner in) {
-        long answer;
-        String line = in.nextLine();
+        int[] parts = parse(in);
+        return (part1 ? part1(parts) : part2(parts)).toString();
+    }
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        int[] parts = parse(in);
+        return new String[]{part1(parts).toString(), part2(parts).toString()};
+    }
+
+    private int[] parse(Scanner in) {
+        String raw = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        if (raw.isEmpty()) {
+            throw new IllegalArgumentException("Missing disk map");
+        }
+        int lineEnd = 0;
+        while (lineEnd < raw.length()
+                && raw.charAt(lineEnd) != '\n' && raw.charAt(lineEnd) != '\r') {
+            lineEnd++;
+        }
+        String line = raw.substring(0, lineEnd).trim();
+        if (line.isEmpty()) {
+            throw new IllegalArgumentException("Empty disk map");
+        }
+        for (int i = lineEnd; i < raw.length(); i++) {
+            if (raw.charAt(i) > ' ') {
+                throw new IllegalArgumentException("Disk map must be one line");
+            }
+        }
         int[] parts = new int[line.length()];
-        int length = 0;
-        for(int i = 0; i < parts.length; i++){
-            parts[i] = Integer.parseInt(line.substring(i, i+1));
-            length += parts[i];
+        for (int i = 0; i < parts.length; i++) {
+            char digit = line.charAt(i);
+            if (digit < '0' || digit > '9') {
+                throw new IllegalArgumentException("Invalid disk-map digit: " + digit);
+            }
+            parts[i] = digit - '0';
         }
-        if(part1){
-            answer = part1(length, parts);
-        }
-        else{
-            answer = part2(parts);
-        }
-        return answer + "";
+        return parts;
     }
 
-    private long part1(int length, int[] parts){
-        long answer = 0;
-        int[] filesystem = new int[length];
-        int[] condensed = new int[length];
-        int index = 0;
-        for(int i = 0; i < parts.length; i++){
-            int part = parts[i];
-            for(int j = 0; j < part; j++){
-                filesystem[index + j] = (i % 2 == 1)?-1:i/2;
-            }
-            index += part;
-        }
-        int backindex = length - 1;
-        for(int i = 0; i < length; i++){
-            if(filesystem[i] != -1){
-                condensed[i] = filesystem[i];
-            }
-            else{
-                while(backindex >= i && filesystem[backindex] == -1){
-                    backindex--;
-                }
-                if(backindex > i){
-                    condensed[i] = filesystem[backindex];
-                    filesystem[backindex] = -1;
-                }
+    private ExactTotal part1(int[] parts) {
+        long[] starts = new long[parts.length + 1];
+        ExactTotal answer = new ExactTotal();
+        for (int run = 0; run < parts.length; run++) {
+            starts[run + 1] = starts[run] + parts[run];
+            if ((run & 1) == 0) {
+                answer.addChecksum(run / 2L, starts[run], parts[run]);
             }
         }
-        for(int i = 0; i < condensed.length; i++){
-            if(condensed[i] != -1){
-                answer+= (long) i * condensed[i];
+
+        int leftRun = 1;
+        while (leftRun < parts.length && parts[leftRun] == 0) {
+            leftRun += 2;
+        }
+        int rightRun = (parts.length - 1) & ~1;
+        while (rightRun >= 0 && parts[rightRun] == 0) {
+            rightRun -= 2;
+        }
+        int leftUsed = 0;
+        int rightUsed = 0;
+        while (leftRun < parts.length && rightRun >= 0) {
+            long leftPosition = starts[leftRun] + leftUsed;
+            long rightPosition = starts[rightRun] + parts[rightRun] - 1L - rightUsed;
+            if (leftPosition >= rightPosition) {
+                break;
+            }
+
+            int gapRemaining = parts[leftRun] - leftUsed;
+            int fileRemaining = parts[rightRun] - rightUsed;
+            long crossingLimit = (rightPosition - leftPosition + 1) / 2;
+            int moved = (int) Math.min(Math.min(gapRemaining, fileRemaining), crossingLimit);
+            answer.addProduct(rightRun / 2L, moved,
+                    leftPosition - rightPosition + moved - 1L);
+
+            leftUsed += moved;
+            if (leftUsed == parts[leftRun]) {
+                leftRun += 2;
+                leftUsed = 0;
+                while (leftRun < parts.length && parts[leftRun] == 0) {
+                    leftRun += 2;
+                }
+            }
+            rightUsed += moved;
+            if (rightUsed == parts[rightRun]) {
+                rightRun -= 2;
+                rightUsed = 0;
+                while (rightRun >= 0 && parts[rightRun] == 0) {
+                    rightRun -= 2;
+                }
             }
         }
         return answer;
     }
 
-    private long part2(int[] parts){
-        long answer = 0;
-        Map<Integer, int[]> starting = new HashMap<>();
-        Map<Integer, int[]> gaps = new HashMap<>();
-        int index = 0;
-        for(int i = 0; i < parts.length; i++) {
-            if(i %2 == 0){
-                starting.put(i / 2, new int[]{index, parts[i]});
-            }
-            if(i % 2 == 1){
-                gaps.put(i / 2, new int[]{index, parts[i]});
-            }
-            index += parts[i];
+    private ExactTotal part2(int[] parts) {
+        int fileCount = (parts.length + 1) / 2;
+        long[] fileStarts = new long[fileCount];
+        int[] fileSizes = new int[fileCount];
+        long[][] gapStarts = new long[10][];
+        long[][] gapSizes = new long[10][];
+        int[] gapCounts = new int[10];
+        for (int i = 0; i < gapStarts.length; i++) {
+            gapStarts[i] = new long[16];
+            gapSizes[i] = new long[16];
         }
-        for(int i = parts.length/2 ; i >= 0; i--){
-            int size = starting.get(i)[1];
-            for(int j = 0; j < i; j++){
-                int gap = gaps.get(j)[1];
-                if(gap >= size){
-                    starting.put(i, new int[]{gaps.get(j)[0], size});
-                    gaps.put(j, new int[]{gaps.get(j)[0] + size, gaps.get(j)[1] - size});
-                    break;
+
+        long index = 0;
+        long pendingGapStart = 0;
+        long pendingGapSize = 0;
+        for (int i = 0; i < parts.length; i++) {
+            int size = parts[i];
+            if ((i & 1) == 0) {
+                if (size > 0 && pendingGapSize > 0) {
+                    addGap(gapStarts, gapSizes, gapCounts, pendingGapStart, pendingGapSize);
+                    pendingGapSize = 0;
                 }
+                int file = i / 2;
+                fileStarts[file] = index;
+                fileSizes[file] = size;
+            } else if (size > 0) {
+                if (pendingGapSize == 0) {
+                    pendingGapStart = index;
+                }
+                pendingGapSize += size;
+            }
+            index += size;
+        }
+        if (pendingGapSize > 0) {
+            addGap(gapStarts, gapSizes, gapCounts, pendingGapStart, pendingGapSize);
+        }
+
+        ExactTotal answer = new ExactTotal();
+        for (int file = fileCount - 1; file >= 0; file--) {
+            int fileSize = fileSizes[file];
+            long fileStart = fileStarts[file];
+            if (fileSize == 0) {
+                continue;
+            }
+            int bestBucket = -1;
+            long bestStart = 0;
+            for (int size = fileSize; size < gapStarts.length; size++) {
+                if (gapCounts[size] > 0) {
+                    long start = gapStarts[size][0];
+                    if (start < fileStart && (bestBucket < 0 || start < bestStart)) {
+                        bestBucket = size;
+                        bestStart = start;
+                    }
+                }
+            }
+
+            long finalStart = fileStart;
+            if (bestBucket >= 0) {
+                long gapStart = gapStarts[bestBucket][0];
+                long gapSize = gapSizes[bestBucket][0];
+                pollGap(gapStarts[bestBucket], gapSizes[bestBucket], gapCounts, bestBucket);
+                finalStart = gapStart;
+                long remaining = gapSize - fileSize;
+                if (remaining > 0) {
+                    addGap(gapStarts, gapSizes, gapCounts, gapStart + fileSize, remaining);
+                }
+            }
+            answer.addChecksum(file, finalStart, fileSize);
+        }
+        return answer;
+    }
+
+    private void addGap(long[][] gapStarts, long[][] gapSizes, int[] gapCounts,
+                        long start, long size) {
+        int bucket = (int) Math.min(size, 9);
+        long[] starts = gapStarts[bucket];
+        long[] sizes = gapSizes[bucket];
+        int count = gapCounts[bucket];
+        if (count == starts.length) {
+            starts = Arrays.copyOf(starts, count * 2);
+            sizes = Arrays.copyOf(sizes, count * 2);
+            gapStarts[bucket] = starts;
+            gapSizes[bucket] = sizes;
+        }
+        starts[count] = start;
+        sizes[count] = size;
+        gapCounts[bucket] = count + 1;
+        int child = count;
+        while (child > 0) {
+            int parent = (child - 1) / 2;
+            if (starts[parent] <= starts[child]) {
+                break;
+            }
+            long swapStart = starts[parent];
+            long swapSize = sizes[parent];
+            starts[parent] = starts[child];
+            sizes[parent] = sizes[child];
+            starts[child] = swapStart;
+            sizes[child] = swapSize;
+            child = parent;
+        }
+    }
+
+    private void pollGap(long[] starts, long[] sizes, int[] gapCounts, int bucket) {
+        int count = gapCounts[bucket] - 1;
+        gapCounts[bucket] = count;
+        starts[0] = starts[count];
+        sizes[0] = sizes[count];
+        int parent = 0;
+        while (true) {
+            int left = 2 * parent + 1;
+            if (left >= count) {
+                break;
+            }
+            int smallest = left;
+            int right = left + 1;
+            if (right < count && starts[right] < starts[left]) {
+                smallest = right;
+            }
+            if (starts[parent] <= starts[smallest]) {
+                break;
+            }
+            long swapStart = starts[parent];
+            long swapSize = sizes[parent];
+            starts[parent] = starts[smallest];
+            sizes[parent] = sizes[smallest];
+            starts[smallest] = swapStart;
+            sizes[smallest] = swapSize;
+            parent = smallest;
+        }
+    }
+
+    private static final class ExactTotal {
+        private long value;
+        private BigInteger largeValue;
+
+        private void addChecksum(long fileId, long start, long size) {
+            long span = 2 * start + size - 1;
+            if ((size & 1) == 0) {
+                addProduct(fileId, size / 2, span);
+            } else {
+                addProduct(fileId, size, span / 2);
             }
         }
 
-        for (Map.Entry<Integer, int[]> entry : starting.entrySet()) {
-            int[] value = entry.getValue();
-            for (int i = value[0]; i < value[0] + value[1]; i++) {
-                answer += (long) i * entry.getKey();
+        private void addProduct(long first, long second, long third) {
+            if (largeValue != null) {
+                largeValue = largeValue.add(product(first, second, third));
+                return;
+            }
+            try {
+                long amount = Math.multiplyExact(Math.multiplyExact(first, second), third);
+                value = Math.addExact(value, amount);
+            } catch (ArithmeticException overflow) {
+                largeValue = BigInteger.valueOf(value).add(product(first, second, third));
             }
         }
-        return answer;
+
+        private BigInteger product(long first, long second, long third) {
+            return BigInteger.valueOf(first).multiply(BigInteger.valueOf(second))
+                    .multiply(BigInteger.valueOf(third));
+        }
+
+        @Override
+        public String toString() {
+            return largeValue == null ? Long.toString(value) : largeValue.toString();
+        }
     }
 }

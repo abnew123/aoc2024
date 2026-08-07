@@ -1,11 +1,6 @@
 .idea/
 data/
-/out/*
-!out/production
-/out/production/*
-!out/production/aoc2024
-/out/production/aoc2024/*
-!out/production/aoc2024/src
+/out/
 
 /src/meta/MasterSolver.java
 

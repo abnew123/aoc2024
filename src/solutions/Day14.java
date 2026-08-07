@@ -1,145 +1,192 @@
 package src.solutions;
+
 import src.meta.DayTemplate;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class Day14 extends DayTemplate {
+
+    private static final int WIDTH = 101;
+    private static final int HEIGHT = 103;
+    private static final int DENSITY_THRESHOLD = 30;
+
+    @Override
+    public String[] fullSolve(Scanner in) {
+        Robots robots = parse(in);
+        return new String[]{
+                safetyFactor(robots, WIDTH, HEIGHT, 100) + "",
+                treeTime(robots, WIDTH, HEIGHT, DENSITY_THRESHOLD) + ""
+        };
+    }
+
+    @Override
     public String solve(boolean part1, Scanner in) {
-        long answer = 0;
-        List<Robot> robots = new ArrayList<>();
-        while(in.hasNext()){
-            String line = in.nextLine();
-            String[] parts = line.split(" |,|=");
-            robots.add(new Robot(Integer.parseInt(parts[1]),Integer.parseInt(parts[2]), Integer.parseInt(parts[4]), Integer.parseInt(parts[5])));
-        }
+        Robots robots = parse(in);
+        return (part1
+                ? safetyFactor(robots, WIDTH, HEIGHT, 100)
+                : treeTime(robots, WIDTH, HEIGHT, DENSITY_THRESHOLD)) + "";
+    }
 
-        if(part1){
-            int xlimit = 101;
-            int ylimit = 103;
-            for(Robot robot: robots){
-                robot.updateBatch(xlimit, ylimit, 100);
+    private static String slurp(Scanner in) {
+        return in.useDelimiter("\\A").hasNext() ? in.next() : "";
+    }
+
+    private static Robots parse(Scanner in) {
+        String input = slurp(in);
+        int[] x = new int[512];
+        int[] y = new int[512];
+        int[] vx = new int[512];
+        int[] vy = new int[512];
+        int count = 0;
+        int length = input.length();
+        int position = 0;
+        while (position < length) {
+            int lineStart = position;
+            int lineEnd = position;
+            while (lineEnd < length) {
+                char c = input.charAt(lineEnd);
+                if (c == '\n' || c == '\r') {
+                    break;
+                }
+                lineEnd++;
             }
-
-            int[] quadrants = new int[]{0,0,0,0};
-            for(Robot robot: robots){
-                if(robot.x%xlimit > (xlimit - 1)/2){
-                    if(robot.y%ylimit > (ylimit - 1)/2){
-                        quadrants[0]++;
+            if (lineEnd < length) {
+                position = input.charAt(lineEnd) == '\r' && lineEnd + 1 < length
+                        && input.charAt(lineEnd + 1) == '\n'
+                        ? lineEnd + 2 : lineEnd + 1;
+            } else {
+                position = length;
+            }
+            if (lineEnd == lineStart) {
+                continue;
+            }
+            if (count == x.length) {
+                int size = x.length * 2;
+                x = Arrays.copyOf(x, size);
+                y = Arrays.copyOf(y, size);
+                vx = Arrays.copyOf(vx, size);
+                vy = Arrays.copyOf(vy, size);
+            }
+            int[] values = new int[4];
+            int valueCount = 0;
+            for (int index = lineStart; index < lineEnd && valueCount < values.length;) {
+                char current = input.charAt(index);
+                if (current == '-' || current >= '0' && current <= '9') {
+                    int sign = 1;
+                    if (current == '-') {
+                        sign = -1;
+                        index++;
                     }
-                    if(robot.y%ylimit < (ylimit - 1)/2){
-                        quadrants[1]++;
+                    int value = 0;
+                    while (index < lineEnd) {
+                        char digit = input.charAt(index);
+                        if (digit < '0' || digit > '9') {
+                            break;
+                        }
+                        value = value * 10 + digit - '0';
+                        index++;
                     }
-                }
-                if(robot.x%xlimit < (xlimit - 1)/2){
-                    if(robot.y%ylimit > (ylimit - 1)/2){
-                        quadrants[2]++;
-                    }
-                    if(robot.y%ylimit < (ylimit - 1)/2){
-                        quadrants[3]++;
-                    }
+                    values[valueCount++] = sign * value;
+                } else {
+                    index++;
                 }
             }
-            answer = (long)quadrants[0] * quadrants[1]* quadrants[2] * quadrants[3];
+            if (valueCount != 4) {
+                throw new IllegalArgumentException(
+                        "Malformed robot: " + input.substring(lineStart, lineEnd));
+            }
+            x[count] = values[0];
+            y[count] = values[1];
+            vx[count] = values[2];
+            vy[count] = values[3];
+            count++;
         }
-        else{
-            int xlimit = 101;
-            int ylimit = 103;
-            int counter = 1;
-            int increment = 1;
-            while(counter < 103 * 101){
-                for(Robot robot: robots){
-                    robot.updateBatch(xlimit, ylimit, increment);
-                }
-                boolean boxX = boxX(robots);
-                boolean boxY = boxY(robots);
-                if(boxX && boxY){
-                    return counter + "";
-                }
-                if(boxX(robots)){
-                    increment = 101;
-                }
-                counter += increment;
+        return new Robots(
+                Arrays.copyOf(x, count),
+                Arrays.copyOf(y, count),
+                Arrays.copyOf(vx, count),
+                Arrays.copyOf(vy, count));
+    }
 
+    private static long safetyFactor(Robots robots, int width, int height, int time) {
+        int middleX = width / 2;
+        int middleY = height / 2;
+        int[] quadrants = new int[4];
+        for (int robot = 0; robot < robots.x.length; robot++) {
+            int x = Math.floorMod(robots.x[robot] + robots.vx[robot] * time, width);
+            int y = Math.floorMod(robots.y[robot] + robots.vy[robot] * time, height);
+            if (x == middleX || y == middleY) {
+                continue;
+            }
+            int quadrant = (x > middleX ? 0 : 2) + (y < middleY ? 1 : 0);
+            quadrants[quadrant]++;
+        }
+        return (long) quadrants[0] * quadrants[1] * quadrants[2] * quadrants[3];
+    }
+
+    private static int treeTime(Robots robots, int width, int height, int threshold) {
+        boolean[] denseX = denseResidues(robots.x, robots.vx, width, threshold);
+        boolean[] denseY = denseResidues(robots.y, robots.vy, height, threshold);
+        int inverse = modularInverse(width, height);
+        int period = width * height;
+        int best = Integer.MAX_VALUE;
+        for (int xResidue = 0; xResidue < width; xResidue++) {
+            if (!denseX[xResidue]) {
+                continue;
+            }
+            for (int yResidue = 0; yResidue < height; yResidue++) {
+                if (!denseY[yResidue]) {
+                    continue;
+                }
+                int multiplier = Math.floorMod((yResidue - xResidue) * inverse, height);
+                int time = xResidue + width * multiplier;
+                if (time == 0) {
+                    time = period;
+                }
+                best = Math.min(best, time);
             }
         }
-        return answer + "";
+        return best == Integer.MAX_VALUE ? 0 : best;
     }
 
-//    private boolean box(List<Robot> robots){
-//        HashMap<Integer, Integer> mapX = new HashMap<>();
-//        HashMap<Integer, Integer> mapY = new HashMap<>();
-//        for(Robot robot: robots){
-//            mapX.merge(robot.x, 1, Integer::sum);
-//            mapY.merge(robot.y, 1, Integer::sum);
-//        }
-//
-//        boolean xbox = false;
-//        boolean ybox = false;
-//
-//        for(int key: mapX.keySet()){
-//            if(mapX.get(key) > 30){
-//                xbox = true;
-//            }
-//        }
-//        for(int key: mapY.keySet()){
-//            if(mapY.get(key) > 30){
-//                ybox = true;
-//            }
-//        }
-//        return xbox && ybox;
-//    }
-
-    private boolean boxX(List<Robot> robots){
-        HashMap<Integer, Integer> mapX = new HashMap<>();
-        for(Robot robot: robots){
-            mapX.merge(robot.x, 1, Integer::sum);
-        }
-        for(int key: mapX.keySet()){
-            if(mapX.get(key) > 30){
-                return true;
+    private static boolean[] denseResidues(int[] positions, int[] velocities,
+                                           int modulus, int threshold) {
+        boolean[] dense = new boolean[modulus];
+        int[] counts = new int[modulus];
+        for (int time = 0; time < modulus; time++) {
+            Arrays.fill(counts, 0);
+            for (int robot = 0; robot < positions.length; robot++) {
+                int position = Math.floorMod(positions[robot] + velocities[robot] * time, modulus);
+                if (++counts[position] > threshold) {
+                    dense[time] = true;
+                    break;
+                }
             }
         }
-        return false;
+        return dense;
     }
 
-    private boolean boxY(List<Robot> robots){
-        HashMap<Integer, Integer> mapY = new HashMap<>();
-        for(Robot robot: robots){
-            mapY.merge(robot.y, 1, Integer::sum);
+    private static int modularInverse(int value, int modulus) {
+        int oldRemainder = value;
+        int remainder = modulus;
+        int oldCoefficient = 1;
+        int coefficient = 0;
+        while (remainder != 0) {
+            int quotient = oldRemainder / remainder;
+            int nextRemainder = oldRemainder - quotient * remainder;
+            oldRemainder = remainder;
+            remainder = nextRemainder;
+            int nextCoefficient = oldCoefficient - quotient * coefficient;
+            oldCoefficient = coefficient;
+            coefficient = nextCoefficient;
         }
-        for(int key: mapY.keySet()){
-            if(mapY.get(key) > 30){
-                return true;
-            }
+        if (oldRemainder != 1) {
+            throw new IllegalArgumentException("Grid dimensions must be coprime");
         }
-        return false;
-    }
-}
-
-class Robot{
-    int x;
-    int y;
-    int vx;
-    int vy;
-
-    public Robot(int x, int y, int vx, int vy){
-        this.x = x;
-        this.y = y;
-        this.vx = vx;
-        this.vy = vy;
+        return Math.floorMod(oldCoefficient, modulus);
     }
 
-    public void update(int xlimit, int ylimit){
-        x += vx;
-        y += vy;
-        x = (x%xlimit + xlimit)%xlimit;
-        y = (y%ylimit + ylimit)%ylimit;
-    }
-
-    public void updateBatch(int xlimit, int ylimit, int numUpdate){
-        x += vx * numUpdate;
-        y += vy * numUpdate;
-        x = (x%xlimit + xlimit)%xlimit;
-        y = (y%ylimit + ylimit)%ylimit;
+    private record Robots(int[] x, int[] y, int[] vx, int[] vy) {
     }
 }

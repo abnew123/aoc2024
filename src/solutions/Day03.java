@@ -3,41 +3,92 @@ package src.solutions;
 import src.meta.DayTemplate;
 
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Day03 extends DayTemplate {
 
     public String solve(boolean part1, Scanner in) {
-        long answer = 0;
-        StringBuilder input = new StringBuilder();
-        while (in.hasNext()) {
-            input.append(in.nextLine());
-        }
-
-        if (part1) {
-            answer += multiply(input.toString());
-        } else {
-            input.insert(0, "do()");
-            input.append("don't()");
-            Pattern pattern = Pattern.compile("do\\(\\)(.*?)don't\\(\\)");
-            Matcher matcher = pattern.matcher(input);
-            while (matcher.find()) {
-                answer += multiply(matcher.group(1));
-            }
-        }
-        return answer + "";
+        long[] answers = calculate(readInput(in));
+        return answers[part1 ? 0 : 1] + "";
     }
 
-    private int multiply(String line) {
-        Pattern pattern = Pattern.compile("mul\\((\\d+),(\\d+)\\)");
-        Matcher matcher = pattern.matcher(line);
-        int sum = 0;
-        while (matcher.find()) {
-            int factor1 = Integer.parseInt(matcher.group(1));
-            int factor2 = Integer.parseInt(matcher.group(2));
-            sum += factor1 * factor2;
+    @Override
+    public String[] fullSolve(Scanner in) {
+        long[] answers = calculate(readInput(in));
+        return new String[]{answers[0] + "", answers[1] + ""};
+    }
+
+    private String readInput(Scanner in) {
+        String raw = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        char[] joined = new char[raw.length()];
+        int length = 0;
+        for (int i = 0; i < raw.length(); i++) {
+            char c = raw.charAt(i);
+            if (c == '\n' || c == '\r' || c == 0x2028 || c == 0x2029 || c == 0x0085) {
+                continue;
+            }
+            joined[length++] = c;
         }
-        return sum;
+        return new String(joined, 0, length);
+    }
+
+    private long[] calculate(String input) {
+        long part1 = 0;
+        long part2 = 0;
+        boolean enabled = true;
+        for (int index = 0; index < input.length(); index++) {
+            if (input.startsWith("do()", index)) {
+                enabled = true;
+                index += 3;
+                continue;
+            }
+            if (input.startsWith("don't()", index)) {
+                enabled = false;
+                index += 6;
+                continue;
+            }
+            if (!input.startsWith("mul(", index)) {
+                continue;
+            }
+
+            int cursor = index + 4;
+            int first = 0;
+            int firstDigits = 0;
+            while (cursor < input.length() && firstDigits < 3) {
+                char digit = input.charAt(cursor);
+                if (digit < '0' || digit > '9') {
+                    break;
+                }
+                first = first * 10 + digit - '0';
+                firstDigits++;
+                cursor++;
+            }
+            if (firstDigits == 0 || cursor >= input.length() || input.charAt(cursor) != ',') {
+                continue;
+            }
+
+            cursor++;
+            int second = 0;
+            int secondDigits = 0;
+            while (cursor < input.length() && secondDigits < 3) {
+                char digit = input.charAt(cursor);
+                if (digit < '0' || digit > '9') {
+                    break;
+                }
+                second = second * 10 + digit - '0';
+                secondDigits++;
+                cursor++;
+            }
+            if (secondDigits == 0 || cursor >= input.length() || input.charAt(cursor) != ')') {
+                continue;
+            }
+
+            long product = (long) first * second;
+            part1 += product;
+            if (enabled) {
+                part2 += product;
+            }
+            index = cursor;
+        }
+        return new long[]{part1, part2};
     }
 }
