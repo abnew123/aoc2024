@@ -26,8 +26,17 @@ public class Day07 extends DayTemplate {
     private Answers analyze(Scanner in) {
         ExactTotal partOne = new ExactTotal();
         ExactTotal partTwo = new ExactTotal();
-        while (in.hasNextLine()) {
-            String line = in.nextLine();
+        String raw = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int rawLength = raw.length();
+        int rawIndex = 0;
+        while (rawIndex < rawLength) {
+            int lineStart = rawIndex;
+            while (rawIndex < rawLength
+                    && raw.charAt(rawIndex) != '\n' && raw.charAt(rawIndex) != '\r') {
+                rawIndex++;
+            }
+            String line = raw.substring(lineStart, rawIndex);
+            rawIndex = nextLineStart(raw, rawIndex);
             if (line.isBlank()) {
                 continue;
             }
@@ -54,6 +63,17 @@ public class Day07 extends DayTemplate {
             }
         }
         return new Answers(partOne.toString(), partTwo.toString());
+    }
+
+    private int nextLineStart(String raw, int separatorIndex) {
+        if (separatorIndex >= raw.length()) {
+            return separatorIndex;
+        }
+        if (raw.charAt(separatorIndex) == '\r' && separatorIndex + 1 < raw.length()
+                && raw.charAt(separatorIndex + 1) == '\n') {
+            return separatorIndex + 2;
+        }
+        return separatorIndex + 1;
     }
 
     private int reachable(long target, long[] values, long[] divisors, int index) {

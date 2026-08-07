@@ -30,9 +30,24 @@ public class Day25 extends DayTemplate {
         int rows = 0;
         boolean lock = false;
 
-        while (in.hasNextLine()) {
-            String line = in.nextLine();
-            if (line.isEmpty()) {
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int length = input.length();
+        int position = 0;
+        while (position < length) {
+            int lineStart = position;
+            int lineEnd = position;
+            while (lineEnd < length
+                    && input.charAt(lineEnd) != '\n' && input.charAt(lineEnd) != '\r') {
+                lineEnd++;
+            }
+            position = lineEnd;
+            if (position < length && input.charAt(position) == '\r') {
+                position++;
+            }
+            if (position < length && input.charAt(position) == '\n') {
+                position++;
+            }
+            if (lineEnd == lineStart) {
                 if (rows > 0) {
                     addProfile(lockFrequency, keyFrequency, filled, rows, lock);
                     Arrays.fill(filled, 0);
@@ -40,14 +55,14 @@ public class Day25 extends DayTemplate {
                 }
                 continue;
             }
-            if (line.length() != WIDTH || rows >= HEIGHT) {
+            if (lineEnd - lineStart != WIDTH || rows >= HEIGHT) {
                 throw new IllegalArgumentException("invalid lock or key schematic");
             }
             if (rows == 0) {
-                lock = line.charAt(0) == '#';
+                lock = input.charAt(lineStart) == '#';
             }
             for (int col = 0; col < WIDTH; col++) {
-                char tile = line.charAt(col);
+                char tile = input.charAt(lineStart + col);
                 if (tile == '#') {
                     filled[col]++;
                 } else if (tile != '.') {

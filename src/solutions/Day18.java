@@ -37,18 +37,41 @@ public class Day18 extends DayTemplate {
         if (gridSize <= 0) {
             throw new IllegalArgumentException("Grid size must be positive");
         }
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int length = input.length();
         int[] bytes = new int[128];
         int size = 0;
-        while (in.hasNextLine()) {
-            String line = in.nextLine();
-            int comma = line.indexOf(',');
-            if (comma <= 0 || comma == line.length() - 1 || line.indexOf(',', comma + 1) >= 0) {
-                throw new IllegalArgumentException("Invalid byte coordinate: " + line);
+        int position = 0;
+        while (position < length) {
+            char current = input.charAt(position);
+            if (current == '\n' || current == '\r') {
+                position++;
+                continue;
             }
-            int x = Integer.parseInt(line.substring(0, comma));
-            int y = Integer.parseInt(line.substring(comma + 1));
+            int x = 0;
+            int digits = 0;
+            while (position < length && (current = input.charAt(position)) >= '0' && current <= '9') {
+                x = x * 10 + (current - '0');
+                position++;
+                digits++;
+            }
+            if (digits == 0 || position >= length || input.charAt(position) != ',') {
+                throw new IllegalArgumentException("Invalid byte coordinate");
+            }
+            position++;
+            int y = 0;
+            digits = 0;
+            while (position < length && (current = input.charAt(position)) >= '0' && current <= '9') {
+                y = y * 10 + (current - '0');
+                position++;
+                digits++;
+            }
+            if (digits == 0 || (position < length
+                    && input.charAt(position) != '\n' && input.charAt(position) != '\r')) {
+                throw new IllegalArgumentException("Invalid byte coordinate");
+            }
             if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) {
-                throw new IllegalArgumentException("Byte coordinate outside grid: " + line);
+                throw new IllegalArgumentException("Byte coordinate outside grid");
             }
             if (size == bytes.length) {
                 bytes = Arrays.copyOf(bytes, size * 2);

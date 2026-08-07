@@ -28,33 +28,60 @@ public class Day20 extends DayTemplate {
     }
 
     private ParsedInput parse(Scanner in) {
-        List<String> lines = new ArrayList<>();
-        while (in.hasNext()) {
-            String line = in.nextLine();
-            lines.add(line);
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int length = input.length();
+        cols = 0;
+        while (cols < length && input.charAt(cols) != '\n' && input.charAt(cols) != '\r') {
+            cols++;
         }
-        rows = lines.size();
-        cols = lines.get(0).length();
+        rows = 0;
+        int position = 0;
+        while (position < length) {
+            char current = input.charAt(position);
+            if (current == '\n' || current == '\r') {
+                position++;
+                continue;
+            }
+            int lineEnd = position;
+            while (lineEnd < length
+                    && input.charAt(lineEnd) != '\n' && input.charAt(lineEnd) != '\r') {
+                lineEnd++;
+            }
+            if (lineEnd - position != cols) {
+                throw new IllegalArgumentException("Grid rows must have equal length");
+            }
+            rows++;
+            position = lineEnd;
+        }
         walls = new boolean[rows * cols];
         int startX = -1;
         int startY = -1;
         int endX = -1;
         int endY = -1;
-        for(int i = 0 ; i < rows; i++){
-            for(int j = 0; j < cols; j++){
-                char c = lines.get(i).charAt(j);
-                if(c == 'S'){
-                    startX = i;
-                    startY = j;
+        position = 0;
+        int row = 0;
+        while (position < length) {
+            char current = input.charAt(position);
+            if (current == '\n' || current == '\r') {
+                position++;
+                continue;
+            }
+            for (int col = 0; col < cols; col++) {
+                char c = input.charAt(position + col);
+                if (c == 'S') {
+                    startX = row;
+                    startY = col;
                 }
-                if(c == 'E'){
-                    endX = i;
-                    endY = j;
+                if (c == 'E') {
+                    endX = row;
+                    endY = col;
                 }
-                if(c == '#'){
-                    walls[toIndex(i, j)] = true;
+                if (c == '#') {
+                    walls[toIndex(row, col)] = true;
                 }
             }
+            row++;
+            position += cols;
         }
 
         int start = toIndex(startX, startY);

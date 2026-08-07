@@ -3,9 +3,7 @@ package src.solutions;
 import src.meta.DayTemplate;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 public class Day21 extends DayTemplate {
@@ -41,9 +39,24 @@ public class Day21 extends DayTemplate {
     }
 
     private String[] parse(Scanner in) {
-        List<String> codes = new ArrayList<>();
-        while (in.hasNextLine()) {
-            String code = in.nextLine().trim();
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int length = input.length();
+        String[] codes = new String[8];
+        int count = 0;
+        int position = 0;
+        while (position < length) {
+            char current = input.charAt(position);
+            if (current == '\n' || current == '\r') {
+                position++;
+                continue;
+            }
+            int lineEnd = position;
+            while (lineEnd < length
+                    && input.charAt(lineEnd) != '\n' && input.charAt(lineEnd) != '\r') {
+                lineEnd++;
+            }
+            String code = input.substring(position, lineEnd).trim();
+            position = lineEnd;
             if (code.isEmpty()) {
                 continue;
             }
@@ -55,12 +68,15 @@ public class Day21 extends DayTemplate {
                     throw new IllegalArgumentException("Invalid numeric code: " + code);
                 }
             }
-            codes.add(code);
+            if (count == codes.length) {
+                codes = Arrays.copyOf(codes, count * 2);
+            }
+            codes[count++] = code;
         }
-        if (codes.isEmpty()) {
+        if (count == 0) {
             throw new IllegalArgumentException("Missing door codes");
         }
-        return codes.toArray(String[]::new);
+        return Arrays.copyOf(codes, count);
     }
 
     private long[][] numericCosts(int depth) {

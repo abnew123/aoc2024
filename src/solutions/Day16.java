@@ -2,9 +2,7 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 public class Day16 extends DayTemplate {
@@ -36,21 +34,74 @@ public class Day16 extends DayTemplate {
         return countBestPathTiles(fromStart, input.exit(), bestScore) + "";
     }
 
+    private static String slurp(Scanner in) {
+        return in.useDelimiter("\\A").hasNext() ? in.next() : "";
+    }
+
+    private static int countLines(String input) {
+        int length = input.length();
+        int lines = 0;
+        int position = 0;
+        while (position < length) {
+            while (position < length) {
+                char c = input.charAt(position);
+                if (c == '\n' || c == '\r') {
+                    break;
+                }
+                position++;
+            }
+            if (position < length) {
+                position = input.charAt(position) == '\r' && position + 1 < length
+                        && input.charAt(position + 1) == '\n'
+                        ? position + 2 : position + 1;
+            }
+            lines++;
+        }
+        return lines;
+    }
+
     private ParsedInput parse(Scanner in) {
-        List<String> lines = new ArrayList<>();
-        while (in.hasNextLine()) {
-            lines.add(in.nextLine());
+        String input = slurp(in);
+        int length = input.length();
+        if (length == 0) {
+            throw new IllegalArgumentException("Missing maze");
         }
 
-        rows = lines.size();
-        cols = lines.get(0).length();
+        rows = countLines(input);
+        cols = 0;
+        while (cols < length) {
+            char first = input.charAt(cols);
+            if (first == '\n' || first == '\r') {
+                break;
+            }
+            cols++;
+        }
         walls = new boolean[rows * cols];
         int start = -1;
         int exit = -1;
+        int position = 0;
         for (int row = 0; row < rows; row++) {
-            String line = lines.get(row);
+            int lineStart = position;
+            int lineEnd = position;
+            while (lineEnd < length) {
+                char c = input.charAt(lineEnd);
+                if (c == '\n' || c == '\r') {
+                    break;
+                }
+                lineEnd++;
+            }
+            if (lineEnd < length) {
+                position = input.charAt(lineEnd) == '\r' && lineEnd + 1 < length
+                        && input.charAt(lineEnd + 1) == '\n'
+                        ? lineEnd + 2 : lineEnd + 1;
+            } else {
+                position = length;
+            }
+            if (lineEnd - lineStart < cols) {
+                throw new IllegalArgumentException("Maze rows must span the full width");
+            }
             for (int col = 0; col < cols; col++) {
-                char c = line.charAt(col);
+                char c = input.charAt(lineStart + col);
                 int cell = row * cols + col;
                 if (c == '#') {
                     walls[cell] = true;

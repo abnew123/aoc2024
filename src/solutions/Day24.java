@@ -5,6 +5,7 @@ import src.meta.DayTemplate;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,8 +38,23 @@ public class Day24 extends DayTemplate {
         Map<String, Integer> feedMasks = new HashMap<>();
         Set<String> outputs = new HashSet<>();
         boolean gateSection = false;
-        while (in.hasNextLine()) {
-            String line = in.nextLine().trim();
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int inputLength = input.length();
+        int position = 0;
+        while (position < inputLength) {
+            int lineEnd = position;
+            while (lineEnd < inputLength
+                    && input.charAt(lineEnd) != '\n' && input.charAt(lineEnd) != '\r') {
+                lineEnd++;
+            }
+            String line = input.substring(position, lineEnd).trim();
+            position = lineEnd;
+            if (position < inputLength && input.charAt(position) == '\r') {
+                position++;
+            }
+            if (position < inputLength && input.charAt(position) == '\n') {
+                position++;
+            }
             if (line.isEmpty()) {
                 gateSection = true;
                 continue;
@@ -61,7 +77,7 @@ public class Day24 extends DayTemplate {
                 continue;
             }
 
-            String[] parts = line.split("\\s+");
+            String[] parts = splitTokens(line);
             if (parts.length != 5 || !parts[3].equals("->")) {
                 throw new IllegalArgumentException("Malformed gate: " + line);
             }
@@ -80,8 +96,8 @@ public class Day24 extends DayTemplate {
             if (!parts[0].equals(parts[2])) {
                 addConsumer(consumers, parts[2], index);
             }
-            feedMasks.merge(parts[0], operation, (left, right) -> left | right);
-            feedMasks.merge(parts[2], operation, (left, right) -> left | right);
+            mergeFeedMask(feedMasks, parts[0], operation);
+            mergeFeedMask(feedMasks, parts[2], operation);
         }
         if (gates.isEmpty()) {
             throw new IllegalArgumentException("Circuit has no gates");
@@ -89,8 +105,43 @@ public class Day24 extends DayTemplate {
         return new Circuit(Map.copyOf(initial), List.copyOf(gates), consumers, feedMasks);
     }
 
+    private String[] splitTokens(String line) {
+        String[] parts = new String[5];
+        int count = 0;
+        int position = 0;
+        int length = line.length();
+        while (position < length) {
+            while (position < length && line.charAt(position) <= ' ') {
+                position++;
+            }
+            if (position >= length) {
+                break;
+            }
+            int tokenEnd = position;
+            while (tokenEnd < length && line.charAt(tokenEnd) > ' ') {
+                tokenEnd++;
+            }
+            if (count == parts.length) {
+                parts = Arrays.copyOf(parts, count * 2);
+            }
+            parts[count++] = line.substring(position, tokenEnd);
+            position = tokenEnd;
+        }
+        return count == parts.length ? parts : Arrays.copyOf(parts, count);
+    }
+
+    private void mergeFeedMask(Map<String, Integer> feedMasks, String wire, int operation) {
+        Integer existing = feedMasks.get(wire);
+        feedMasks.put(wire, existing == null ? operation : existing | operation);
+    }
+
     private void addConsumer(Map<String, List<Integer>> consumers, String wire, int gate) {
-        consumers.computeIfAbsent(wire, ignored -> new ArrayList<>()).add(gate);
+        List<Integer> list = consumers.get(wire);
+        if (list == null) {
+            list = new ArrayList<>();
+            consumers.put(wire, list);
+        }
+        list.add(gate);
     }
 
     private String evaluate(Circuit circuit) {
@@ -150,10 +201,13 @@ public class Day24 extends DayTemplate {
     }
 
     private String swappedOutputs(Circuit circuit) {
-        int finalZ = circuit.gates().stream()
-                .mapToInt(gate -> wireIndex(gate.output(), 'z'))
-                .max()
-                .orElseThrow();
+        int finalZ = Integer.MIN_VALUE;
+        for (Gate gate : circuit.gates()) {
+            int outputZ = wireIndex(gate.output(), 'z');
+            if (outputZ > finalZ) {
+                finalZ = outputZ;
+            }
+        }
         Set<String> bad = new TreeSet<>();
         for (Gate gate : circuit.gates()) {
             boolean firstInputBit = wireIndex(gate.left(), 'x') == 0

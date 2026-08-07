@@ -7,8 +7,9 @@ import java.util.*;
 public class Day23 extends DayTemplate {
 
     private final Map<String, Integer> nameToIndex = new HashMap<>();
-    private final List<String> names = new ArrayList<>();
-    private final List<BitSet> connections = new ArrayList<>();
+    private String[] names;
+    private BitSet[] connections;
+    private int nodeCount;
     private boolean[] startsWithT;
     private BitSet bestClique;
     private int bestCliqueSize;
@@ -32,24 +33,41 @@ public class Day23 extends DayTemplate {
 
     private void readConnections(Scanner in) {
         nameToIndex.clear();
-        names.clear();
-        connections.clear();
+        names = new String[128];
+        connections = new BitSet[128];
+        nodeCount = 0;
 
-        while (in.hasNextLine()) {
-            String line = in.nextLine();
-            if (line.isEmpty()) {
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int length = input.length();
+        int position = 0;
+        while (position < length) {
+            char current = input.charAt(position);
+            if (current == '\n' || current == '\r') {
+                position++;
                 continue;
             }
-            int split = line.indexOf('-');
-            int first = indexFor(line.substring(0, split));
-            int second = indexFor(line.substring(split + 1));
-            connections.get(first).set(second);
-            connections.get(second).set(first);
+            int lineEnd = position;
+            int dash = -1;
+            while (lineEnd < length
+                    && (current = input.charAt(lineEnd)) != '\n' && current != '\r') {
+                if (current == '-' && dash < 0) {
+                    dash = lineEnd;
+                }
+                lineEnd++;
+            }
+            if (dash < 0) {
+                throw new IllegalArgumentException("Connection must contain a dash");
+            }
+            int first = indexFor(input.substring(position, dash));
+            int second = indexFor(input.substring(dash + 1, lineEnd));
+            connections[first].set(second);
+            connections[second].set(first);
+            position = lineEnd;
         }
 
-        startsWithT = new boolean[names.size()];
-        for (int i = 0; i < names.size(); i++) {
-            startsWithT[i] = names.get(i).startsWith("t");
+        startsWithT = new boolean[nodeCount];
+        for (int i = 0; i < nodeCount; i++) {
+            startsWithT[i] = names[i].startsWith("t");
         }
     }
 
@@ -58,20 +76,25 @@ public class Day23 extends DayTemplate {
         if (existing != null) {
             return existing;
         }
-        int index = names.size();
+        int index = nodeCount;
         nameToIndex.put(name, index);
-        names.add(name);
-        connections.add(new BitSet());
+        if (index == names.length) {
+            names = Arrays.copyOf(names, index * 2);
+            connections = Arrays.copyOf(connections, index * 2);
+        }
+        names[index] = name;
+        connections[index] = new BitSet();
+        nodeCount++;
         return index;
     }
 
     private long countTrianglesWithT() {
         long total = 0;
-        for (int first = 0; first < names.size(); first++) {
-            BitSet firstConnections = connections.get(first);
+        for (int first = 0; first < nodeCount; first++) {
+            BitSet firstConnections = connections[first];
             for (int second = firstConnections.nextSetBit(first + 1); second >= 0; second = firstConnections.nextSetBit(second + 1)) {
                 BitSet common = (BitSet) firstConnections.clone();
-                common.and(connections.get(second));
+                common.and(connections[second]);
                 for (int third = common.nextSetBit(second + 1); third >= 0; third = common.nextSetBit(third + 1)) {
                     if (startsWithT[first] || startsWithT[second] || startsWithT[third]) {
                         total++;
@@ -86,9 +109,9 @@ public class Day23 extends DayTemplate {
         bestClique = new BitSet();
         bestCliqueSize = 0;
 
-        BitSet candidates = new BitSet(names.size());
-        candidates.set(0, names.size());
-        bronKerbosch(new BitSet(names.size()), candidates, new BitSet(names.size()));
+        BitSet candidates = new BitSet(nodeCount);
+        candidates.set(0, nodeCount);
+        bronKerbosch(new BitSet(nodeCount), candidates, new BitSet(nodeCount));
     }
 
     private void bronKerbosch(BitSet required, BitSet candidates, BitSet excluded) {
@@ -107,7 +130,7 @@ public class Day23 extends DayTemplate {
         BitSet toVisit = (BitSet) candidates.clone();
         int pivot = choosePivot(candidates, excluded);
         if (pivot >= 0) {
-            toVisit.andNot(connections.get(pivot));
+            toVisit.andNot(connections[pivot]);
         }
 
         for (int vertex = toVisit.nextSetBit(0); vertex >= 0; vertex = toVisit.nextSetBit(vertex + 1)) {
@@ -115,10 +138,10 @@ public class Day23 extends DayTemplate {
             nextRequired.set(vertex);
 
             BitSet nextCandidates = (BitSet) candidates.clone();
-            nextCandidates.and(connections.get(vertex));
+            nextCandidates.and(connections[vertex]);
 
             BitSet nextExcluded = (BitSet) excluded.clone();
-            nextExcluded.and(connections.get(vertex));
+            nextExcluded.and(connections[vertex]);
 
             bronKerbosch(nextRequired, nextCandidates, nextExcluded);
 
@@ -137,7 +160,7 @@ public class Day23 extends DayTemplate {
         int bestPivot = -1;
         int bestReach = -1;
         for (int vertex = choices.nextSetBit(0); vertex >= 0; vertex = choices.nextSetBit(vertex + 1)) {
-            BitSet reachableCandidates = (BitSet) connections.get(vertex).clone();
+            BitSet reachableCandidates = (BitSet) connections[vertex].clone();
             reachableCandidates.and(candidates);
             int reach = reachableCandidates.cardinality();
             if (reach > bestReach) {
@@ -149,11 +172,19 @@ public class Day23 extends DayTemplate {
     }
 
     private String cliqueToString(BitSet clique) {
-        List<String> cliqueNames = new ArrayList<>(clique.cardinality());
+        String[] cliqueNames = new String[clique.cardinality()];
+        int count = 0;
         for (int index = clique.nextSetBit(0); index >= 0; index = clique.nextSetBit(index + 1)) {
-            cliqueNames.add(names.get(index));
+            cliqueNames[count++] = names[index];
         }
-        Collections.sort(cliqueNames);
-        return String.join(",", cliqueNames);
+        Arrays.sort(cliqueNames);
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < cliqueNames.length; i++) {
+            if (i > 0) {
+                result.append(',');
+            }
+            result.append(cliqueNames[i]);
+        }
+        return result.toString();
     }
 }

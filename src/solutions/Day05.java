@@ -2,14 +2,16 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 public class Day05 extends DayTemplate {
+
+    private int[] idKeys;
+    private int[] idValues;
+    private int[] pageValues;
+    private int pageCount;
+
     @Override
     public String solve(boolean part1, Scanner in) {
         Answers answers = solve(parse(in));
@@ -23,13 +25,26 @@ public class Day05 extends DayTemplate {
     }
 
     private ParsedInput parse(Scanner in) {
-        Map<Integer, Integer> ids = new HashMap<>();
-        List<Integer> pageValues = new ArrayList<>();
-        List<int[]> rules = new ArrayList<>();
-        List<int[]> updates = new ArrayList<>();
+        String raw = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        idKeys = new int[64];
+        idValues = new int[64];
+        Arrays.fill(idValues, -1);
+        pageValues = new int[16];
+        pageCount = 0;
+        int[][] rules = new int[16][];
+        int ruleCount = 0;
+        int[][] updates = new int[16][];
+        int updateCount = 0;
 
-        while (in.hasNextLine()) {
-            String line = in.nextLine();
+        int length = raw.length();
+        int index = 0;
+        while (index < length) {
+            int start = index;
+            while (index < length && raw.charAt(index) != '\n' && raw.charAt(index) != '\r') {
+                index++;
+            }
+            String line = raw.substring(start, index);
+            index = nextLineStart(raw, index);
             if (line.isBlank()) {
                 continue;
             }
@@ -39,19 +54,23 @@ public class Day05 extends DayTemplate {
                         || line.indexOf('|', ruleSeparator + 1) >= 0 || line.indexOf(',') >= 0) {
                     throw new IllegalArgumentException("Invalid ordering rule: " + line);
                 }
-                int first = pageId(parsePage(line, 0, ruleSeparator), ids, pageValues);
-                int second = pageId(parsePage(line, ruleSeparator + 1, line.length()), ids, pageValues);
-                rules.add(new int[]{first, second});
+                int first = pageId(parsePage(line, 0, ruleSeparator));
+                int second = pageId(parsePage(line, ruleSeparator + 1, line.length()));
+                if (ruleCount == rules.length) {
+                    rules = Arrays.copyOf(rules, ruleCount * 2);
+                }
+                rules[ruleCount++] = new int[]{first, second};
             } else {
-                updates.add(parseUpdate(line, ids, pageValues));
+                if (updateCount == updates.length) {
+                    updates = Arrays.copyOf(updates, updateCount * 2);
+                }
+                updates[updateCount++] = parseUpdate(line);
             }
         }
 
-        int[] values = new int[pageValues.size()];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = pageValues.get(i);
-        }
-        int[][] ruleArray = rules.toArray(int[][]::new);
+        int[] values = Arrays.copyOf(pageValues, pageCount);
+        int[][] ruleArray = Arrays.copyOf(rules, ruleCount);
+        int[][] updateArray = Arrays.copyOf(updates, updateCount);
         int[] successorCounts = new int[values.length];
         for (int[] rule : ruleArray) {
             successorCounts[rule[0]]++;
@@ -64,10 +83,21 @@ public class Day05 extends DayTemplate {
         for (int[] rule : ruleArray) {
             successors[rule[0]][successorCounts[rule[0]]++] = rule[1];
         }
-        return new ParsedInput(values, ruleArray, updates.toArray(int[][]::new), successors);
+        return new ParsedInput(values, ruleArray, updateArray, successors);
     }
 
-    private int[] parseUpdate(String line, Map<Integer, Integer> ids, List<Integer> pageValues) {
+    private int nextLineStart(String raw, int separatorIndex) {
+        if (separatorIndex >= raw.length()) {
+            return separatorIndex;
+        }
+        if (raw.charAt(separatorIndex) == '\r' && separatorIndex + 1 < raw.length()
+                && raw.charAt(separatorIndex + 1) == '\n') {
+            return separatorIndex + 2;
+        }
+        return separatorIndex + 1;
+    }
+
+    private int[] parseUpdate(String line) {
         int count = 1;
         for (int i = 0; i < line.length(); i++) {
             if (line.charAt(i) == ',') {
@@ -79,7 +109,7 @@ public class Day05 extends DayTemplate {
         int output = 0;
         for (int i = 0; i <= line.length(); i++) {
             if (i == line.length() || line.charAt(i) == ',') {
-                update[output++] = pageId(parsePage(line, start, i), ids, pageValues);
+                update[output++] = pageId(parsePage(line, start, i));
                 start = i + 1;
             }
         }
@@ -93,15 +123,51 @@ public class Day05 extends DayTemplate {
         return Integer.parseInt(line.substring(start, end).trim());
     }
 
-    private int pageId(int page, Map<Integer, Integer> ids, List<Integer> pageValues) {
-        Integer id = ids.get(page);
-        if (id != null) {
-            return id;
+    private int pageId(int page) {
+        int mask = idKeys.length - 1;
+        int slot = hashPage(page) & mask;
+        while (idValues[slot] != -1) {
+            if (idKeys[slot] == page) {
+                return idValues[slot];
+            }
+            slot = (slot + 1) & mask;
         }
-        int next = pageValues.size();
-        ids.put(page, next);
-        pageValues.add(page);
-        return next;
+        int id = pageCount;
+        if (pageCount == pageValues.length) {
+            pageValues = Arrays.copyOf(pageValues, pageCount * 2);
+        }
+        pageValues[pageCount++] = page;
+        idKeys[slot] = page;
+        idValues[slot] = id;
+        if (pageCount * 2 > idKeys.length) {
+            growIdTable();
+        }
+        return id;
+    }
+
+    private void growIdTable() {
+        int[] oldKeys = idKeys;
+        int[] oldValues = idValues;
+        idKeys = new int[oldKeys.length * 2];
+        idValues = new int[idKeys.length];
+        Arrays.fill(idValues, -1);
+        int mask = idKeys.length - 1;
+        for (int i = 0; i < oldKeys.length; i++) {
+            if (oldValues[i] == -1) {
+                continue;
+            }
+            int slot = hashPage(oldKeys[i]) & mask;
+            while (idValues[slot] != -1) {
+                slot = (slot + 1) & mask;
+            }
+            idKeys[slot] = oldKeys[i];
+            idValues[slot] = oldValues[i];
+        }
+    }
+
+    private static int hashPage(int value) {
+        int h = value * 0x9E3779B9;
+        return h ^ (h >>> 16);
     }
 
     private Answers solve(ParsedInput input) {

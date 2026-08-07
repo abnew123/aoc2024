@@ -3,7 +3,8 @@ package src.solutions;
 import src.meta.DayTemplate;
 import src.objects.Coordinate;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class Day15 extends DayTemplate {
 
@@ -22,29 +23,56 @@ public class Day15 extends DayTemplate {
         return new String[]{run(input, false) + "", run(input, true) + ""};
     }
 
+    private static String slurp(Scanner in) {
+        return in.useDelimiter("\\A").hasNext() ? in.next() : "";
+    }
+
     private ParsedInput parse(Scanner in) {
-        List<String> lines = new ArrayList<>();
+        String input = slurp(in);
+        String[] lines = new String[64];
+        int lineCount = 0;
         StringBuilder movements = new StringBuilder();
         boolean movement = false;
-        while (in.hasNextLine()) {
-            String line = in.nextLine();
-            if (line.isEmpty()) {
+        int length = input.length();
+        int position = 0;
+        while (position < length) {
+            int lineStart = position;
+            int lineEnd = position;
+            while (lineEnd < length) {
+                char c = input.charAt(lineEnd);
+                if (c == '\n' || c == '\r') {
+                    break;
+                }
+                lineEnd++;
+            }
+            if (lineEnd < length) {
+                position = input.charAt(lineEnd) == '\r' && lineEnd + 1 < length
+                        && input.charAt(lineEnd + 1) == '\n'
+                        ? lineEnd + 2 : lineEnd + 1;
+            } else {
+                position = length;
+            }
+            if (lineEnd == lineStart) {
                 movement = true;
                 continue;
             }
             if (!movement) {
-                lines.add(line);
+                if (lineCount == lines.length) {
+                    lines = Arrays.copyOf(lines, lineCount * 2);
+                }
+                lines[lineCount++] = input.substring(lineStart, lineEnd);
             } else {
-                movements.append(line);
+                movements.append(input, lineStart, lineEnd);
             }
         }
-        if (lines.isEmpty() || !movement) {
+        if (lineCount == 0 || !movement) {
             throw new IllegalArgumentException("Missing warehouse map or movement separator");
         }
 
-        int width = lines.get(0).length();
+        int width = lines[0].length();
         int robots = 0;
-        for (String line : lines) {
+        for (int row = 0; row < lineCount; row++) {
+            String line = lines[row];
             if (line.length() != width) {
                 throw new IllegalArgumentException("Warehouse map must be rectangular");
             }
@@ -66,7 +94,9 @@ public class Day15 extends DayTemplate {
                 throw new IllegalArgumentException("Invalid movement: " + move);
             }
         }
-        return new ParsedInput(lines.toArray(String[]::new), movements.toString().toCharArray());
+        char[] moves = new char[movements.length()];
+        movements.getChars(0, movements.length(), moves, 0);
+        return new ParsedInput(Arrays.copyOf(lines, lineCount), moves);
     }
 
     private long run(ParsedInput input, boolean wide) {

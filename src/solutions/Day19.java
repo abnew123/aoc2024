@@ -19,15 +19,21 @@ public class Day19 extends DayTemplate {
     }
 
     private Answers analyze(Scanner in, boolean countArrangements) {
-        if (!in.hasNextLine()) {
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int length = input.length();
+        if (length == 0) {
             throw new IllegalArgumentException("Missing towel patterns");
         }
         TowelNode root = new TowelNode();
-        String patterns = in.nextLine();
+        int patternsEnd = 0;
+        while (patternsEnd < length
+                && input.charAt(patternsEnd) != '\n' && input.charAt(patternsEnd) != '\r') {
+            patternsEnd++;
+        }
         int start = 0;
-        for (int index = 0; index <= patterns.length(); index++) {
-            if (index == patterns.length() || patterns.charAt(index) == ',') {
-                String towel = patterns.substring(start, index).trim();
+        for (int index = 0; index <= patternsEnd; index++) {
+            if (index == patternsEnd || input.charAt(index) == ',') {
+                String towel = input.substring(start, index).trim();
                 if (towel.isEmpty()) {
                     throw new IllegalArgumentException("Towel patterns must not be empty");
                 }
@@ -35,18 +41,39 @@ public class Day19 extends DayTemplate {
                 start = index + 1;
             }
         }
-        if (!in.hasNextLine() || !in.nextLine().isBlank()) {
+        int position = patternsEnd;
+        if (position < length && input.charAt(position) == '\r') {
+            position++;
+        }
+        if (position < length && input.charAt(position) == '\n') {
+            position++;
+        }
+        int blankEnd = position;
+        while (blankEnd < length
+                && input.charAt(blankEnd) != '\n' && input.charAt(blankEnd) != '\r') {
+            blankEnd++;
+        }
+        if (position >= length || !input.substring(position, blankEnd).isBlank()) {
             throw new IllegalArgumentException("Missing blank line before designs");
         }
+        position = blankEnd;
 
         long possibleCount = 0;
         long arrangementCount = 0;
         BigInteger largeArrangementCount = null;
-        while (in.hasNextLine()) {
-            String design = in.nextLine();
-            if (design.isEmpty()) {
+        while (position < length) {
+            char current = input.charAt(position);
+            if (current == '\n' || current == '\r') {
+                position++;
                 continue;
             }
+            int designEnd = position;
+            while (designEnd < length
+                    && input.charAt(designEnd) != '\n' && input.charAt(designEnd) != '\r') {
+                designEnd++;
+            }
+            String design = input.substring(position, designEnd);
+            position = designEnd;
             if (!countArrangements) {
                 if (canMake(root, design)) {
                     possibleCount++;

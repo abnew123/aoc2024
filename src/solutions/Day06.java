@@ -2,9 +2,7 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 public class Day06 extends DayTemplate {
@@ -35,28 +33,62 @@ public class Day06 extends DayTemplate {
     }
 
     private Grid parse(Scanner in) {
-        List<String> lines = new ArrayList<>();
-        while (in.hasNextLine()) {
-            lines.add(in.nextLine());
+        String raw = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int length = raw.length();
+        int lineCount = 0;
+        int firstLineLength = -1;
+        int index = 0;
+        while (index < length) {
+            int lineStart = index;
+            while (index < length && raw.charAt(index) != '\n' && raw.charAt(index) != '\r') {
+                index++;
+            }
+            if (firstLineLength < 0) {
+                firstLineLength = index - lineStart;
+            }
+            lineCount++;
+            index = nextLineStart(raw, index);
         }
 
-        rows = lines.size();
-        cols = lines.get(0).length();
+        rows = lineCount;
+        cols = firstLineLength;
         boolean[] walls = new boolean[rows * cols];
         int start = -1;
-        for (int row = 0; row < rows; row++) {
-            String line = lines.get(row);
+        int row = 0;
+        index = 0;
+        while (index < length) {
+            int lineStart = index;
+            while (index < length && raw.charAt(index) != '\n' && raw.charAt(index) != '\r') {
+                index++;
+            }
+            int lineLength = index - lineStart;
             for (int col = 0; col < cols; col++) {
-                char c = line.charAt(col);
-                int index = row * cols + col;
+                if (col >= lineLength) {
+                    throw new StringIndexOutOfBoundsException(col);
+                }
+                char c = raw.charAt(lineStart + col);
+                int cell = row * cols + col;
                 if (c == '#') {
-                    walls[index] = true;
+                    walls[cell] = true;
                 } else if (c == '^') {
-                    start = index;
+                    start = cell;
                 }
             }
+            row++;
+            index = nextLineStart(raw, index);
         }
         return new Grid(walls, start);
+    }
+
+    private int nextLineStart(String raw, int separatorIndex) {
+        if (separatorIndex >= raw.length()) {
+            return separatorIndex;
+        }
+        if (raw.charAt(separatorIndex) == '\r' && separatorIndex + 1 < raw.length()
+                && raw.charAt(separatorIndex + 1) == '\n') {
+            return separatorIndex + 2;
+        }
+        return separatorIndex + 1;
     }
 
     private int countVisited(int start, boolean[] walls) {

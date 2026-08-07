@@ -2,8 +2,6 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Day04 extends DayTemplate {
@@ -41,17 +39,45 @@ public class Day04 extends DayTemplate {
     }
 
     private void parse(Scanner in) {
-        List<String> lines = new ArrayList<>();
-        while (in.hasNextLine()) {
-            lines.add(in.nextLine());
+        String raw = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int length = raw.length();
+        int lineCount = 0;
+        int index = 0;
+        while (index < length) {
+            lineCount++;
+            while (index < length && raw.charAt(index) != '\n' && raw.charAt(index) != '\r') {
+                index++;
+            }
+            index = nextLineStart(raw, index);
         }
 
-        rows = lines.size();
-        cols = lines.get(0).length();
-        grid = new char[rows][cols];
-        for (int row = 0; row < rows; row++) {
-            grid[row] = lines.get(row).toCharArray();
+        grid = new char[lineCount][];
+        int row = 0;
+        index = 0;
+        while (index < length) {
+            int start = index;
+            while (index < length && raw.charAt(index) != '\n' && raw.charAt(index) != '\r') {
+                index++;
+            }
+            char[] line = new char[index - start];
+            raw.getChars(start, index, line, 0);
+            grid[row++] = line;
+            index = nextLineStart(raw, index);
         }
+
+        rows = lineCount;
+        cols = grid[0].length;
+    }
+
+    private int nextLineStart(String raw, int separatorIndex) {
+        if (separatorIndex >= raw.length()) {
+            return separatorIndex;
+        }
+        if (raw.charAt(separatorIndex) == '\r' && separatorIndex + 1 < raw.length()
+                && raw.charAt(separatorIndex + 1) == '\n') {
+            return separatorIndex + 2;
+        }
+        return separatorIndex + 1;
     }
 
     private long countXmas() {

@@ -11,6 +11,8 @@ public class Day13 extends DayTemplate {
     private static final BigInteger PART_ONE_LIMIT = BigInteger.valueOf(100);
     private static final BigInteger THREE = BigInteger.valueOf(3);
 
+    private int position;
+
     @Override
     public String solve(boolean part1, Scanner in) {
         return solveBoth(in)[part1 ? 0 : 1].toString();
@@ -22,13 +24,19 @@ public class Day13 extends DayTemplate {
         return new String[]{answers[0].toString(), answers[1].toString()};
     }
 
+    private static String slurp(Scanner in) {
+        return in.useDelimiter("\\A").hasNext() ? in.next() : "";
+    }
+
     private BigInteger[] solveBoth(Scanner in) {
+        String input = slurp(in);
+        position = 0;
         BigInteger part1 = BigInteger.ZERO;
         BigInteger part2 = BigInteger.ZERO;
         String first;
-        while ((first = nextNonBlank(in)) != null) {
-            String second = nextNonBlank(in);
-            String prize = nextNonBlank(in);
+        while ((first = nextNonBlank(input)) != null) {
+            String second = nextNonBlank(input);
+            String prize = nextNonBlank(input);
             if (second == null || prize == null) {
                 throw new IllegalArgumentException("Incomplete claw machine");
             }
@@ -42,11 +50,34 @@ public class Day13 extends DayTemplate {
         return new BigInteger[]{part1, part2};
     }
 
-    private String nextNonBlank(Scanner in) {
-        while (in.hasNextLine()) {
-            String line = in.nextLine();
-            if (!line.isBlank()) {
-                return line;
+    private String nextNonBlank(String input) {
+        int length = input.length();
+        while (position < length) {
+            int start = position;
+            int end = start;
+            while (end < length) {
+                char c = input.charAt(end);
+                if (c == '\n' || c == '\r') {
+                    break;
+                }
+                end++;
+            }
+            if (end < length) {
+                position = input.charAt(end) == '\r' && end + 1 < length
+                        && input.charAt(end + 1) == '\n'
+                        ? end + 2 : end + 1;
+            } else {
+                position = length;
+            }
+            boolean blank = true;
+            for (int i = start; i < end; i++) {
+                if (!Character.isWhitespace(input.charAt(i))) {
+                    blank = false;
+                    break;
+                }
+            }
+            if (!blank) {
+                return input.substring(start, end);
             }
         }
         return null;

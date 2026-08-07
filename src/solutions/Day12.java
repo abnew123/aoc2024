@@ -2,8 +2,6 @@ package src.solutions;
 
 import src.meta.DayTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Day12 extends DayTemplate {
@@ -22,19 +20,72 @@ public class Day12 extends DayTemplate {
         return new String[]{prices[0] + "", prices[1] + ""};
     }
 
+    private static String slurp(Scanner in) {
+        return in.useDelimiter("\\A").hasNext() ? in.next() : "";
+    }
+
+    private static int countLines(String input) {
+        int length = input.length();
+        int lines = 0;
+        int position = 0;
+        while (position < length) {
+            while (position < length) {
+                char c = input.charAt(position);
+                if (c == '\n' || c == '\r') {
+                    break;
+                }
+                position++;
+            }
+            if (position < length) {
+                position = input.charAt(position) == '\r' && position + 1 < length
+                        && input.charAt(position + 1) == '\n'
+                        ? position + 2 : position + 1;
+            }
+            lines++;
+        }
+        return lines;
+    }
+
     private long[] prices(Scanner in, boolean needPerimeter, boolean needSides) {
-        List<String> lines = new ArrayList<>();
-        while (in.hasNextLine()) {
-            lines.add(in.nextLine());
+        String input = slurp(in);
+        int length = input.length();
+        if (length == 0) {
+            throw new IllegalArgumentException("Missing garden map");
         }
 
-        int rows = lines.size();
-        int cols = lines.get(0).length();
+        int rows = countLines(input);
+        int cols = 0;
+        while (cols < length) {
+            char c = input.charAt(cols);
+            if (c == '\n' || c == '\r') {
+                break;
+            }
+            cols++;
+        }
         char[] grid = new char[rows * cols];
+        int position = 0;
         for (int row = 0; row < rows; row++) {
-            String line = lines.get(row);
+            int lineStart = position;
+            int lineEnd = position;
+            while (lineEnd < length) {
+                char c = input.charAt(lineEnd);
+                if (c == '\n' || c == '\r') {
+                    break;
+                }
+                lineEnd++;
+            }
+            if (lineEnd < length) {
+                position = input.charAt(lineEnd) == '\r' && lineEnd + 1 < length
+                        && input.charAt(lineEnd + 1) == '\n'
+                        ? lineEnd + 2 : lineEnd + 1;
+            } else {
+                position = length;
+            }
+            if (lineEnd - lineStart < cols) {
+                throw new IllegalArgumentException("Garden map rows must span the full width");
+            }
             for (int col = 0; col < cols; col++) {
-                grid[row * cols + col] = line.charAt(col);
+                grid[row * cols + col] = input.charAt(lineStart + col);
             }
         }
 

@@ -3,10 +3,8 @@ package src.solutions;
 import src.meta.DayTemplate;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -205,35 +203,42 @@ public class Day11 extends DayTemplate {
         return total;
     }
 
+    private static String slurp(Scanner in) {
+        return in.useDelimiter("\\A").hasNext() ? in.next() : "";
+    }
+
     private String[] parse(Scanner in) {
-        List<String> stones = new ArrayList<>();
-        while (in.hasNextLine()) {
-            String line = in.nextLine();
-            int start = 0;
-            while (start < line.length()) {
-                while (start < line.length() && Character.isWhitespace(line.charAt(start))) {
-                    start++;
-                }
-                int end = start;
-                while (end < line.length() && !Character.isWhitespace(line.charAt(end))) {
-                    end++;
-                }
-                if (start < end) {
-                    String stone = line.substring(start, end);
-                    for (int i = 0; i < stone.length(); i++) {
-                        if (stone.charAt(i) < '0' || stone.charAt(i) > '9') {
-                            throw new IllegalArgumentException("Invalid stone: " + stone);
-                        }
-                    }
-                    stones.add(stone);
-                }
-                start = end;
+        String input = slurp(in);
+        String[] stones = new String[16];
+        int count = 0;
+        int length = input.length();
+        int start = 0;
+        while (start < length) {
+            while (start < length && Character.isWhitespace(input.charAt(start))) {
+                start++;
             }
+            int end = start;
+            while (end < length && !Character.isWhitespace(input.charAt(end))) {
+                end++;
+            }
+            if (start < end) {
+                String stone = input.substring(start, end);
+                for (int i = 0; i < stone.length(); i++) {
+                    if (stone.charAt(i) < '0' || stone.charAt(i) > '9') {
+                        throw new IllegalArgumentException("Invalid stone: " + stone);
+                    }
+                }
+                if (count == stones.length) {
+                    stones = Arrays.copyOf(stones, count * 2);
+                }
+                stones[count++] = stone;
+            }
+            start = end;
         }
-        if (stones.isEmpty()) {
+        if (count == 0) {
             throw new IllegalArgumentException("Missing stones");
         }
-        return stones.toArray(String[]::new);
+        return Arrays.copyOf(stones, count);
     }
 
     private long[] parseLongs(String[] stones) {

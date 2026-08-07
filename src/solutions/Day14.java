@@ -28,15 +28,37 @@ public class Day14 extends DayTemplate {
                 : treeTime(robots, WIDTH, HEIGHT, DENSITY_THRESHOLD)) + "";
     }
 
+    private static String slurp(Scanner in) {
+        return in.useDelimiter("\\A").hasNext() ? in.next() : "";
+    }
+
     private static Robots parse(Scanner in) {
+        String input = slurp(in);
         int[] x = new int[512];
         int[] y = new int[512];
         int[] vx = new int[512];
         int[] vy = new int[512];
         int count = 0;
-        while (in.hasNextLine()) {
-            String line = in.nextLine();
-            if (line.isEmpty()) {
+        int length = input.length();
+        int position = 0;
+        while (position < length) {
+            int lineStart = position;
+            int lineEnd = position;
+            while (lineEnd < length) {
+                char c = input.charAt(lineEnd);
+                if (c == '\n' || c == '\r') {
+                    break;
+                }
+                lineEnd++;
+            }
+            if (lineEnd < length) {
+                position = input.charAt(lineEnd) == '\r' && lineEnd + 1 < length
+                        && input.charAt(lineEnd + 1) == '\n'
+                        ? lineEnd + 2 : lineEnd + 1;
+            } else {
+                position = length;
+            }
+            if (lineEnd == lineStart) {
                 continue;
             }
             if (count == x.length) {
@@ -48,8 +70,8 @@ public class Day14 extends DayTemplate {
             }
             int[] values = new int[4];
             int valueCount = 0;
-            for (int index = 0; index < line.length() && valueCount < values.length;) {
-                char current = line.charAt(index);
+            for (int index = lineStart; index < lineEnd && valueCount < values.length;) {
+                char current = input.charAt(index);
                 if (current == '-' || current >= '0' && current <= '9') {
                     int sign = 1;
                     if (current == '-') {
@@ -57,8 +79,8 @@ public class Day14 extends DayTemplate {
                         index++;
                     }
                     int value = 0;
-                    while (index < line.length()) {
-                        char digit = line.charAt(index);
+                    while (index < lineEnd) {
+                        char digit = input.charAt(index);
                         if (digit < '0' || digit > '9') {
                             break;
                         }
@@ -71,7 +93,8 @@ public class Day14 extends DayTemplate {
                 }
             }
             if (valueCount != 4) {
-                throw new IllegalArgumentException("Malformed robot: " + line);
+                throw new IllegalArgumentException(
+                        "Malformed robot: " + input.substring(lineStart, lineEnd));
             }
             x[count] = values[0];
             y[count] = values[1];

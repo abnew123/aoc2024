@@ -18,11 +18,17 @@ public class Day03 extends DayTemplate {
     }
 
     private String readInput(Scanner in) {
-        StringBuilder input = new StringBuilder();
-        while (in.hasNextLine()) {
-            input.append(in.nextLine());
+        String raw = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        char[] joined = new char[raw.length()];
+        int length = 0;
+        for (int i = 0; i < raw.length(); i++) {
+            char c = raw.charAt(i);
+            if (c == '\n' || c == '\r' || c == 0x2028 || c == 0x2029 || c == 0x0085) {
+                continue;
+            }
+            joined[length++] = c;
         }
-        return input.toString();
+        return new String(joined, 0, length);
     }
 
     private long[] calculate(String input) {

@@ -11,17 +11,18 @@ public class Day22 extends DayTemplate {
 
     @Override
     public String[] fullSolve(Scanner in) {
+        long[] secrets = parseSecrets(in);
         long part1 = 0;
         int part2 = 0;
         int[] sequenceValues = new int[SEQUENCE_COUNT];
         int[] viewedHashes = new int[SEQUENCE_COUNT];
         int buyerId = 1;
-        while (in.hasNext()) {
+        for (int index = 0; index < secrets.length; index++) {
             int a = 0;
             int b = 0;
             int c = 0;
             int d = 0;
-            long initial = Long.parseLong(in.nextLine());
+            long initial = secrets[index];
             int secret = (int) (initial & MASK);
             int pastPrice = (int) (initial % 10);
             for(int j = 0; j < 2000; j++){
@@ -51,11 +52,12 @@ public class Day22 extends DayTemplate {
     }
 
     public String solve(boolean part1, Scanner in) {
+        long[] secrets = parseSecrets(in);
         long answer = 0;
 
         if(part1){
-            while (in.hasNext()) {
-                int secret = (int) (Long.parseLong(in.nextLine()) & MASK);
+            for (int index = 0; index < secrets.length; index++) {
+                int secret = (int) (secrets[index] & MASK);
                 for(int i = 0; i < 2000; i++){
                     secret = oneIteration(secret);
                 }
@@ -66,12 +68,12 @@ public class Day22 extends DayTemplate {
             int[] sequenceValues = new int[SEQUENCE_COUNT];
             int[] viewedHashes = new int[SEQUENCE_COUNT];
             int buyerId = 1;
-            while (in.hasNext()) {
+            for (int index = 0; index < secrets.length; index++) {
                 int a = 0;
                 int b = 0;
                 int c = 0;
                 int d = 0;
-                long initial = Long.parseLong(in.nextLine());
+                long initial = secrets[index];
                 int past = (int) (initial & MASK);
                 int pastPrice = (int) (initial % 10);
                 for(int j = 0; j < 2000; j++){
@@ -100,6 +102,37 @@ public class Day22 extends DayTemplate {
         }
 
         return answer + "";
+    }
+
+    private long[] parseSecrets(Scanner in) {
+        String input = in.useDelimiter("\\A").hasNext() ? in.next() : "";
+        int length = input.length();
+        long[] secrets = new long[128];
+        int count = 0;
+        int position = 0;
+        while (position < length) {
+            char current = input.charAt(position);
+            if (current == '\n' || current == '\r') {
+                position++;
+                continue;
+            }
+            long value = 0;
+            int digits = 0;
+            while (position < length && (current = input.charAt(position)) >= '0' && current <= '9') {
+                value = value * 10 + (current - '0');
+                position++;
+                digits++;
+            }
+            if (digits == 0 || (position < length
+                    && input.charAt(position) != '\n' && input.charAt(position) != '\r')) {
+                throw new IllegalArgumentException("Invalid initial secret");
+            }
+            if (count == secrets.length) {
+                secrets = Arrays.copyOf(secrets, count * 2);
+            }
+            secrets[count++] = value;
+        }
+        return Arrays.copyOf(secrets, count);
     }
 
     private int oneIteration(int secret){

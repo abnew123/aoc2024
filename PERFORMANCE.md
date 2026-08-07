@@ -33,9 +33,10 @@ One slurped buffer and a sign-aware digit scan fill two primitive arrays, sorted
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 24.543 | 3.802 | -20.741 | — |
+| 24.543 | 3.670 | -20.873 | — |
 
-*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the n=100 confirming run. The measured step versus the preceding replay tip (n=100) was -5.474 [-5.541, -5.406].*
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -0.028 [-0.086, 0.030].*
+
 
 ## Day 02
 
@@ -43,7 +44,9 @@ Reports are parsed once into primitive arrays. An allocation-free monotonic scan
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 7.224 | 3.248 | -3.976 | [-4.208, -3.744] |
+| 7.224 | 1.556 | -5.668 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -5.153 [-5.206, -5.101].*
 
 ## Day 03
 
@@ -51,7 +54,9 @@ A single character scan recognizes `do`, `don't`, and strictly formed one-to-thr
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 3.616 | 2.296 | -1.320 | [-1.545, -1.094] |
+| 3.616 | 3.189 | -0.427 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was 0.679 [0.632, 0.725].*
 
 ## Day 04
 
@@ -59,7 +64,9 @@ The combined solve parses once and scans the grid once, counting `XMAS`/`SAMX` i
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 17.743 | 1.840 | -15.903 | [-16.248, -15.559] |
+| 17.743 | 3.100 | -14.643 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was 1.217 [1.178, 1.257].*
 
 ## Day 05
 
@@ -67,7 +74,9 @@ Signed page labels are mapped to compact IDs once; updates are validated directl
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 29.352 | 5.757 | -23.595 | [-23.980, -23.211] |
+| 29.352 | 5.585 | -23.767 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was 0.011 [-0.107, 0.129].*
 
 ## Day 06
 
@@ -75,7 +84,9 @@ The combined solve walks the flattened grid once, then tests obstruction candida
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 166.445 | 6.955 | -159.489 | [-168.431, -150.548] |
+| 166.445 | 4.682 | -161.763 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was 0.803 [0.726, 0.881].*
 
 ## Day 07
 
@@ -83,7 +94,9 @@ Equations are parsed once and solved backward from the target through inverse ad
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 12.524 | 3.579 | -8.945 | [-9.383, -8.507] |
+| 12.524 | 4.109 | -8.415 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was 0.250 [0.194, 0.305].*
 
 ## Day 08
 
@@ -91,7 +104,9 @@ The grid is parsed once into antenna coordinates; primitive boolean arrays recor
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 5.156 | 1.373 | -3.784 | [-4.071, -3.496] |
+| 5.156 | 1.053 | -4.103 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -0.263 [-0.303, -0.223].*
 
 ## Day 09
 
@@ -99,7 +114,9 @@ Both parts operate on parsed file/gap runs. Part 1 uses arithmetic-series checks
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 133.504 | 8.827 | -124.678 | [-126.275, -123.080] |
+| 133.504 | 4.446 | -129.058 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -3.964 [-4.021, -3.908].*
 
 ## Day 10
 
@@ -107,7 +124,9 @@ The rectangular height grid is parsed once. A descending dynamic program shares 
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 4.467 | 0.528 | -3.939 | [-4.116, -3.762] |
+| 4.467 | 0.527 | -3.940 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -0.029 [-0.045, -0.013].*
 
 ## Day 11
 
@@ -115,9 +134,10 @@ The finite blink universe is closed once into dense integer ids with primitive o
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 39.342 | 3.499 | -35.843 | — |
+| 39.342 | 3.317 | -36.025 | — |
 
-*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the n=100 confirming run. The measured step versus the preceding replay tip (n=100) was -4.730 [-4.839, -4.620].*
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -0.163 [-0.203, -0.124].*
+
 
 ## Day 12
 
@@ -125,7 +145,9 @@ The garden is flattened into primitive arrays and each crop region is flood-fill
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 179.314 | 3.840 | -175.474 | [-188.296, -162.652] |
+| 179.314 | 4.509 | -174.805 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was 0.537 [0.496, 0.577].*
 
 ## Day 13
 
@@ -133,7 +155,9 @@ Each machine is parsed once and solved exactly for both prize offsets. Signed `B
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 6.630 | 3.595 | -3.035 | [-3.387, -2.684] |
+| 6.630 | 4.776 | -1.854 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -0.189 [-0.242, -0.136].*
 
 ## Day 14
 
@@ -141,7 +165,9 @@ The combined solve parses once, computes Part 1 directly, and replaces time step
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 25.013 | 2.810 | -22.203 | [-22.978, -21.429] |
+| 25.013 | 2.532 | -22.481 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -0.173 [-0.214, -0.132].*
 
 ## Day 15
 
@@ -149,7 +175,9 @@ The map and moves are parsed once into primitive narrow and wide grids. Wide ver
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 6.435 | 3.231 | -3.203 | [-3.553, -2.854] |
+| 6.435 | 3.383 | -3.052 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was 0.210 [0.159, 0.262].*
 
 ## Day 16
 
@@ -157,7 +185,9 @@ A cyclic 1001-bucket Dijkstra exploits the exact 1/1000 edge weights over primit
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 5315.551 | 6.693 | -5308.857 | [-5339.758, -5277.957] |
+| 5315.551 | 7.069 | -5308.482 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was 0.262 [0.146, 0.378].*
 
 ## Day 17
 
@@ -165,7 +195,9 @@ Part 2 builds register A one octal digit at a time while matching output suffixe
 
 | Baseline | Current | Delta | Evidence |
 | ---: | ---: | ---: | --- |
-| timeout | 4.370 | censored | Both 180-second full-suite baseline runs stopped in Day 17; all current runs completed. |
+| timeout | 1.415 | censored | Both 180-second full-suite baseline runs stopped in Day 17; all current runs completed. |
+
+*Current is the 2026-08-07 n=100 confirming run; the measured step versus the preceding tip (n=100) was -3.392 [-3.457, -3.326].*
 
 ## Day 18
 
@@ -173,7 +205,9 @@ The input is parsed once into primitive earliest-fall cells for reusable BFS; co
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 26.957 | 12.294 | -14.663 | [-17.182, -12.144] |
+| 26.957 | 4.750 | -22.207 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -0.593 [-0.689, -0.498].*
 
 ## Day 19
 
@@ -181,7 +215,9 @@ Patterns are stored in a fixed five-color trie; reverse reachability and countin
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 66.926 | 3.842 | -63.084 | [-63.838, -62.329] |
+| 66.926 | 3.951 | -62.975 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was 0.580 [0.471, 0.689].*
 
 ## Day 20
 
@@ -189,7 +225,9 @@ The combined solve computes one distance-to-end field, walks the uniquely decrea
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 374.984 | 13.573 | -361.411 | [-377.714, -345.107] |
+| 374.984 | 13.349 | -361.635 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -2.478 [-3.022, -1.933].*
 
 ## Day 21
 
@@ -197,7 +235,9 @@ Primitive keypad transition-cost matrices are composed for two and twenty-five r
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 11.386 | 3.074 | -8.312 | [-8.687, -7.936] |
+| 11.386 | 2.748 | -8.638 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -0.275 [-0.304, -0.247].*
 
 ## Day 22
 
@@ -205,7 +245,9 @@ Each buyer's 2,000-step secret stream is evaluated once for both parts. Four pri
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 495.191 | 30.461 | -464.729 | [-485.439, -444.020] |
+| 495.191 | 16.834 | -478.357 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -3.890 [-4.394, -3.386].*
 
 ## Day 23
 
@@ -213,7 +255,9 @@ The network is parsed once into an indexed `BitSet` graph. Triangle intersection
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 30.680 | 3.989 | -26.690 | [-27.640, -25.740] |
+| 30.680 | 4.139 | -26.541 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -0.630 [-0.722, -0.538].*
 
 ## Day 24
 
@@ -221,7 +265,9 @@ The circuit is parsed once into indexed immutable gates, evaluated in arbitrary 
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 11.056 | 8.501 | -2.555 | [-3.124, -1.987] |
+| 11.056 | 2.025 | -9.031 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -2.731 [-2.809, -2.654].*
 
 ## Day 25
 
@@ -229,4 +275,6 @@ Schematics stream directly into base-6 lock and key profile frequencies. A five-
 
 | Baseline | Current | Delta | 95% CI |
 | ---: | ---: | ---: | ---: |
-| 4.834 | 1.494 | -3.340 | [-3.379, -3.302] |
+| 4.834 | 1.531 | -3.303 | — |
+
+*Baseline is the documented pre-speed measurement (commit `ff4e78e1`, n=10, at the 2026-07-18 freeze); Current is the 2026-08-07 n=100 confirming run. The measured step versus the preceding tip (n=100) was -0.065 [-0.088, -0.043].*
