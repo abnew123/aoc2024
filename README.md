@@ -1,3 +1,8 @@
+> [!NOTE]
+> This repository is archived. These solutions, with their full history, now live in
+> [ShichengRao/advent-of-code](https://github.com/ShichengRao/advent-of-code/tree/main/2024)
+> alongside every other year.
+
 2024 AoC repo. For more detailed thoughts about the problems, see https://abnew123.substack.com/
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=abnew123_aoc2024&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=abnew123_aoc2024)
