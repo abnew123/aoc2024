@@ -1,1 +1,1 @@
-class C{String s(boolean P,String[]I){long A=0;var on=true;for(var t:I){var m=java.util.regex.Pattern.compile("mul\\((\\d+),(\\d+)\\)|do(n't)?\\(\\)").matcher(t);while(m.find()){if(m.start(1)<0)on=m.start(3)<0;else if(P|on)A+=new Long(m.group(1))*new Long(m.group(2));}}return""+A;}}
+class C{long A;int i;Object s(boolean P,String[]I){var q="".join("",I).replaceAll(P?"":"don't\\(\\).*?(do\\(\\)|$)","").replaceAll(".*?mul\\((\\d+,\\d+)\\)|.","$1,").split(",");for(;i<q.length;)A+=new Long(q[i++])*new Long(q[i++]);return A;}}
